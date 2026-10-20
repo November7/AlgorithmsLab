@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html lang="pl">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Cztery algorytmy usuwania duplikatów: zbiór, sortowanie, porównywanie z wynikiem i tablica obecności.">
+    <title>Usuwanie duplikatów · AlgorithmsLab</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body class="step-lab dedupe-lab">
+    <a class="skip" href="#visualization">Przejdź do wizualizacji</a>
+    <main class="shell">
+      <header class="masthead">
+        <a class="brand" href="index.html"><span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i></span>AlgorithmsLab <span class="graph-brand-note"> / edukacja</span></a>
+        <span class="meta">Tablice · Usuwanie duplikatów</span>
+      </header>
+      <section class="intro" aria-labelledby="pageTitle">
+        <div>
+          <span class="eyebrow">Zrozum, zanim zapamiętasz</span>
+          <h1 id="pageTitle">Usuwanie duplikatów</h1>
+          <p>Porównaj cztery sposoby pozostawienia po jednym wystąpieniu każdej wartości. Zobacz, jak wybór algorytmu wpływa na kolejność wyniku, liczbę porównań i potrzebną pamięć.</p>
+        </div>
+        <span class="badge">4 algorytmy · jeden zestaw danych</span>
+      </section>
+      <section class="panel lesson" aria-labelledby="lessonTitle">
+        <div class="lesson-header">
+          <div>
+            <p class="eyebrow">01 / Zrozum algorytm</p>
+            <h2 id="lessonTitle">Zbiór wartości</h2>
+          </div>
+          <span class="tag" id="methodTag">Zachowuje kolejność</span>
+        </div>
+        <dl class="complexity" id="complexity"></dl>
+        <p class="complexity-note" id="complexityNote"></p>
+        <div class="lesson-columns">
+          <div>
+            <h3>Jak to działa?</h3>
+            <p id="description"></p>
+            <ol id="steps"></ol>
+          </div>
+          <div>
+            <h3>Zalety</h3>
+            <p id="pros"></p>
+            <h3>Ograniczenia</h3>
+            <p id="cons"></p>
+          </div>
+          <div>
+            <h3>Kiedy się przydaje?</h3>
+            <p id="uses"></p>
+          </div>
+        </div>
+      </section>
+      <section class="panel controls" aria-label="Ustawienia i sterowanie">
+        <div class="lab-fields">
+          <div class="field">
+            <label for="algorithm">Algorytm</label>
+            <select id="algorithm">
+              <option value="set">Zbiór: zachowaj kolejność</option>
+              <option value="sort">Sortowanie i jeden przebieg</option>
+              <option value="naive">Porównywanie z wynikiem</option>
+              <option value="presence">Tablica obecności: mały zakres</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="dataInput">Liczby oddzielone przecinkami (maks. 16)</label>
+            <input id="dataInput" type="text" value="4, 2, 4, 3, 2, 5, 3" aria-describedby="dataHint" spellcheck="false">
+          </div>
+          <div class="field">
+            <label for="speed">Tempo <output id="speedLabel" for="speed">4 kroków/s</output></label>
+            <input id="speed" type="range" min="1" max="12" value="4">
+          </div>
+        </div>
+        <div class="actions">
+          <button type="button" id="applyBtn" class="btn">Użyj danych</button>
+          <button type="button" id="randomBtn" class="btn">↻ Losuj dane</button>
+          <button type="button" id="startBtn" class="btn primary">▶ Start</button>
+          <button type="button" id="pauseBtn" class="btn" disabled>Pauza</button>
+          <button type="button" id="stepBtn" class="btn">Jeden krok</button>
+          <button type="button" id="stopBtn" class="btn" disabled>Reset</button>
+        </div>
+        <p class="control-hint" id="dataHint">Liczby całkowite od −9007199254740991 do 9007199254740991. Puste pole oznacza pustą tablicę. Start i Jeden krok zatwierdzają wpisane dane. Tablica obecności wymaga zakresu max − min + 1 ≤ 64. Reset zachowuje ostatnio zatwierdzone dane.</p>
+      </section>
+      <div class="main-column lab-results">
+        <section class="panel visualizer" id="visualization" tabindex="-1" aria-labelledby="chartTitle">
+          <div class="chart-heading">
+            <div>
+              <div class="eyebrow">02 / Obserwuj działanie</div>
+              <h2 id="chartTitle">Zbiór wartości</h2>
+            </div>
+            <span id="statusText" role="status">Gotowe</span>
+          </div>
+          <div class="dedupe-board">
+            <section aria-labelledby="inputTitle">
+              <h3 id="inputTitle">Dane wejściowe</h3>
+              <ol id="inputValues" class="dedupe-values" aria-label="Wartości wejściowe"></ol>
+            </section>
+            <section aria-labelledby="resultTitle">
+              <h3 id="resultTitle">Wynik bez duplikatów</h3>
+              <ol id="resultValues" class="dedupe-values" aria-label="Wartości w wyniku"></ol>
+            </section>
+            <section id="seenPanel" class="dedupe-seen" aria-labelledby="seenTitle">
+              <h3 id="seenTitle">Zbiór pomocniczy</h3>
+              <ol id="seenValues" class="dedupe-values" aria-label="Zapamiętane wartości"></ol>
+            </section>
+          </div>
+          <div class="chart-caption dedupe-legend">
+            <span><i class="dedupe-key current" aria-hidden="true"></i>Sprawdzana wartość</span>
+            <span><i class="dedupe-key compared" aria-hidden="true"></i>Porównywana wartość</span>
+            <span><i class="dedupe-key duplicate" aria-hidden="true"></i>Duplikat</span>
+          </div>
+          <p id="operation" role="status" aria-live="polite">Wybierz Start lub wykonaj pierwszy krok.</p>
+        </section>
+        <section class="stats" aria-label="Statystyki algorytmu">
+          <div class="stat"><span>Sprawdzone wartości</span><output id="checkedCount">0</output><small>przejrzane elementy wejścia</small></div>
+          <div class="stat"><span>Porównania wartości</span><output id="comparisonCount">0</output><small id="comparisonHint">Testy obecności w zbiorze: 0</small></div>
+          <div class="stat"><span>Usunięte duplikaty</span><output id="duplicateCount">0</output><small>powtórne wystąpienia</small></div>
+          <div class="stat"><span>Wynik</span><output id="resultCount">0</output><small>unikalne wartości</small></div>
+        </section>
+        <section class="panel dedupe-output" aria-labelledby="outputTitle">
+          <h2 id="outputTitle">Tablica wynikowa</h2>
+          <p id="resultText" class="lab-result" role="status">Wynik pojawi się podczas działania algorytmu.</p>
+        </section>
+        <details class="data-details">
+          <summary>Co liczą statystyki?</summary>
+          <p>„Sprawdzone wartości” to elementy, dla których podjęto już decyzję: zachowaj lub pomiń. „Porównania wartości” obejmują porównania z wynikiem, z sąsiadem, przy wyznaczaniu zakresu oraz wywołania komparatora sortowania. Sortowanie jest jednym krokiem animacji; liczba jego porównań zależy od silnika przeglądarki. Testy obecności w zbiorze i odczyty tablicy obecności pokazujemy osobno pod licznikiem porównań. Nie są to pomiary czasu ani pełne koszty operacji wewnątrz zbioru. Wariant sortujący zwraca wynik rosnąco, pozostałe zachowują kolejność pierwszych wystąpień.</p>
+        </details>
+      </div>
+      <footer><span>AlgorithmsLab · Interaktywna nauka algorytmów</span><a href="index.html">Wszystkie symulacje</a></footer>
+    </main>
+    <script>
+(() => {
+  'use strict';
+  const $ = id => document.getElementById(id);
+  const MAX_RANGE = 64;
+  const METHODS = {
+    set: {
+      name: 'Zbiór wartości',
+      tag: 'Zachowuje kolejność',
+      time: 'O(n) średnio',
+      memory: 'O(u)',
+      alternate: 'n testów obecności',
+      order: 'Pierwsze wystąpienia',
+      description: 'Przejdź po tablicy i zapamiętuj napotkane wartości w zbiorze. Wartość, której jeszcze nie ma w zbiorze, dodaj do wyniku; powtórne wystąpienie pomiń.',
+      steps: ['Rozpocznij od pustego zbioru i pustego wyniku.', 'Dla każdej wartości sprawdź, czy zbiór już ją zawiera.', 'Nową wartość zapisz w zbiorze i wyniku, a duplikat pomiń.'],
+      pros: 'Szybki w typowym przypadku i zachowuje kolejność pierwszych wystąpień.',
+      cons: 'Potrzebuje pamięci na zbiór pomocniczy. O(n) zakłada średni stały koszt operacji tablicy mieszającej; JavaScript nie gwarantuje takiej implementacji Set.',
+      uses: 'Gdy trzeba szybko usunąć powtórzenia bez zmiany kolejności danych.'
+    },
+    sort: {
+      name: 'Sortowanie i jeden przebieg',
+      tag: 'Wynik rosnący',
+      time: 'O(n log n) przy takim sortowaniu',
+      memory: 'O(n)',
+      alternate: 'O(n) po sortowaniu',
+      order: 'Rosnąco',
+      description: 'Najpierw utwórz kopię posortowaną rosnąco. W takim układzie równe wartości stoją obok siebie, więc wystarczy porównać każdy element z poprzednim.',
+      steps: ['Skopiuj dane i posortuj kopię rosnąco.', 'Dodaj pierwszy element do wyniku.', 'Porównaj każdy następny element z poprzednim; dodaj go tylko wtedy, gdy jest inny.'],
+      pros: 'Po sortowaniu wystarczy jeden liniowy przebieg, a wynik jest uporządkowany.',
+      cons: 'Zmienia kolejność wyniku i wymaga kopii danych. Używamy Array.sort z komparatorem liczbowym; jego algorytm i koszt zależą od silnika JavaScript.',
+      uses: 'Gdy wynik ma być posortowany albo kolejność wejściowa nie ma znaczenia.'
+    },
+    naive: {
+      name: 'Porównywanie z wynikiem',
+      tag: 'Zachowuje kolejność',
+      time: 'O(n²)',
+      memory: 'O(1)',
+      alternate: 'Do n(n − 1)/2 porównań',
+      order: 'Pierwsze wystąpienia',
+      description: 'Dla każdej wartości sprawdź po kolei, czy znajduje się już w wyniku. Zapisz ją tylko wtedy, gdy nie znajdziesz równej wartości.',
+      steps: ['Rozpatrz kolejną wartość wejściową.', 'Porównuj ją z elementami już zbudowanego wyniku.', 'Jeśli nie ma równej wartości, dopisz ją; w przeciwnym razie pomiń.'],
+      pros: 'Jest prosty i zachowuje kolejność bez dodatkowego zbioru.',
+      cons: 'Liczba porównań może rosnąć kwadratowo wraz z rozmiarem wejścia.',
+      uses: 'Do małych tablic, gdy ważna jest prostota lub pokazanie działania wyszukiwania liniowego.'
+    },
+    presence: {
+      name: 'Tablica obecności',
+      tag: 'Mały zakres liczb',
+      time: 'O(n + R)',
+      memory: 'O(R)',
+      alternate: 'n odczytów tablicy',
+      order: 'Pierwsze wystąpienia',
+      description: 'Każdej liczbie z zakresu od minimum do maksimum przypisz komórkę. Wartość x ma indeks x − min, więc metoda obsługuje także liczby ujemne. Komórka pamięta, czy liczba już wystąpiła.',
+      steps: ['Wyznacz minimum i maksimum. Przygotuj R = max − min + 1 pustych komórek.', 'Dla wartości x odczytaj komórkę o indeksie x − min.', 'Jeśli jest pusta, zaznacz obecność i dopisz x do wyniku. W przeciwnym razie pomiń duplikat.'],
+      pros: 'Stały koszt dostępu do komórki i zachowana kolejność pierwszych wystąpień.',
+      cons: 'Pamięć zależy od całego zakresu, także od wartości nieobecnych w danych. Demonstracja dopuszcza najwyżej 64 komórki.',
+      uses: 'Dla liczb całkowitych z małej dziedziny, np. ocen lub numerów dni.'
+    }
+  };
+  const state = {
+    algorithm: 'set', input: [], working: [], result: [], seen: new Set(), presence: [], minimum: 0,
+    i: -1, j: -1, current: null, compared: null, duplicate: null,
+    checked: 0, comparisons: 0, sortComparisons: 0, lookups: 0, duplicates: 0, steps: 0,
+    iterator: null, running: false, paused: false, done: false
+  };
+  let frameId = null, lastTime = null, budget = 0;
+
+  function text(id, value) { $(id).textContent = String(value); }
+  function parseInput(value) {
+    if (!value.trim()) return [];
+    const parts = value.split(',').map(part => part.trim());
+    if (parts.length < 1 || parts.length > 16 || parts.some(part => !/^[+-]?\d+$/.test(part))) {
+      throw new Error('Wpisz najwyżej 16 liczb całkowitych oddzielonych przecinkami. Puste pole oznacza pustą tablicę.');
+    }
+    const values = parts.map(Number);
+    if (values.some(number => !Number.isSafeInteger(number))) {
+      throw new Error('Każda liczba musi być bezpieczną liczbą całkowitą JavaScript.');
+    }
+    return values;
+  }
+  function describeAlgorithm() {
+    const method = METHODS[state.algorithm];
+    text('lessonTitle', method.name);
+    text('chartTitle', method.name);
+    text('methodTag', method.tag);
+    $('complexity').replaceChildren();
+    for (const [label, value] of [['Czas', method.time], ['Pamięć poza wynikiem', method.memory], ['Faza usuwania powtórzeń', method.alternate], ['Kolejność wyniku', method.order]]) {
+      const item = document.createElement('div');
+      const term = document.createElement('dt');
+      const detail = document.createElement('dd');
+      term.textContent = label;
+      detail.textContent = value;
+      item.append(term, detail);
+      $('complexity').append(item);
+    }
+    text('complexityNote', 'n to liczba elementów, u to liczba różnych wartości, a R = max − min + 1 to rozmiar zakresu. Sam wynik zajmuje O(u) pamięci. Podane koszty pamięci nie obejmują wyniku ani wizualizacji.');
+    text('description', method.description);
+    text('pros', method.pros);
+    text('cons', method.cons);
+    text('uses', method.uses);
+    $('steps').replaceChildren(...method.steps.map(label => {
+      const item = document.createElement('li');
+      item.textContent = label;
+      return item;
+    }));
+  }
+  function appendValues(id, values, classFor = () => '') {
+    const list = $(id);
+    list.replaceChildren();
+    if (values.length === 0) {
+      const empty = document.createElement('li');
+      empty.className = 'dedupe-empty';
+      empty.textContent = '-';
+      list.append(empty);
+      return;
+    }
+    values.forEach((value, index) => {
+      const item = document.createElement('li');
+      item.className = classFor(value, index);
+      item.textContent = String(value);
+      list.append(item);
+    });
+  }
+  function render() {
+    const values = state.algorithm === 'sort' && state.working.length ? state.working : state.input;
+    text('inputTitle', state.algorithm === 'sort' && state.working.length ? 'Posortowana kopia danych' : 'Dane wejściowe');
+    appendValues('inputValues', values, (value, index) => {
+      if (index === state.i) return state.duplicate === index ? 'dedupe-value duplicate' : 'dedupe-value current';
+      if (state.algorithm === 'sort' && index === state.j) return 'dedupe-value compared';
+      return 'dedupe-value';
+    });
+    appendValues('resultValues', state.result, (value, index) =>
+      state.algorithm === 'naive' && index === state.j ? 'dedupe-value compared' : 'dedupe-value kept');
+    $('seenPanel').hidden = !['set', 'presence'].includes(state.algorithm);
+    text('seenTitle', state.algorithm === 'presence' ? 'Tablica obecności: wartość → flaga (0/1)' : 'Zbiór pomocniczy');
+    if (state.algorithm === 'presence') {
+      appendValues('seenValues', state.presence.map((seen, index) => `${state.minimum + index} → ${seen ? 1 : 0}`),
+        (value, index) => `dedupe-value ${state.current !== null && state.minimum + index === state.current ? 'compared' : state.presence[index] ? 'seen' : ''}`);
+    } else appendValues('seenValues', [...state.seen], () => 'dedupe-value seen');
+    text('checkedCount', state.checked);
+    text('comparisonCount', state.comparisons);
+    text('comparisonHint', state.algorithm === 'set' ? `Testy obecności w zbiorze: ${state.lookups}`
+      : state.algorithm === 'presence' ? `Odczyty tablicy obecności: ${state.lookups}`
+      : state.algorithm === 'sort' ? `W tym sortowanie: ${state.sortComparisons}` : 'Porównania z elementami wyniku');
+    text('duplicateCount', state.duplicates);
+    text('resultCount', state.result.length);
+    text('resultText', state.done ? `Wynik: [${state.result.join(', ')}]` : `Wynik częściowy: [${state.result.join(', ')}]`);
+  }
+  function reset() {
+    if (frameId !== null) cancelAnimationFrame(frameId);
+    frameId = null;
+    lastTime = null;
+    budget = 0;
+    state.algorithm = $('algorithm').value;
+    state.working = [];
+    state.result = [];
+    state.seen = new Set();
+    state.presence = [];
+    state.minimum = 0;
+    state.i = -1;
+    state.j = -1;
+    state.current = null;
+    state.compared = null;
+    state.duplicate = null;
+    state.checked = 0;
+    state.comparisons = 0;
+    state.sortComparisons = 0;
+    state.lookups = 0;
+    state.duplicates = 0;
+    state.steps = 0;
+    state.iterator = null;
+    state.running = false;
+    state.paused = false;
+    state.done = false;
+    $('dataInput').value = state.input.join(', ');
+    $('dataInput').setAttribute('aria-invalid', 'false');
+    describeAlgorithm();
+    text('statusText', 'Gotowe');
+    text('operation', 'Wybierz Start lub wykonaj pierwszy krok.');
+    updateControls();
+    render();
+  }
+  function* removeWithSet() {
+    for (let i = 0; i < state.input.length; i += 1) {
+      state.i = i;
+      state.current = state.input[i];
+      state.j = -1;
+      state.checked += 1;
+      state.lookups += 1;
+      if (state.seen.has(state.current)) {
+        state.duplicate = i;
+        state.duplicates += 1;
+        text('operation', `${state.current} jest już w zbiorze. Pomijamy duplikat.`);
+      } else {
+        state.duplicate = null;
+        state.seen.add(state.current);
+        state.result.push(state.current);
+        text('operation', `${state.current} nie ma jeszcze w zbiorze. Dodajemy ją do zbioru i wyniku.`);
+      }
+      yield;
+    }
+  }
+  function* removeAfterSort() {
+    state.working = state.input.slice().sort((a, b) => {
+      state.comparisons += 1;
+      state.sortComparisons += 1;
+      return a - b;
+    });
+    state.duplicate = null;
+    text('operation', 'Utworzono rosnąco posortowaną kopię. Teraz równe wartości będą sąsiadami.');
+    yield;
+    for (let i = 0; i < state.working.length; i += 1) {
+      const value = state.working[i];
+      state.i = i;
+      state.j = i > 0 ? i - 1 : -1;
+      state.current = value;
+      state.compared = i > 0 ? state.working[i - 1] : null;
+      state.checked += 1;
+      if (i > 0) state.comparisons += 1;
+      if (i > 0 && value === state.working[i - 1]) {
+        state.duplicate = i;
+        state.duplicates += 1;
+        text('operation', `${value} jest równe poprzedniej wartości. Pomijamy duplikat.`);
+      } else {
+        state.duplicate = null;
+        state.result.push(value);
+        text('operation', i === 0 ? `Dodajemy pierwszą wartość ${value} do wyniku.` : `${value} różni się od poprzedniej. Dodajemy ją do wyniku.`);
+      }
+      yield;
+    }
+  }
+  function* removeByScanningResult() {
+    for (let i = 0; i < state.input.length; i += 1) {
+      const value = state.input[i];
+      state.i = i;
+      state.current = value;
+      state.j = -1;
+      state.duplicate = null;
+      let found = false;
+      for (let j = 0; j < state.result.length; j += 1) {
+        state.j = j;
+        state.compared = state.result[j];
+        state.comparisons += 1;
+        if (state.result[j] === value) {
+          found = true;
+          state.duplicate = i;
+          state.duplicates += 1;
+          state.checked += 1;
+          text('operation', `Porównujemy ${value} z ${state.result[j]}: wartości są równe, więc pomijamy duplikat.`);
+          yield;
+          break;
+        }
+        text('operation', `Porównujemy ${value} z ${state.result[j]}: wartości są różne.`);
+        yield;
+      }
+      if (!found) {
+        state.checked += 1;
+        state.duplicate = null;
+        state.j = -1;
+        state.result.push(value);
+        text('operation', `Nie znaleziono ${value} w dotychczasowym wyniku. Dopisujemy wartość.`);
+        yield;
+      }
+    }
+  }
+  function* removeWithPresence() {
+    if (!state.input.length) return;
+    state.minimum = state.input[0];
+    let maximum = state.input[0];
+    for (let i = 1; i < state.input.length; i += 1) {
+      const value = state.input[i];
+      state.i = i;
+      state.current = value;
+      state.comparisons += 2;
+      state.minimum = Math.min(state.minimum, value);
+      maximum = Math.max(maximum, value);
+      text('operation', `Sprawdzamy ${value} względem obu granic: min = ${state.minimum}, max = ${maximum}.`);
+      yield;
+    }
+    state.presence = Array(maximum - state.minimum + 1).fill(false);
+    state.i = -1;
+    state.current = null;
+    text('operation', `Przygotowano ${state.presence.length} komórek. Wartość x trafia pod indeks x − (${state.minimum}).`);
+    yield;
+    for (let i = 0; i < state.input.length; i += 1) {
+      const value = state.input[i], index = value - state.minimum;
+      state.i = i;
+      state.current = value;
+      state.lookups += 1;
+      state.checked += 1;
+      if (state.presence[index]) {
+        state.duplicate = i;
+        state.duplicates += 1;
+        text('operation', `Komórka ${index} dla ${value} ma flagę 1. Pomijamy duplikat.`);
+      } else {
+        state.duplicate = null;
+        state.presence[index] = true;
+        state.result.push(value);
+        text('operation', `Komórka ${index} dla ${value} miała flagę 0. Ustawiamy 1 i dopisujemy wartość do wyniku.`);
+      }
+      yield;
+    }
+  }
+  function updateControls() {
+    const locked = state.running;
+    $('algorithm').disabled = locked;
+    $('dataInput').disabled = locked;
+    $('applyBtn').disabled = locked;
+    $('randomBtn').disabled = locked;
+    $('startBtn').disabled = locked;
+    $('startBtn').textContent = state.done ? '↻ Start od nowa' : '▶ Start';
+    $('pauseBtn').disabled = !locked;
+    $('pauseBtn').textContent = state.paused ? 'Wznów' : 'Pauza';
+    $('stepBtn').disabled = locked && !state.paused;
+    $('stopBtn').disabled = false;
+  }
+  function finish() {
+    if (frameId !== null) cancelAnimationFrame(frameId);
+    frameId = null;
+    lastTime = null;
+    budget = 0;
+    state.running = false;
+    state.paused = false;
+    state.done = true;
+    state.iterator = null;
+    state.i = -1;
+    state.j = -1;
+    state.current = null;
+    state.compared = null;
+    state.duplicate = null;
+    text('statusText', 'Zakończono');
+    text('operation', `Gotowe. Wynik zawiera ${state.result.length} unikalnych wartości.`);
+    updateControls();
+    render();
+  }
+  function nextStep() {
+    if (!state.iterator) return;
+    const step = state.iterator.next();
+    if (step.done) {
+      finish();
+      return;
+    }
+    state.steps += 1;
+    render();
+  }
+  function begin(paused = false) {
+    if (state.running || !applyInput()) return;
+    const methods = { set: removeWithSet, sort: removeAfterSort, naive: removeByScanningResult, presence: removeWithPresence };
+    state.iterator = methods[state.algorithm]();
+    state.running = true;
+    state.paused = paused;
+    text('statusText', paused ? 'Pauza' : 'W trakcie');
+    updateControls();
+    if (!paused) {
+      lastTime = null;
+      frameId = requestAnimationFrame(frame);
+    }
+  }
+  function frame(now) {
+    frameId = null;
+    if (!state.running || state.paused || document.hidden) return;
+    if (lastTime !== null) budget += Math.min((now - lastTime) / 1000, 0.1) * Number($('speed').value);
+    lastTime = now;
+    let count = 0;
+    while (budget >= 1 && state.running && count++ < 20) {
+      nextStep();
+      budget -= 1;
+    }
+    if (state.running && !state.paused && !document.hidden) frameId = requestAnimationFrame(frame);
+  }
+  function applyInput() {
+    if (state.running) return false;
+    try {
+      const values = parseInput($('dataInput').value);
+      if ($('algorithm').value === 'presence' && values.length &&
+          Math.max(...values) - Math.min(...values) + 1 > MAX_RANGE) {
+        throw new Error(`Tablica obecności obsługuje zakres najwyżej ${MAX_RANGE} wartości. Zmniejsz rozstęp danych lub wybierz inną metodę.`);
+      }
+      state.input = values;
+      reset();
+      return true;
+    } catch (error) {
+      $('dataInput').setAttribute('aria-invalid', 'true');
+      text('statusText', 'Nieprawidłowe dane');
+      text('operation', error.message);
+      return false;
+    }
+  }
+  function generateData() {
+    const values = Array.from({ length: 8 }, () => Math.floor(Math.random() * 8) - 2);
+    $('dataInput').value = values.join(', ');
+    state.input = values;
+    reset();
+  }
+
+  function togglePause() {
+    if (!state.running) return;
+    state.paused = !state.paused;
+    text('statusText', state.paused ? 'Pauza' : 'W trakcie');
+    if (!state.paused) {
+      lastTime = null;
+      budget = 0;
+      frameId = requestAnimationFrame(frame);
+    } else if (frameId !== null) {
+      cancelAnimationFrame(frameId);
+      frameId = null;
+    }
+    updateControls();
+  }
+
+  $('algorithm').addEventListener('change', () => {
+    const draft = $('dataInput').value;
+    reset();
+    $('dataInput').value = draft;
+    applyInput();
+  });
+  $('applyBtn').addEventListener('click', applyInput);
+  $('randomBtn').addEventListener('click', generateData);
+  $('startBtn').addEventListener('click', () => begin());
+  $('pauseBtn').addEventListener('click', togglePause);
+  $('stepBtn').addEventListener('click', () => {
+    if (!state.running) begin(true);
+    if (state.paused) nextStep();
+  });
+  $('stopBtn').addEventListener('click', reset);
+  $('dataInput').addEventListener('keydown', event => {
+    if (event.key === 'Enter') { event.preventDefault(); applyInput(); }
+  });
+  $('speed').addEventListener('input', () => text('speedLabel', `${$('speed').value} kroków/s`));
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden && state.running && !state.paused) togglePause();
+  });
+
+  state.input = parseInput($('dataInput').value);
+  reset();
+})();
+    </script>
+  </body>
+</html>

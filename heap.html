@@ -59,7 +59,7 @@
           <div class="stat"><span>Zamiany</span><output id="swapCount">0</output><small>przesunięcia w górę i w dół</small></div>
         </section>
         <section class="panel lab-table-panel" aria-labelledby="resultTitle"><h2 id="resultTitle">Kolejność wyjmowania</h2><p id="phaseText">Wyjęte korzenie pojawią się tutaj, w kolejności priorytetu.</p><ol id="chosen" class="graph-tokens" aria-label="Wyjęte elementy"></ol><p id="resultText" class="lab-result" role="status">Wynik pojawi się po zakończeniu.</p></section>
-        <details class="data-details"><summary>Reguły operacji</summary><p>Wstawianie: dopisz element na końcu tablicy i przesuwaj go w górę, dopóki jest mniejszy od rodzica. Usuwanie korzenia: zastąp korzeń ostatnim elementem, skróć kopiec i przesuwaj nowy korzeń w dół, zamieniając go z mniejszym dzieckiem, dopóki któreś dziecko jest od niego mniejsze.</p></details>
+        <details class="data-details"><summary>Reguły operacji</summary><p>W kopcu min: dopisz element na końcu tablicy i przesuwaj go w górę, dopóki jest mniejszy od rodzica. Przy usuwaniu korzenia zastąp go ostatnim elementem, skróć kopiec i przesuwaj nowy korzeń w dół, zamieniając go z mniejszym dzieckiem, dopóki któreś dziecko jest od niego mniejsze. W kopcu max odwróć porównania: w górę przesuwaj element większy od rodzica, a w dół zamieniaj z większym dzieckiem.</p></details>
       </div>
       <footer><span>AlgorithmsLab · Interaktywna nauka algorytmów</span><a href="index.html">Wszystkie symulacje</a></footer>
     </main>
@@ -166,7 +166,7 @@ window.Lab = (() => {
     document.addEventListener('visibilitychange', () => { if (document.hidden && api.running) api.pause(); });
     document.addEventListener('keydown', event => {
       if (event.target.closest('input, select, textarea') || event.altKey || event.ctrlKey || event.metaKey) return;
-      if (event.key === ' ' && !event.target.closest('button, [role="button"], [role="gridcell"]')) { event.preventDefault(); api.running ? api.pause() : api.start(); }
+      if (event.key === ' ' && !event.target.closest('a, button, summary, [role="button"], [role="gridcell"]')) { event.preventDefault(); api.running ? api.pause() : api.start(); }
       if (event.key.toLowerCase() === 'n' && !api.running) api.next();
       if (event.key.toLowerCase() === 'r') api.reset();
     });

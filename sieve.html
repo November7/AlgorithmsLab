@@ -165,7 +165,7 @@ window.Lab = (() => {
     document.addEventListener('visibilitychange', () => { if (document.hidden && api.running) api.pause(); });
     document.addEventListener('keydown', event => {
       if (event.target.closest('input, select, textarea') || event.altKey || event.ctrlKey || event.metaKey) return;
-      if (event.key === ' ' && !event.target.closest('button, [role="button"], [role="gridcell"]')) { event.preventDefault(); api.running ? api.pause() : api.start(); }
+      if (event.key === ' ' && !event.target.closest('a, button, summary, [role="button"], [role="gridcell"]')) { event.preventDefault(); api.running ? api.pause() : api.start(); }
       if (event.key.toLowerCase() === 'n' && !api.running) api.next();
       if (event.key.toLowerCase() === 'r') api.reset();
     });
@@ -179,7 +179,12 @@ window.Lab = (() => {
   'use strict';
   const { $, text, element, paint, tokens, controller } = Lab;
   let n, divisor, crossedAt, primes, p, current, crosses, highlight, focusNumber = 2;
-  function reset() { n = Number($('limit').value); divisor = Array(n + 1).fill(0); crossedAt = []; primes = []; p = 0; current = 0; crosses = 0; highlight = 0; text('limitLabel', n); }
+  function reset() {
+    n = Number($('limit').value);
+    focusNumber = Math.max(2, Math.min(n, focusNumber));
+    divisor = Array(n + 1).fill(0); crossedAt = []; primes = [];
+    p = 0; current = 0; crosses = 0; highlight = 0; text('limitLabel', n);
+  }
   function* run() {
     for (let candidate = 2; candidate * candidate <= n; candidate++) {
       if (divisor[candidate]) continue;

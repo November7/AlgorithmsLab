@@ -520,6 +520,75 @@
   color:var(--muted);
   font-size:11px;
 }
+.dedupe-lab .lab-fields { grid-template-columns:1fr 2fr 1fr; }
+.dedupe-lab .lab-fields .field { min-width:0; }
+.dedupe-lab .complexity { grid-template-columns:repeat(4,minmax(0,1fr)); }
+.dedupe-lab .complexity div:last-child { grid-column:auto; }
+.dedupe-lab .field input[type="text"] {
+  box-sizing:border-box;
+  width:100%;
+  min-height:42px;
+  border:1px solid #c9d5e5;
+  border-radius:8px;
+  padding:7px 9px;
+  background:#f9fbfe;
+  color:var(--ink);
+  font-size:12px;
+}
+.dedupe-lab .dedupe-board {
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:16px;
+  padding:18px 24px;
+}
+.dedupe-board section { min-width:0; }
+.dedupe-board h3 { color:var(--muted); }
+.dedupe-values {
+  display:flex;
+  flex-wrap:wrap;
+  gap:7px;
+  min-height:36px;
+  margin:0;
+  padding:4px 0;
+  list-style:none;
+}
+.dedupe-values li {
+  display:grid;
+  place-items:center;
+  min-width:34px;
+  min-height:32px;
+  padding:3px 9px;
+  border:1px solid #cbdafa;
+  border-radius:7px;
+  background:var(--soft);
+  color:var(--blue-dark);
+  font:600 12px/1.5 ui-monospace,Consolas,monospace;
+  transition:background .16s,border-color .16s,transform .16s;
+  max-width:100%;
+  overflow-wrap:anywhere;
+}
+.dedupe-values li.dedupe-value.current { background:#315fb1; border-color:#315fb1; color:white; transform:translateY(-2px); }
+.dedupe-values li.dedupe-value.compared { background:#e1ebff; border-color:#8aa8da; box-shadow:inset 0 0 0 2px #8aa8da; }
+.dedupe-values li.dedupe-value.duplicate { background:#fff1e8; border-color:#e5b08f; color:#84462b; }
+.dedupe-values li.dedupe-value.kept,.dedupe-values li.dedupe-value.seen { background:#e3f1ee; border-color:#bfd9d2; color:#234e48; }
+.dedupe-values li.dedupe-empty { border-color:transparent; background:transparent; color:var(--muted); }
+.dedupe-seen { grid-column:1/-1; border-top:1px solid var(--line); padding-top:14px; }
+.dedupe-legend { justify-content:flex-start; flex-wrap:wrap; gap:8px 18px; }
+.dedupe-legend span { display:inline-flex; align-items:center; gap:7px; }
+.dedupe-key { width:12px; height:12px; border-radius:4px; background:#315fb1; }
+.dedupe-key.compared { background:#e1ebff; border:2px solid #8aa8da; }
+.dedupe-key.duplicate { background:#fff1e8; border:1px solid #e5b08f; }
+.dedupe-output { padding:18px 24px; }
+.dedupe-output h2 { margin-bottom:8px; }
+.dedupe-output .lab-result { margin:0; overflow-wrap:anywhere; font-family:ui-monospace,Consolas,monospace; }
+@media(max-width:760px) {
+  .dedupe-lab .lab-fields { grid-template-columns:1fr; }
+  .dedupe-lab .complexity { grid-template-columns:repeat(2,minmax(0,1fr)); }
+  .dedupe-lab .complexity div:nth-last-child(-n+2) { border-bottom:0; }
+  .dedupe-lab .dedupe-board { grid-template-columns:1fr; padding:16px; }
+  .dedupe-seen { grid-column:auto; }
+  .dedupe-output { padding:16px; }
+}
 @media(max-width:1050px) {
   .workspace {
     grid-template-columns:220px minmax(0,1fr);
@@ -975,14 +1044,14 @@
 /* Interactive step labs. Keep controls and long diagrams usable on narrow screens. */
 .interactive-lab .lab-table-panel { overflow-x:auto; }
 .interactive-lab .lab-table-panel h2 { margin-top:0; }
-.interactive-lab .lab-board [role="button"],.interactive-lab tr[role="button"] { cursor:pointer; }
+.interactive-lab .lab-board [role="button"],.interactive-lab .lab-interactive-row { cursor:pointer; }
 .interactive-lab [role="button"]:focus-visible { outline:3px solid #315fb1; outline-offset:3px; }
-.interactive-lab .graph-tokens button,.interactive-lab .lab-dp button {
+.interactive-lab .graph-tokens button,.interactive-lab .lab-dp button,.interactive-lab .lab-table-action {
   border:0; background:transparent; color:inherit; font:inherit; cursor:pointer;
   padding:4px; min-height:28px;
 }
 .interactive-lab .lab-dp button { width:100%; }
-.interactive-lab .graph-tokens button:focus-visible,.interactive-lab .lab-dp button:focus-visible { outline:2px solid currentColor; outline-offset:2px; }
+.interactive-lab .graph-tokens button:focus-visible,.interactive-lab .lab-dp button:focus-visible,.interactive-lab .lab-table-action:focus-visible { outline:2px solid currentColor; outline-offset:2px; }
 .interactive-lab .lab-completed { opacity:.6; }
 .interactive-lab .lab-label { fill:var(--ink); font:12px "Segoe UI",sans-serif; }
 .interactive-lab #board { touch-action:pan-y; }

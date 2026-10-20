@@ -166,7 +166,7 @@ window.Lab = (() => {
     document.addEventListener('visibilitychange', () => { if (document.hidden && api.running) api.pause(); });
     document.addEventListener('keydown', event => {
       if (event.target.closest('input, select, textarea') || event.altKey || event.ctrlKey || event.metaKey) return;
-      if (event.key === ' ' && !event.target.closest('button, [role="button"], [role="gridcell"]')) { event.preventDefault(); api.running ? api.pause() : api.start(); }
+      if (event.key === ' ' && !event.target.closest('a, button, summary, [role="button"], [role="gridcell"]')) { event.preventDefault(); api.running ? api.pause() : api.start(); }
       if (event.key.toLowerCase() === 'n' && !api.running) api.next();
       if (event.key.toLowerCase() === 'r') api.reset();
     });

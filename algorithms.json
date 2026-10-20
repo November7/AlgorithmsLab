@@ -12,6 +12,12 @@
     "status": "published"
   },
   {
+    "title": "Usuwanie duplikatów",
+    "description": "Usuwanie duplikatów przez zbiór, sortowanie, porównywanie z wynikiem i tablicę obecności.",
+    "url": "duplicates.html",
+    "status": "published"
+  },
+  {
     "title": "Algorytmy sortowania",
     "description": "Algorytmy sortowania.",
     "url": "sort.html",

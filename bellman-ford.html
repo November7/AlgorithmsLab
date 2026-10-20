@@ -58,7 +58,7 @@
           <div class="stat"><span>Ujemny cykl</span><output id="cycleFlag">-</output><small>wynik rundy kontrolnej</small></div>
         </section>
         <section class="panel lab-table-panel" aria-labelledby="distTitle"><h2 id="distTitle">Odległości od startu</h2><p>Dla każdego wierzchołka: aktualna odległość i poprzednik na najlepszej znanej drodze.</p><table id="distTable" class="graph-table"><caption>Wierzchołki · odległość · poprzednik</caption><thead id="distHead"></thead><tbody id="distBody"></tbody></table><p id="resultText" class="lab-result" role="status">Wynik pojawi się po zakończeniu.</p></section>
-        <details class="data-details"><summary>Dane wejściowe i reguła relaksacji</summary><p id="dataText"></p><p>Początkowo d[start] = 0, a pozostałe d[v] = ∞. Dla krawędzi (u, v) o wadze w: jeśli d[u] + w &lt; d[v], ustaw d[v] = d[u] + w i poprzednik[v] = u. Po V - 1 rundach odległości są ostateczne; poprawa w kolejnej rundzie oznacza ujemny cykl osiągalny ze startu.</p></details>
+        <details class="data-details"><summary>Dane wejściowe i reguła relaksacji</summary><p id="dataText"></p><p>Początkowo d[start] = 0, a pozostałe d[v] = ∞. Dla krawędzi (u, v) o wadze w: jeśli u jest osiągalny i d[u] + w &lt; d[v], ustaw d[v] = d[u] + w i poprzednik[v] = u. Jeśli ze startu nie można dojść do ujemnego cyklu, po V − 1 rundach odległości są ostateczne. Poprawa w kolejnej rundzie oznacza ujemny cykl osiągalny ze startu.</p></details>
       </div>
       <footer><span>AlgorithmsLab · Interaktywna nauka algorytmów</span><a href="index.html">Wszystkie symulacje</a></footer>
     </main>
@@ -165,7 +165,7 @@ window.Lab = (() => {
     document.addEventListener('visibilitychange', () => { if (document.hidden && api.running) api.pause(); });
     document.addEventListener('keydown', event => {
       if (event.target.closest('input, select, textarea') || event.altKey || event.ctrlKey || event.metaKey) return;
-      if (event.key === ' ' && !event.target.closest('button, [role="button"], [role="gridcell"]')) { event.preventDefault(); api.running ? api.pause() : api.start(); }
+      if (event.key === ' ' && !event.target.closest('a, button, summary, [role="button"], [role="gridcell"]')) { event.preventDefault(); api.running ? api.pause() : api.start(); }
       if (event.key.toLowerCase() === 'n' && !api.running) api.next();
       if (event.key.toLowerCase() === 'r') api.reset();
     });
@@ -179,7 +179,7 @@ window.Lab = (() => {
   'use strict';
   const { $, text, element, svg, paint, controller } = Lab;
   let n, edges, positions, distance, previous, improved, round, checks, relaxations, active, accepted, cycleEdges, affected, phase, route, dragging;
-  const name = i => String.fromCharCode(65 + i), fmt = v => v === Infinity ? '∞' : v === -Infinity ? '-∞' : String(v);
+  const name = i => String.fromCharCode(65 + i), fmt = v => v === Infinity ? '∞' : v === -Infinity ? '−∞' : String(v);
   function generate() {
     n = Number($('size').value); const kind = $('scenario').value;
     let triples;
@@ -234,8 +234,8 @@ window.Lab = (() => {
       affected.forEach(v => { distance[v] = -Infinity; });
     }
     phase = 'done'; active = -1;
-    text('resultText', affected.size ? `Osiągalny ujemny cykl. Odległość -∞ dla: ${[...affected].sort().map(name).join(', ')}. Do tych wierzchołków nie istnieje najkrótsza ścieżka; pozostałe odległości są poprawne.` : `Wyznaczono najkrótsze ścieżki od ${name(Number($('startVertex').value))}. ${stable ? 'Zakończono wcześniej: cała runda bez poprawy.' : 'Runda kontrolna nie wykazała osiągalnego ujemnego cyklu.'} ∞ oznacza brak drogi.`);
-    return affected.size ? 'Zaznaczono krawędzie ujemnego cyklu i wierzchołki o odległości -∞.' : 'Wybierz wiersz tabeli, aby zobaczyć najkrótszą ścieżkę.';
+    text('resultText', affected.size ? `Osiągalny ujemny cykl. Odległość −∞ dla: ${[...affected].sort().map(name).join(', ')}. Do tych wierzchołków nie istnieje najkrótsza ścieżka; pozostałe odległości są poprawne.` : `Wyznaczono najkrótsze ścieżki od ${name(Number($('startVertex').value))}. ${stable ? 'Zakończono wcześniej: cała runda bez poprawy.' : 'Runda kontrolna nie wykazała osiągalnego ujemnego cyklu.'} ∞ oznacza brak drogi.`);
+    return affected.size ? 'Zaznaczono krawędzie ujemnego cyklu i wierzchołki o odległości −∞.' : 'Wybierz wiersz tabeli, aby zobaczyć najkrótszą ścieżkę.';
   }
   function showPath(vertex) {
     if (phase !== 'done') return;
@@ -288,9 +288,17 @@ window.Lab = (() => {
     });
     paint($('distHead'), root => { const tr = element('tr'); ['Wierzchołek', 'Odległość', 'Poprzednik', 'Runda poprawy'].forEach(v => tr.append(element('th', { scope: 'col' }, v))); root.append(tr); });
     paint($('distBody'), root => distance.forEach((d, i) => {
-      const tr = element('tr', { class: affected.has(i) ? 'lab-rejected' : active >= 0 && edges[active].b === i ? 'lab-current' : '' });
-      [name(i), fmt(d), previous[i] < 0 || affected.has(i) ? '-' : name(edges[previous[i]].a), improved[i] || '-'].forEach(v => tr.append(element('td', {}, v)));
-      Lab.action(tr, () => showPath(i), `Ścieżka do ${name(i)}, odległość ${fmt(d)}`, i); root.append(tr);
+      const style = affected.has(i) ? 'lab-rejected' : active >= 0 && edges[active].b === i ? 'lab-current' : '';
+      const tr = element('tr', { class: `lab-interactive-row ${style}` });
+      const cell = element('td');
+      cell.append(element('button', {
+        type: 'button', class: 'lab-table-action', 'data-focus': String(i),
+        'aria-label': `Ścieżka do ${name(i)}, odległość ${fmt(d)}`
+      }, name(i)));
+      tr.append(cell);
+      [fmt(d), previous[i] < 0 || affected.has(i) ? '-' : name(edges[previous[i]].a), improved[i] || '-'].forEach(v => tr.append(element('td', {}, v)));
+      tr.addEventListener('click', () => showPath(i));
+      root.append(tr);
     }));
     text('roundCount', round); text('edgeCount', checks); text('relaxCount', relaxations); text('cycleFlag', phase === 'done' ? affected.size ? 'TAK' : 'NIE' : '-');
   }

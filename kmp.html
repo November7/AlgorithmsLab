@@ -51,7 +51,7 @@
           <div class="chart-caption lab-legend"><span><i class="lab-key current" aria-hidden="true"></i>Porównywane znaki</span><span><i class="lab-key accepted" aria-hidden="true"></i>Zgodny prefiks</span><span><i class="lab-key rejected" aria-hidden="true"></i>Niezgodność</span></div>
           <p id="operation" role="status" aria-live="polite">Wybierz Start lub wykonaj pierwszy krok.</p>
         </section>
-        <section class="panel lab-table-panel" aria-labelledby="lpsTitle"><h2 id="lpsTitle">Tablica prefikso-sufiksów</h2><p>lps[i] to długość najdłuższego właściwego prefiksu wzorca[0..i], który jest też jego sufiksem. Mówi, o ile można się cofnąć we wzorcu po niezgodności.</p><table id="lpsTable" class="graph-table"><caption>Pozycja · znak wzorca · lps</caption><thead id="lpsHead"></thead><tbody id="lpsBody"></tbody></table></section>
+        <section class="panel lab-table-panel" aria-labelledby="lpsTitle"><h2 id="lpsTitle">Tablica prefikso-sufiksów</h2><p>lps[i] to długość najdłuższego właściwego prefiksu wzorca[0..i], który jest też jego sufiksem. Po niezgodności na pozycji j &gt; 0 wracamy we wzorcu do indeksu lps[j − 1].</p><table id="lpsTable" class="graph-table"><caption>Pozycja · znak wzorca · lps</caption><thead id="lpsHead"></thead><tbody id="lpsBody"></tbody></table></section>
         <section class="stats" aria-label="Statystyki algorytmu">
           <div class="stat"><span>Porównania znaków</span><output id="compareCount">0</output><small>przy budowie lps i wyszukiwaniu</small></div>
           <div class="stat"><span>Znalezione dopasowania</span><output id="matchCount">0</output><small>pozycje początku w tekście (od 0)</small></div>
@@ -166,7 +166,7 @@ window.Lab = (() => {
     document.addEventListener('visibilitychange', () => { if (document.hidden && api.running) api.pause(); });
     document.addEventListener('keydown', event => {
       if (event.target.closest('input, select, textarea') || event.altKey || event.ctrlKey || event.metaKey) return;
-      if (event.key === ' ' && !event.target.closest('button, [role="button"], [role="gridcell"]')) { event.preventDefault(); api.running ? api.pause() : api.start(); }
+      if (event.key === ' ' && !event.target.closest('a, button, summary, [role="button"], [role="gridcell"]')) { event.preventDefault(); api.running ? api.pause() : api.start(); }
       if (event.key.toLowerCase() === 'n' && !api.running) api.next();
       if (event.key.toLowerCase() === 'r') api.reset();
     });
@@ -239,8 +239,16 @@ window.Lab = (() => {
     });
     paint($('lpsHead'), root => { const tr = element('tr'); ['Pozycja', 'Znak', 'lps'].forEach(v => tr.append(element('th', { scope: 'col' }, v))); root.append(tr); });
     paint($('lpsBody'), root => pattern.forEach((char, k) => {
-      const tr = element('tr', { class: phase === 'lps' && pair?.[0] === k ? 'lab-current' : '' });
-      [k, char, lps[k] ?? '·'].forEach(v => tr.append(element('td', {}, v))); Lab.action(tr, () => inspect(k), `lps[${k}] = ${lps[k] ?? 'nieobliczone'}`, k); root.append(tr);
+      const tr = element('tr', { class: `lab-interactive-row${phase === 'lps' && pair?.[0] === k ? ' lab-current' : ''}` });
+      const cell = element('td');
+      cell.append(element('button', {
+        type: 'button', class: 'lab-table-action', 'data-focus': String(k),
+        'aria-label': `lps[${k}] = ${lps[k] ?? 'nieobliczone'}`
+      }, k));
+      tr.append(cell);
+      [char, lps[k] ?? '·'].forEach(v => tr.append(element('td', {}, v)));
+      tr.addEventListener('click', () => inspect(k));
+      root.append(tr);
     }));
     tokens('chosen', matches.map(pos => `Pozycja ${pos}`), index => {
       if (ctl.running) return; inspected = null; selected = matches[index]; offset = selected; prefix = pattern.length; pair = null; render();
