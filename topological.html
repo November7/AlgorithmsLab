@@ -40,7 +40,7 @@
           <div class="field"><label for="size">Liczba zadań <output id="sizeLabel" for="size">8</output></label><input id="size" type="range" min="4" max="10" value="8"></div>
           <div class="field"><label for="speed">Tempo <output id="speedLabel" for="speed">3 op./s</output></label><input id="speed" type="range" min="1" max="12" value="3"></div>
         </div>
-        <div class="actions"><button type="button" id="startBtn" class="btn primary">▶ Start</button><button type="button" id="pauseBtn" class="btn" disabled>Pauza</button><button type="button" id="stepBtn" class="btn">Jeden krok</button><button type="button" id="stopBtn" class="btn" disabled>Reset</button><button type="button" id="randomBtn" class="btn">↻ Losuj graf</button></div>
+        <div class="actions"><button type="button" id="startBtn" class="btn primary">Start</button><button type="button" id="pauseBtn" class="btn" disabled>Pauza</button><button type="button" id="backBtn" class="btn" disabled>Krok wstecz</button><button type="button" id="stepBtn" class="btn">Krok naprzód</button><button type="button" id="stopBtn" class="btn" disabled>Reset</button><button type="button" id="randomBtn" class="btn">Losuj graf</button></div>
         <p class="control-hint">Jeden krok przygotowuje kolejkę, pobiera jedno zadanie lub usuwa jedną zależność. Reset zachowuje graf. Strzałka A → B oznacza: A musi poprzedzać B.</p>
         <p class="control-hint">Liczba „wejść” pod wierzchołkiem to liczba jego niespełnionych zależności. Nowe zadania trafiają na koniec kolejki; przy jednoczesnym starcie porządkujemy je według numerów.</p>
       </section>
@@ -48,7 +48,7 @@
         <section class="panel visualizer" id="visualization" tabindex="-1" aria-labelledby="chartTitle">
           <div class="chart-heading"><div><div class="eyebrow">02 / Obserwuj działanie</div><h2 id="chartTitle">Graf zależności</h2></div><span id="statusText" role="status">Gotowy</span></div>
           <div class="lab-viewport" tabindex="0" role="region" aria-label="Przewijany widok grafu"><svg id="board" class="lab-board" viewBox="0 0 760 420" role="img" aria-label="Graf skierowany ze stopniami wejściowymi" aria-describedby="operation graphText"></svg></div>
-          <div class="chart-caption lab-legend"><span><i class="lab-key current" aria-hidden="true"></i>▶ Wybrane teraz</span><span><i class="lab-key ready" aria-hidden="true"></i>Q W kolejce</span><span><i class="lab-key accepted" aria-hidden="true"></i>✓ W wyniku</span><span><i class="lab-key rejected" aria-hidden="true"></i>! Zablokowane</span></div>
+          <div class="chart-caption lab-legend"><span><i class="lab-key current" aria-hidden="true"></i>Wybrane teraz</span><span><i class="lab-key ready" aria-hidden="true"></i>Q W kolejce</span><span><i class="lab-key accepted" aria-hidden="true"></i>✓ W wyniku</span><span><i class="lab-key rejected" aria-hidden="true"></i>! Zablokowane</span></div>
           <p id="operation" role="status" aria-live="polite">Wybierz Start lub wykonaj pierwszy krok.</p>
         </section>
         <section class="stats" aria-label="Statystyki algorytmu">
@@ -73,6 +73,7 @@
   const $ = id => document.getElementById(id);
   const state = { n: 0, edges: [], adjacency: [], indegree: [], queue: [], head: 0, order: [], placed: new Set(), removed: new Set(), blocked: new Set(), current: -1, active: -1, steps: 0, running: false, paused: false, done: false, iterator: null };
   let frameId = null, lastTime = null, budget = 0;
+  let autoStarted = false;
   const controls = ['scenario', 'size', 'randomBtn'];
 
   function reset() {
@@ -84,6 +85,7 @@
     state.placed.clear(); state.removed.clear(); state.blocked.clear();
     state.current = -1; state.active = -1; state.steps = 0;
     state.running = false; state.paused = false; state.done = false; state.iterator = null;
+    autoStarted = false;
     $('operation').textContent = 'Wybierz Start lub wykonaj pierwszy krok.';
     $('resultText').textContent = 'Wynik pojawi się po zakończeniu.';
     render();
@@ -125,7 +127,7 @@
     while (state.head < state.queue.length) {
       const v = state.queue[state.head++];
       state.current = v; state.active = -1; state.order.push(v); state.placed.add(v);
-      yield `▶ Pobieramy zadanie ${v + 1} i dopisujemy je do wyniku. Teraz usuwamy jego zależności wychodzące.`;
+      yield `Pobieramy zadanie ${v + 1} i dopisujemy je do wyniku. Teraz usuwamy jego zależności wychodzące.`;
       for (const edge of state.adjacency[v]) {
         state.active = edge.id; state.removed.add(edge.id); state.indegree[edge.b]--;
         const ready = state.indegree[edge.b] === 0;
@@ -175,7 +177,7 @@
     const ready = new Set(state.queue.slice(state.head));
     points.forEach((point, v) => {
       const kind = v === state.current ? 'current' : state.placed.has(v) ? 'accepted' : state.blocked.has(v) ? 'rejected' : ready.has(v) ? 'ready' : '';
-      const mark = v === state.current ? '▶' : state.placed.has(v) ? '✓' : state.blocked.has(v) ? '!' : ready.has(v) ? 'Q' : '';
+      const mark = v === state.current ? '' : state.placed.has(v) ? '✓' : state.blocked.has(v) ? '!' : ready.has(v) ? 'Q' : '';
       board.append(svg('circle', { cx: point.x, cy: point.y, r: 22, class: `lab-node ${kind}` }));
       board.append(svg('text', { x: point.x, y: point.y + 5, class: `lab-number ${kind}` }, v + 1));
       board.append(svg('text', { x: point.x, y: point.y + 39, class: 'lab-node-note' }, `${mark} wejść: ${state.indegree[v]}`));
@@ -197,7 +199,7 @@
     $('degreeTable').replaceChildren(...state.indegree.map((degree, v) => {
       const row = document.createElement('tr');
       row.className = v === state.current ? 'lab-current' : state.placed.has(v) ? 'lab-accepted' : state.blocked.has(v) ? 'lab-rejected' : '';
-      const label = v === state.current ? '▶ Usuwanie zależności' : state.placed.has(v) ? '✓ W wyniku' : state.blocked.has(v) ? '! Zablokowane' : ready.has(v) ? 'Q W kolejce' : 'Oczekuje';
+      const label = v === state.current ? 'Usuwanie zależności' : state.placed.has(v) ? '✓ W wyniku' : state.blocked.has(v) ? '! Zablokowane' : ready.has(v) ? 'Q W kolejce' : 'Oczekuje';
       for (const value of [v + 1, degree, label]) { const cell = document.createElement('td'); cell.textContent = value; row.append(cell); }
       return row;
     }));
@@ -215,11 +217,12 @@
   }
   function updateControls() {
     $('statusText').textContent = state.done ? state.blocked.size ? 'Wykryto cykl' : 'Zakończono' : state.running ? state.paused ? 'Pauza' : 'W trakcie' : 'Gotowy';
-    $('startBtn').disabled = state.running && !state.paused;
-    $('startBtn').textContent = state.done ? '▶ Uruchom ponownie' : state.paused ? '▶ Wznów' : '▶ Start';
+    $('startBtn').disabled = autoStarted && !state.done || state.running && !state.paused && !autoStarted;
+    $('startBtn').textContent = state.done ? 'Uruchom ponownie' : 'Start';
     $('pauseBtn').disabled = !state.running; $('pauseBtn').textContent = state.paused ? 'Wznów' : 'Pauza';
     $('stepBtn').disabled = state.running && !state.paused;
-    $('stopBtn').disabled = !state.running && state.steps === 0;
+    $('backBtn').disabled = state.running && !state.paused || state.steps === 0;
+    $('stopBtn').disabled = !autoStarted && state.steps === 0;
     for (const id of controls) $(id).disabled = state.running;
   }
   function nextStep() {
@@ -229,6 +232,17 @@
     if (!result.done) { state.steps++; $('operation').textContent = result.value; }
     if (result.done || state.done) { state.done = true; state.running = false; state.paused = false; state.iterator = null; stopClock(); }
     render();
+  }
+  function previousStep() {
+    if (state.steps === 0) return;
+    const target = state.steps - 1;
+    const wasAutoStarted = autoStarted;
+    reset();
+    if (target > 0) {
+      state.running = true; state.paused = true; state.iterator = runAlgorithm();
+      for (let i = 0; i < target; i++) nextStep();
+    }
+    autoStarted = wasAutoStarted && target > 0; updateControls();
   }
   function animate(time) {
     frameId = null;
@@ -241,7 +255,7 @@
   function start() {
     if (state.running && !state.paused) return;
     if (state.done) reset();
-    stopClock(); state.running = true; state.paused = false; updateControls(); frameId = requestAnimationFrame(animate);
+    stopClock(); state.running = true; state.paused = false; autoStarted = true; updateControls(); frameId = requestAnimationFrame(animate);
   }
   $('startBtn').addEventListener('click', start);
   $('pauseBtn').addEventListener('click', () => {
@@ -253,6 +267,14 @@
     if (state.running && !state.paused) return;
     if (state.done) reset();
     stopClock(); state.running = true; state.paused = true; nextStep();
+  });
+  $('backBtn').addEventListener('click', previousStep);
+  document.addEventListener('keydown', event => {
+    if (event.target.closest('input, select, textarea') || event.altKey || event.ctrlKey || event.metaKey) return;
+    if (event.key !== 'ArrowLeft' && event.key !== 'ArrowRight') return;
+    event.preventDefault();
+    if (state.running && !state.paused) { stopClock(); state.paused = true; updateControls(); }
+    if (event.key === 'ArrowLeft') previousStep(); else $('stepBtn').click();
   });
   $('stopBtn').addEventListener('click', reset);
   $('randomBtn').addEventListener('click', generateData);

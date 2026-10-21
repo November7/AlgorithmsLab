@@ -72,10 +72,11 @@
         </div>
         <div class="actions">
           <button type="button" id="applyBtn" class="btn">Użyj danych</button>
-          <button type="button" id="randomBtn" class="btn">↻ Losuj dane</button>
-          <button type="button" id="startBtn" class="btn primary">▶ Start</button>
+          <button type="button" id="randomBtn" class="btn">Losuj dane</button>
+          <button type="button" id="startBtn" class="btn primary">Start</button>
           <button type="button" id="pauseBtn" class="btn" disabled>Pauza</button>
-          <button type="button" id="stepBtn" class="btn">Jeden krok</button>
+          <button type="button" id="backBtn" class="btn" disabled>Krok wstecz</button>
+          <button type="button" id="stepBtn" class="btn">Krok naprzód</button>
           <button type="button" id="stopBtn" class="btn" disabled>Reset</button>
         </div>
         <p class="control-hint" id="dataHint">Liczby całkowite od −9007199254740991 do 9007199254740991. Puste pole oznacza pustą tablicę. Start i Jeden krok zatwierdzają wpisane dane. Tablica obecności wymaga zakresu max − min + 1 ≤ 64. Reset zachowuje ostatnio zatwierdzone dane.</p>
@@ -192,7 +193,7 @@
     checked: 0, comparisons: 0, sortComparisons: 0, lookups: 0, duplicates: 0, steps: 0,
     iterator: null, running: false, paused: false, done: false
   };
-  let frameId = null, lastTime = null, budget = 0;
+  let frameId = null, lastTime = null, budget = 0, autoStarted = false;
 
   function text(id, value) { $(id).textContent = String(value); }
   function parseInput(value) {
@@ -301,6 +302,7 @@
     state.running = false;
     state.paused = false;
     state.done = false;
+    autoStarted = false;
     $('dataInput').value = state.input.join(', ');
     $('dataInput').setAttribute('aria-invalid', 'false');
     describeAlgorithm();
@@ -436,12 +438,13 @@
     $('dataInput').disabled = locked;
     $('applyBtn').disabled = locked;
     $('randomBtn').disabled = locked;
-    $('startBtn').disabled = locked;
-    $('startBtn').textContent = state.done ? '↻ Start od nowa' : '▶ Start';
+    $('startBtn').disabled = autoStarted && !state.done || locked && !state.paused;
+    $('startBtn').textContent = state.done ? '↻ Start od nowa' : 'Start';
     $('pauseBtn').disabled = !locked;
     $('pauseBtn').textContent = state.paused ? 'Wznów' : 'Pauza';
     $('stepBtn').disabled = locked && !state.paused;
-    $('stopBtn').disabled = false;
+    $('backBtn').disabled = locked && !state.paused || state.steps === 0;
+    $('stopBtn').disabled = !autoStarted && state.steps === 0;
   }
   function finish() {
     if (frameId !== null) cancelAnimationFrame(frameId);
@@ -471,13 +474,30 @@
     }
     state.steps += 1;
     render();
+    updateControls();
+  }
+  function previousStep() {
+    if (state.steps === 0) return;
+    const target = state.steps - 1;
+    const wasAutoStarted = autoStarted;
+    reset();
+    if (target > 0) {
+      begin(true);
+      for (let i = 0; i < target; i++) nextStep();
+    }
+    autoStarted = wasAutoStarted && target > 0; updateControls();
   }
   function begin(paused = false) {
-    if (state.running || !applyInput()) return;
+    if (state.running) {
+      if (state.paused) { autoStarted = true; togglePause(); }
+      return;
+    }
+    if (!applyInput()) return;
     const methods = { set: removeWithSet, sort: removeAfterSort, naive: removeByScanningResult, presence: removeWithPresence };
     state.iterator = methods[state.algorithm]();
     state.running = true;
     state.paused = paused;
+    autoStarted = !paused;
     text('statusText', paused ? 'Pauza' : 'W trakcie');
     updateControls();
     if (!paused) {
@@ -550,6 +570,14 @@
   $('stepBtn').addEventListener('click', () => {
     if (!state.running) begin(true);
     if (state.paused) nextStep();
+  });
+  $('backBtn').addEventListener('click', previousStep);
+  document.addEventListener('keydown', event => {
+    if (event.target.closest('input, select, textarea') || event.altKey || event.ctrlKey || event.metaKey) return;
+    if (event.key !== 'ArrowLeft' && event.key !== 'ArrowRight') return;
+    event.preventDefault();
+    if (state.running && !state.paused) togglePause();
+    if (event.key === 'ArrowLeft') previousStep(); else $('stepBtn').click();
   });
   $('stopBtn').addEventListener('click', reset);
   $('dataInput').addEventListener('keydown', event => {

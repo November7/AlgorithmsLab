@@ -41,7 +41,7 @@
           <div class="field"><label for="pattern">Wzorzec</label><input id="pattern" type="text" maxlength="10" value="ABABCABAB" autocomplete="off"></div>
           <div class="field"><label for="speed">Tempo <output id="speedLabel" for="speed">4 op./s</output></label><input id="speed" type="range" min="1" max="20" value="4"></div>
         </div>
-        <div class="actions"><button type="button" id="startBtn" class="btn primary">▶ Start</button><button type="button" id="pauseBtn" class="btn" disabled>Pauza</button><button type="button" id="stepBtn" class="btn">Jeden krok</button><button type="button" id="stopBtn" class="btn" disabled>Reset</button><button type="button" id="randomBtn" class="btn">↻ Losuj tekst</button></div>
+        <div class="actions"><button type="button" id="startBtn" class="btn primary">Start</button><button type="button" id="pauseBtn" class="btn" disabled>Pauza</button><button type="button" id="backBtn" class="btn" disabled>Krok wstecz</button><button type="button" id="stepBtn" class="btn">Krok naprzód</button><button type="button" id="stopBtn" class="btn" disabled>Reset</button><button type="button" id="randomBtn" class="btn">Losuj tekst</button></div>
         <p class="control-hint">Najpierw budowana jest tablica prefikso-sufiksów wzorca, potem trwa właściwe wyszukiwanie. Jeden krok to jedno porównanie znaków. Tekst ma do 30 znaków, wzorzec do 10.</p>
       </section>
       <div class="main-column lab-results">
@@ -116,14 +116,15 @@ window.Lab = (() => {
     return new DOMPoint(event.clientX, event.clientY).matrixTransform(board.getScreenCTM().inverse());
   }
   function controller({ run, render, reset, validate = () => true, locked = [], manual = () => false, update = () => {} }) {
-    let iterator = null, timer = null;
-    const api = { running: false, done: false, steps: 0, started: false,
+    let iterator = null, timer = null, replayRun = run, replayReset = reset;
+    const api = { running: false, done: false, steps: 0, started: false, autoStarted: false,
       sync() {
-        $('startBtn').disabled = api.running || api.done || manual();
+        $('startBtn').disabled = api.autoStarted && !api.done || manual();
         $('pauseBtn').disabled = !api.started || api.done || manual();
         text('pauseBtn', api.started && !api.running ? 'Wznów' : 'Pauza');
-        $('stepBtn').disabled = api.running || api.done || manual();
-        $('stopBtn').disabled = false;
+        $('stepBtn').disabled = api.running || manual();
+        $('backBtn').disabled = api.running || api.steps === 0 || manual();
+        $('stopBtn').disabled = !api.started && !api.autoStarted;
         locked.forEach(id => { $(id).disabled = api.running; $(id).setAttribute('aria-disabled', String(api.running)); });
         $('speed').disabled = manual();
         text('statusText', manual() ? (api.done ? 'Ukończono' : 'Tryb ręczny') : api.done ? 'Zakończono' : api.running ? 'W trakcie' : api.started ? 'Pauza' : 'Gotowe');
@@ -131,21 +132,26 @@ window.Lab = (() => {
       },
       refresh() { render(); api.sync(); },
       pause() { clearTimeout(timer); timer = null; api.running = false; api.sync(); },
-      reset() {
-        api.pause(); iterator = null; api.done = false; api.started = false; api.steps = 0;
+      reset() { api.restart(run, reset); },
+      restart(nextRun, nextReset) {
+        api.pause(); iterator = null; api.done = false; api.started = false; api.autoStarted = false; api.steps = 0;
+        replayRun = nextRun; replayReset = nextReset;
         text('operation', 'Wybierz Start lub wykonaj pierwszy krok.'); text('resultText', 'Wynik pojawi się po zakończeniu.');
-        reset(); api.refresh();
+        replayReset(); api.refresh();
       },
       next() {
-        if (api.done || manual() || !validate()) return;
-        api.started = true; iterator ||= run();
+        if (manual() || !validate()) return;
+        if (api.done) api.reset();
+        api.started = true; iterator ||= replayRun();
         const result = iterator.next();
         if (result.done) { api.done = true; api.pause(); if (result.value) text('operation', result.value); }
         else { api.steps++; text('operation', result.value); }
         api.refresh();
       },
       start() {
-        if (api.running || api.done || manual() || !validate()) return;
+        if (api.running || manual() || !validate()) return;
+        if (api.done) api.reset();
+        api.autoStarted = true;
         api.running = true; api.next();
         const tick = () => {
           if (!api.running) return;
@@ -154,18 +160,33 @@ window.Lab = (() => {
         };
         if (api.running) timer = setTimeout(tick, 1000 / Number($('speed').value));
       },
-      replace(generator) { api.pause(); iterator = generator; api.done = false; api.started = false; api.sync(); },
-      // Replaying a deterministic generator restores Hanoi's recursion and undo history.
-      rewind(count) { api.reset(); for (let i = 0; i < count; i++) api.next(); }
+      replace(generator, { replay = run, restore = reset, steps = api.steps } = {}) {
+        api.pause(); iterator = generator; replayRun = replay; replayReset = restore;
+        api.steps = steps; api.done = false; api.started = false; api.autoStarted = false; api.sync();
+      },
+      // Replay from the input snapshot belonging to the current operation.
+      rewind(count) {
+        const autoStarted = api.autoStarted;
+        api.restart(replayRun, replayReset);
+        for (let i = 0; i < count; i++) api.next();
+        api.autoStarted = autoStarted && count > 0; api.sync();
+      },
+      previous() { if (api.steps > 0) api.rewind(api.steps - 1); }
     };
     $('startBtn').addEventListener('click', api.start);
     $('pauseBtn').addEventListener('click', () => api.running ? api.pause() : api.start());
     $('stepBtn').addEventListener('click', () => { api.pause(); api.next(); });
+    $('backBtn').addEventListener('click', () => { api.pause(); api.previous(); });
     $('stopBtn').addEventListener('click', api.reset);
     $('speed').addEventListener('input', () => text('speedLabel', `${$('speed').value} op./s`));
     document.addEventListener('visibilitychange', () => { if (document.hidden && api.running) api.pause(); });
     document.addEventListener('keydown', event => {
-      if (event.target.closest('input, select, textarea') || event.altKey || event.ctrlKey || event.metaKey) return;
+      if (event.defaultPrevented || event.target.closest('input, select, textarea') || event.altKey || event.ctrlKey || event.metaKey) return;
+      if (event.key === 'ArrowLeft' || event.key === 'ArrowRight') {
+        event.preventDefault();
+        if (api.running) api.pause();
+        if (event.key === 'ArrowLeft') api.previous(); else api.next();
+      }
       if (event.key === ' ' && !event.target.closest('a, button, summary, [role="button"], [role="gridcell"]')) { event.preventDefault(); api.running ? api.pause() : api.start(); }
       if (event.key.toLowerCase() === 'n' && !api.running) api.next();
       if (event.key.toLowerCase() === 'r') api.reset();

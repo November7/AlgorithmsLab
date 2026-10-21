@@ -110,11 +110,12 @@
                     <input type="range" id="speed" min="1" max="200" step="1" value="140" aria-describedby="tempoHint"></div>
                   </div>
                   <div class="actions">
-                    <button type="button" id="startBtn" class="btn primary">▶ Start</button>
+                    <button type="button" id="startBtn" class="btn primary">Start</button>
                     <button type="button" id="pauseBtn" class="btn" disabled>Pauza</button>
-                    <button type="button" id="stepBtn" class="btn">Jeden krok</button>
+                    <button type="button" id="backBtn" class="btn" disabled>Krok wstecz</button>
+                    <button type="button" id="stepBtn" class="btn">Krok naprzód</button>
                     <button type="button" id="stopBtn" class="btn" disabled>Stop</button>
-                    <button type="button" id="randomBtn" class="btn">↻ Losuj dane</button>
+                    <button type="button" id="randomBtn" class="btn">Losuj dane</button>
                   </div>
                   <p class="control-hint" id="tempoHint">Tempo określa liczbę kroków animacji na sekundę. Stop przywraca dane sprzed uruchomienia.</p>
                 </section>
@@ -229,8 +230,8 @@
   };
   const canvas = $('board'), ctx = canvas.getContext('2d');
   const sizeInput = $('size'), speedInput = $('speed');
-  const state = { data: [], original: [], active: new Set(), sorted: new Set(), comparisons: 0, swaps: 0, writes: 0, auxWrites: 0, running: false, paused: false, selected: 'bubble', iterator: null };
-  let frameId = null, lastTime = null, budget = 0, dirty = true, viewWidth = 1, viewHeight = 1;
+  const state = { data: [], original: [], active: new Set(), sorted: new Set(), comparisons: 0, swaps: 0, writes: 0, auxWrites: 0, running: false, paused: false, done: false, selected: 'bubble', iterator: null };
+  let frameId = null, lastTime = null, budget = 0, dirty = true, viewWidth = 1, viewHeight = 1, historySteps = 0, autoStarted = false;
 
   function renderLesson() {
     const info = ALGO_INFO[state.selected];
@@ -256,17 +257,18 @@
     if ($('dataDetails').open) $('dataText').textContent = state.data.join(', ');
   }
   function updateControls() {
-    $('startBtn').disabled = state.running;
-    $('pauseBtn').disabled = !state.running;
+    $('startBtn').disabled = autoStarted && state.running || state.running && !state.paused;
+    $('pauseBtn').disabled = !state.running || state.done;
     $('pauseBtn').textContent = state.paused ? 'Wznów' : 'Pauza';
     $('pauseBtn').setAttribute('aria-pressed', String(state.paused));
-    $('stopBtn').disabled = !state.running;
+    $('stopBtn').disabled = !autoStarted && historySteps === 0;
     $('stepBtn').disabled = state.running && !state.paused;
+    $('backBtn').disabled = state.running && !state.paused || historySteps === 0;
     for (const id of ['size', 'dataset', 'randomBtn']) $(id).disabled = state.running;
     document.querySelectorAll('.algorithm-pick').forEach(button => { button.disabled = state.running; });
   }
   function setStatus(text) { $('statusText').textContent = text; }
-  function clearCounters() { state.comparisons = state.swaps = state.writes = state.auxWrites = 0; state.active.clear(); state.sorted.clear(); }
+  function clearCounters() { state.comparisons = state.swaps = state.writes = state.auxWrites = 0; state.active.clear(); state.sorted.clear(); historySteps = 0; state.done = false; autoStarted = false; }
   function generateData(length) {
     if (state.running) return;
     const kind = $('dataset').value;
@@ -277,7 +279,7 @@
       const j = Math.floor(Math.random() * (length - 1));
       [state.data[j], state.data[j + 1]] = [state.data[j + 1], state.data[j]];
     }
-    clearCounters(); setStatus('Gotowy');
+    clearCounters(); historySteps = 0; setStatus('Gotowy');
     $('operation').textContent = 'Wybierz Start lub wykonaj pierwszy krok.';
     rafDraw();
   }
@@ -634,34 +636,55 @@
 
 
   function begin(paused = false) {
-    if (state.running) return;
+    if (state.running) {
+      if (state.paused) { autoStarted = true; togglePause(); }
+      return;
+    }
     clearCounters(); state.original = state.data.slice();
+    historySteps = 0;
+    autoStarted = !paused;
     state.iterator = SORTERS[state.selected](); state.running = true; state.paused = paused;
     lastTime = null; budget = 0; updateControls(); setStatus(paused ? 'Pauza' : 'Sortowanie'); rafDraw();
   }
   function finish() {
     state.running = false; state.paused = false; state.iterator = null;
+    state.done = true;
     state.active.clear(); setSortedRange(0, state.data.length - 1);
     setStatus('Zakończono'); $('operation').textContent = 'Gotowe. Wszystkie elementy są uporządkowane rosnąco.';
     updateControls(); dirty = true;
   }
   function nextStep() {
     if (!state.iterator) return;
-    try { if (state.iterator.next().done) finish(); }
+    try {
+      if (state.iterator.next().done) finish();
+      else historySteps++;
+    }
     catch (error) {
       stop(); setStatus('Błąd - przywrócono dane');
       $('operation').textContent = 'Nie udało się dokończyć sortowania. Dane wejściowe zostały zachowane.';
       console.error(error);
     }
-    dirty = true;
+    updateControls(); dirty = true;
+  }
+  function previousStep() {
+    if (historySteps === 0) return;
+    const target = historySteps - 1;
+    const wasAutoStarted = autoStarted;
+    if (state.running) stop();
+    state.data = state.original.slice();
+    historySteps = 0;
+    begin(true);
+    for (let i = 0; i < target; i++) nextStep();
+    autoStarted = wasAutoStarted; updateControls();
+    updateControls(); rafDraw();
   }
   function stop() {
-    if (!state.running) return;
+    if (!state.running && !historySteps && !state.done) return;
     // During insertion or merge the visible array may temporarily not be a
     // permutation. Restore the full snapshot, including on unexpected errors.
     state.iterator = null; state.data = state.original.slice();
     state.running = false; state.paused = false; lastTime = null; budget = 0;
-    clearCounters(); updateControls(); setStatus('Zatrzymano');
+    clearCounters(); historySteps = 0; updateControls(); setStatus('Zatrzymano');
     $('operation').textContent = 'Przywrócono dane sprzed uruchomienia i wyzerowano liczniki.'; rafDraw();
   }
   function togglePause() {
@@ -695,6 +718,7 @@
   $('startBtn').addEventListener('click', () => begin());
   $('pauseBtn').addEventListener('click', togglePause);
   $('stepBtn').addEventListener('click', () => { if (!state.running) begin(true); if (state.paused) { nextStep(); $('stepAnnouncement').textContent = $('operation').textContent; rafDraw(); } });
+  $('backBtn').addEventListener('click', previousStep);
   $('stopBtn').addEventListener('click', stop);
   $('randomBtn').addEventListener('click', () => generateData(Number(sizeInput.value)));
   sizeInput.addEventListener('input', () => { $('sizeLabel').textContent = sizeInput.value; generateData(Number(sizeInput.value)); });
@@ -702,6 +726,13 @@
   speedInput.addEventListener('input', () => { $('speedLabel').textContent = `${speedInput.value} op./s`; speedInput.setAttribute('aria-valuetext', `${speedInput.value} kroków na sekundę`); });
   $('dataDetails').addEventListener('toggle', updateInfo);
   document.addEventListener('visibilitychange', () => { lastTime = null; budget = 0; if (!document.hidden) rafDraw(); });
+  document.addEventListener('keydown', event => {
+    if (event.target.closest('input, select, textarea') || event.altKey || event.ctrlKey || event.metaKey) return;
+    if (event.key !== 'ArrowLeft' && event.key !== 'ArrowRight') return;
+    event.preventDefault();
+    if (state.running && !state.paused) togglePause();
+    if (event.key === 'ArrowLeft') previousStep(); else $('stepBtn').click();
+  });
   new ResizeObserver(resizeCanvas).observe(canvas.parentElement);
   generateData(Number(sizeInput.value)); renderLesson(); updateControls(); resizeCanvas();
 })();

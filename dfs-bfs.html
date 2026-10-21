@@ -84,11 +84,12 @@
             </div>
           </div>
           <div class="actions">
-            <button type="button" id="startBtn" class="btn primary">▶ Start</button>
+            <button type="button" id="startBtn" class="btn primary">Start</button>
             <button type="button" id="pauseBtn" class="btn" disabled>Pauza</button>
-            <button type="button" id="stepBtn" class="btn">Jeden krok</button>
+            <button type="button" id="backBtn" class="btn" disabled>Krok wstecz</button>
+            <button type="button" id="stepBtn" class="btn">Krok naprzód</button>
             <button type="button" id="stopBtn" class="btn" disabled>Stop</button>
-            <button type="button" id="randomBtn" class="btn">↻ Losuj graf</button>
+            <button type="button" id="randomBtn" class="btn">Losuj graf</button>
           </div>
           <p class="control-hint" id="tempoHint">Tempo określa liczbę kroków animacji na sekundę. Stop zeruje przebieg, zachowując graf. Start po zakończeniu uruchamia symulację od początku.</p>
           <p class="control-hint" id="densityHint">Najpierw łączymy każdą składową drzewem. Suwak określa szansę dodania każdej pozostałej krawędzi wewnątrz składowej; dla drzewa jest nieaktywny.</p>
@@ -120,7 +121,7 @@
             <div class="chart-caption graph-legend" id="chartDescription">
               <span><i class="graph-key unseen" aria-hidden="true"></i>Nieodkryty</span>
               <span><i class="graph-key discovered" aria-hidden="true"></i>Odkryty · obwódka</span>
-              <span><i class="graph-key current" aria-hidden="true"></i>Bieżący · ▶</span>
+              <span><i class="graph-key current" aria-hidden="true"></i>Bieżący · </span>
               <span><i class="graph-key finished" aria-hidden="true"></i>Zakończony · ✓</span>
               <span>Pogrubiona krawędź: drzewo przeszukiwania. Przerywana: sprawdzana.</span>
             </div>
@@ -171,7 +172,8 @@
       exercise: 'Wylosuj drzewo i przechodź pojedynczymi krokami. Obserwuj stos przy dojściu do liścia i podczas powrotu. Następnie porównaj maksymalny stos DFS z maksymalną kolejką BFS.'
     }
   };
-  const state = { selected: 'bfs', adjacency: [], edges: [], positions: [], running: false, paused: false, iterator: null };
+  const state = { selected: 'bfs', adjacency: [], edges: [], positions: [], steps: 0, running: false, paused: false, done: false, iterator: null };
+  let autoStarted = false;
   const canvas = $('board'), ctx = canvas.getContext('2d');
   let viewWidth = 1, viewHeight = 1, frameId = null, lastTime = null, budget = 0, dirty = true;
   const edgeKey = (a, b) => `${Math.min(a, b)}-${Math.max(a, b)}`;
@@ -179,7 +181,8 @@
   let treeFocus = null;
 
   function resetTraversal(message = 'Wybierz Start lub wykonaj pierwszy krok.') {
-    state.iterator = null; state.running = false; state.paused = false;
+    state.iterator = null; state.running = false; state.paused = false; state.done = false; autoStarted = false;
+    state.steps = 0;
     state.marks = state.adjacency.map(() => 'unseen');
     state.parent = state.adjacency.map(() => -1); state.depth = state.adjacency.map(() => null);
     state.order = []; state.frontier = []; state.treeEdges = new Set();
@@ -237,12 +240,13 @@
   }
 
   function updateControls() {
-    $('startBtn').disabled = state.running;
-    $('pauseBtn').disabled = !state.running;
+    $('startBtn').disabled = autoStarted && !state.done || state.running && !state.paused && !autoStarted;
+    $('pauseBtn').disabled = !state.running || state.done;
     $('pauseBtn').textContent = state.paused ? 'Wznów' : 'Pauza';
     $('pauseBtn').setAttribute('aria-pressed', String(state.paused));
-    $('stopBtn').disabled = !state.running && state.order.length === 0;
+    $('stopBtn').disabled = !autoStarted && state.steps === 0;
     $('stepBtn').disabled = state.running && !state.paused;
+    $('backBtn').disabled = state.running && !state.paused || state.steps === 0;
     for (const id of ['dataset', 'startVertex', 'scope', 'size', 'randomBtn']) $(id).disabled = state.running;
     $('density').disabled = state.running || $('dataset').value === 'tree';
     document.querySelectorAll('.algorithm-pick').forEach(button => { button.disabled = state.running; });
@@ -354,20 +358,33 @@
   }
 
   function begin(paused = false) {
-    if (state.running) return;
-    resetTraversal(); state.running = true; state.paused = paused; state.iterator = traverse();
+    if (state.running) {
+      if (state.paused) { autoStarted = true; togglePause(); }
+      return;
+    }
+    resetTraversal(); state.running = true; state.paused = paused; autoStarted = !paused; state.iterator = traverse();
     $('statusText').textContent = paused ? 'Pauza' : 'Przeszukiwanie'; updateControls(); rafDraw();
   }
   function nextStep() {
     if (!state.iterator) return;
-    if (state.iterator.next().done) {
-      state.iterator = null; state.running = false; state.paused = false; state.active = -1; state.edge = null;
+    const result = state.iterator.next();
+    if (result.done) {
+      state.iterator = null; state.running = false; state.paused = false; state.done = true; state.active = -1; state.edge = null;
       const remaining = state.adjacency.length - state.order.length;
       $('statusText').textContent = 'Zakończono';
       $('operation').textContent = `Gotowe. Odkryto ${state.order.length} z ${state.adjacency.length} wierzchołków.${remaining ? ` Nieosiągalne ze startu: ${remaining}. Wybierz „Cały graf”, aby przejść pozostałe składowe.` : ` Liczba odwiedzonych składowych: ${state.components}.`}`;
       updateControls();
-    }
-    dirty = true;
+    } else state.steps++;
+    updateControls(); dirty = true;
+  }
+  function previousStep() {
+    if (state.steps === 0) return;
+    const target = state.steps - 1;
+    const wasAutoStarted = autoStarted;
+    resetTraversal();
+    if (target > 0) begin(true);
+    for (let i = 0; i < target; i++) nextStep();
+    autoStarted = wasAutoStarted && target > 0; updateControls();
   }
   function togglePause() {
     if (!state.running) return;
@@ -411,7 +428,7 @@
       ctx.font = `600 ${radius < 14 ? 11 : 13}px "Segoe UI", sans-serif`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
       ctx.fillStyle = current || mark === 'finished' ? '#fff' : '#182a45'; ctx.fillText(vertexName(v), p.x, p.y);
       ctx.font = '11px "Segoe UI", sans-serif'; ctx.fillStyle = '#234b92';
-      const marker = current ? '▶' : mark === 'finished' ? '✓' : v === Number($('startVertex').value) ? 'S' : '';
+      const marker = current ? '' : mark === 'finished' ? '✓' : v === Number($('startVertex').value) ? 'S' : '';
       if (marker) ctx.fillText(marker, p.x, p.y - radius - 9);
     });
   }
@@ -460,7 +477,7 @@
     });
     const nodes = layout.nodes.map(({ vertex: v, x, y }) => {
       const current = state.active === v, root = state.parent[v] < 0;
-      const marker = current ? '▶' : state.marks[v] === 'finished' ? '✓' : '';
+      const marker = current ? '' : state.marks[v] === 'finished' ? '✓' : '';
       return `<g class="graph-tree-node ${state.marks[v]}${current ? ' current' : ''}" transform="translate(${x} ${y})" data-vertex="${v}">
         <title>Wierzchołek ${v + 1}, ${root ? 'korzeń' : `rodzic ${state.parent[v] + 1}`}, poziom ${state.depth[v]}</title>
         ${root ? '<text class="graph-tree-root" y="-29">korzeń</text>' : ''}
@@ -495,6 +512,14 @@
   $('stepBtn').addEventListener('click', () => {
     if (!state.running) begin(true);
     if (state.paused) { nextStep(); $('stepAnnouncement').textContent = $('operation').textContent; rafDraw(); }
+  });
+  $('backBtn').addEventListener('click', previousStep);
+  document.addEventListener('keydown', event => {
+    if (event.target.closest('input, select, textarea') || event.altKey || event.ctrlKey || event.metaKey) return;
+    if (event.key !== 'ArrowLeft' && event.key !== 'ArrowRight') return;
+    event.preventDefault();
+    if (state.running && !state.paused) togglePause();
+    if (event.key === 'ArrowLeft') previousStep(); else $('stepBtn').click();
   });
   $('stopBtn').addEventListener('click', () => { resetTraversal('Przebieg i liczniki wyzerowano. Graf pozostał bez zmian.'); $('statusText').textContent = 'Zatrzymano'; });
   $('randomBtn').addEventListener('click', generateGraph); $('dataset').addEventListener('change', generateGraph);

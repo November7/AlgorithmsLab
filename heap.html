@@ -41,7 +41,7 @@
           <div class="field"><label for="value">Wartość do wstawienia</label><input id="value" type="number" min="1" max="99" value="7"></div>
           <div class="field"><label for="speed">Tempo <output id="speedLabel" for="speed">3 op./s</output></label><input id="speed" type="range" min="1" max="12" value="3"></div>
         </div>
-        <div class="actions"><button type="button" id="insertBtn" class="btn">＋ Wstaw</button><button type="button" id="extractBtn" class="btn">− Usuń korzeń</button><button type="button" id="startBtn" class="btn primary">▶ Start</button><button type="button" id="pauseBtn" class="btn" disabled>Pauza</button><button type="button" id="stepBtn" class="btn">Jeden krok</button><button type="button" id="stopBtn" class="btn" disabled>Reset</button><button type="button" id="randomBtn" class="btn">↻ Losuj kopiec</button></div>
+        <div class="actions"><button type="button" id="insertBtn" class="btn">＋ Wstaw</button><button type="button" id="extractBtn" class="btn">− Usuń korzeń</button><button type="button" id="startBtn" class="btn primary">Start</button><button type="button" id="pauseBtn" class="btn" disabled>Pauza</button><button type="button" id="backBtn" class="btn" disabled>Krok wstecz</button><button type="button" id="stepBtn" class="btn">Krok naprzód</button><button type="button" id="stopBtn" class="btn" disabled>Reset</button><button type="button" id="randomBtn" class="btn">Losuj kopiec</button></div>
         <p class="control-hint">Start odtwarza zaplanowany ciąg operacji. Możesz też sam wstawiać wartości i usuwać korzeń. Jeden krok to jedno porównanie albo jedna zamiana rodzica z dzieckiem. Wartości to liczby całkowite 1-99.</p>
       </section>
       <div class="main-column lab-results">
@@ -116,14 +116,15 @@ window.Lab = (() => {
     return new DOMPoint(event.clientX, event.clientY).matrixTransform(board.getScreenCTM().inverse());
   }
   function controller({ run, render, reset, validate = () => true, locked = [], manual = () => false, update = () => {} }) {
-    let iterator = null, timer = null;
-    const api = { running: false, done: false, steps: 0, started: false,
+    let iterator = null, timer = null, replayRun = run, replayReset = reset;
+    const api = { running: false, done: false, steps: 0, started: false, autoStarted: false,
       sync() {
-        $('startBtn').disabled = api.running || api.done || manual();
+        $('startBtn').disabled = api.autoStarted && !api.done || manual();
         $('pauseBtn').disabled = !api.started || api.done || manual();
         text('pauseBtn', api.started && !api.running ? 'Wznów' : 'Pauza');
-        $('stepBtn').disabled = api.running || api.done || manual();
-        $('stopBtn').disabled = false;
+        $('stepBtn').disabled = api.running || manual();
+        $('backBtn').disabled = api.running || api.steps === 0 || manual();
+        $('stopBtn').disabled = !api.started && !api.autoStarted;
         locked.forEach(id => { $(id).disabled = api.running; $(id).setAttribute('aria-disabled', String(api.running)); });
         $('speed').disabled = manual();
         text('statusText', manual() ? (api.done ? 'Ukończono' : 'Tryb ręczny') : api.done ? 'Zakończono' : api.running ? 'W trakcie' : api.started ? 'Pauza' : 'Gotowe');
@@ -131,21 +132,26 @@ window.Lab = (() => {
       },
       refresh() { render(); api.sync(); },
       pause() { clearTimeout(timer); timer = null; api.running = false; api.sync(); },
-      reset() {
-        api.pause(); iterator = null; api.done = false; api.started = false; api.steps = 0;
+      reset() { api.restart(run, reset); },
+      restart(nextRun, nextReset) {
+        api.pause(); iterator = null; api.done = false; api.started = false; api.autoStarted = false; api.steps = 0;
+        replayRun = nextRun; replayReset = nextReset;
         text('operation', 'Wybierz Start lub wykonaj pierwszy krok.'); text('resultText', 'Wynik pojawi się po zakończeniu.');
-        reset(); api.refresh();
+        replayReset(); api.refresh();
       },
       next() {
-        if (api.done || manual() || !validate()) return;
-        api.started = true; iterator ||= run();
+        if (manual() || !validate()) return;
+        if (api.done) api.reset();
+        api.started = true; iterator ||= replayRun();
         const result = iterator.next();
         if (result.done) { api.done = true; api.pause(); if (result.value) text('operation', result.value); }
         else { api.steps++; text('operation', result.value); }
         api.refresh();
       },
       start() {
-        if (api.running || api.done || manual() || !validate()) return;
+        if (api.running || manual() || !validate()) return;
+        if (api.done) api.reset();
+        api.autoStarted = true;
         api.running = true; api.next();
         const tick = () => {
           if (!api.running) return;
@@ -154,18 +160,33 @@ window.Lab = (() => {
         };
         if (api.running) timer = setTimeout(tick, 1000 / Number($('speed').value));
       },
-      replace(generator) { api.pause(); iterator = generator; api.done = false; api.started = false; api.sync(); },
-      // Replaying a deterministic generator restores Hanoi's recursion and undo history.
-      rewind(count) { api.reset(); for (let i = 0; i < count; i++) api.next(); }
+      replace(generator, { replay = run, restore = reset, steps = api.steps } = {}) {
+        api.pause(); iterator = generator; replayRun = replay; replayReset = restore;
+        api.steps = steps; api.done = false; api.started = false; api.autoStarted = false; api.sync();
+      },
+      // Replay from the input snapshot belonging to the current operation.
+      rewind(count) {
+        const autoStarted = api.autoStarted;
+        api.restart(replayRun, replayReset);
+        for (let i = 0; i < count; i++) api.next();
+        api.autoStarted = autoStarted && count > 0; api.sync();
+      },
+      previous() { if (api.steps > 0) api.rewind(api.steps - 1); }
     };
     $('startBtn').addEventListener('click', api.start);
     $('pauseBtn').addEventListener('click', () => api.running ? api.pause() : api.start());
     $('stepBtn').addEventListener('click', () => { api.pause(); api.next(); });
+    $('backBtn').addEventListener('click', () => { api.pause(); api.previous(); });
     $('stopBtn').addEventListener('click', api.reset);
     $('speed').addEventListener('input', () => text('speedLabel', `${$('speed').value} op./s`));
     document.addEventListener('visibilitychange', () => { if (document.hidden && api.running) api.pause(); });
     document.addEventListener('keydown', event => {
-      if (event.target.closest('input, select, textarea') || event.altKey || event.ctrlKey || event.metaKey) return;
+      if (event.defaultPrevented || event.target.closest('input, select, textarea') || event.altKey || event.ctrlKey || event.metaKey) return;
+      if (event.key === 'ArrowLeft' || event.key === 'ArrowRight') {
+        event.preventDefault();
+        if (api.running) api.pause();
+        if (event.key === 'ArrowLeft') api.previous(); else api.next();
+      }
       if (event.key === ' ' && !event.target.closest('a, button, summary, [role="button"], [role="gridcell"]')) { event.preventDefault(); api.running ? api.pause() : api.start(); }
       if (event.key.toLowerCase() === 'n' && !api.running) api.next();
       if (event.key.toLowerCase() === 'r') api.reset();
@@ -237,7 +258,16 @@ window.Lab = (() => {
       if (kind === 'example') { yield* extract(); yield* insert(7); yield* extract(); }
     }
   }
-  function startTask(task) { text('resultText', 'Trwa aktualizacja kopca.'); selected = -1; ctl.replace(finish(task)); ctl.start(); }
+  function startTask(task) {
+    const snapshot = { heap: [...heap], extracted: [...extracted], comparisons, swaps };
+    const restore = () => {
+      reset(); heap = [...snapshot.heap]; extracted = [...snapshot.extracted];
+      comparisons = snapshot.comparisons; swaps = snapshot.swaps;
+    };
+    text('resultText', 'Trwa aktualizacja kopca.'); selected = -1;
+    ctl.replace(finish(task()), { replay: () => finish(task()), restore, steps: 0 });
+    ctl.start();
+  }
   function inspect(i) {
     if (ctl.running) return; selected = i;
     text('operation', `Indeks ${i}, wartość ${heap[i]}. Rodzic: ${i ? Math.floor((i - 1) / 2) : 'brak'}. Dzieci 2i+1 = ${2 * i + 1}${2 * i + 1 >= heap.length ? ' (brak)' : ''}, 2i+2 = ${2 * i + 2}${2 * i + 2 >= heap.length ? ' (brak)' : ''}.`); render();
@@ -276,11 +306,14 @@ window.Lab = (() => {
     const value = Number($('value').value);
     if (!Number.isInteger(value) || value < 1 || value > 99) { text('operation', 'Wpisz liczbę całkowitą od 1 do 99.'); $('value').focus(); return; }
     if (heap.length >= 15) { text('operation', 'Na planszy mieści się najwyżej 15 elementów.'); return; }
-    startTask(insert(value));
+    startTask(() => insert(value));
   }
-  $('insertBtn').addEventListener('click', insertValue); $('extractBtn').addEventListener('click', () => startTask(extract()));
+  $('insertBtn').addEventListener('click', insertValue); $('extractBtn').addEventListener('click', () => startTask(extract));
   $('value').addEventListener('keydown', event => { if (event.key === 'Enter') { event.preventDefault(); insertValue(); } });
-  $('heapType').addEventListener('change', () => { if (heap.length) startTask(build([...heap])); else ctl.reset(); });
+  $('heapType').addEventListener('change', () => {
+    if (!heap.length) { ctl.reset(); return; }
+    const values = [...heap]; startTask(() => build(values));
+  });
   $('scenario').addEventListener('change', () => { initial = [12, 5, 18, 3, 9, 21, 7, 14, 1]; ctl.reset(); });
   $('randomBtn').addEventListener('click', () => { initial = Array.from({ length: 10 }, () => 1 + Math.floor(Math.random() * 99)); $('scenario').value = 'build'; ctl.reset(); });
   initial = [12, 5, 18, 3, 9, 21, 7, 14, 1]; ctl.reset();
