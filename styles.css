@@ -1,3 +1,9 @@
+/*
+ * Copyright (c) 2024-2026 Marcin Kowalski.
+ * SPDX-License-Identifier: GPL-3.0-only
+ * See LICENSE for the full license text. Distributed without warranty.
+ */
+
 /* Keep the Markdown index independent of the simulation defaults. */
 :root:not(:where(.index-page)) {
   color-scheme:light;
@@ -864,6 +870,28 @@
   .graph-diagram-title { margin:0 16px; }
   .graph-tree-summary,.graph-tree-hint,.graph-tree-follow { padding-left:16px; padding-right:16px; }
 }
+/* Shared project information */
+footer.project-notice {
+  display:block;
+  margin-top:24px;
+  padding-top:18px;
+  border-top:1px solid var(--line, #d0d7de);
+  color:var(--muted, inherit);
+  font-size:13px;
+  line-height:1.6;
+  overflow-wrap:anywhere;
+}
+.project-notice p {
+  margin:0 0 8px;
+}
+.project-notice p:last-child {
+  margin-bottom:0;
+}
+.index-page .project-notice {
+  border-color:var(--color-border-default);
+  color:var(--color-fg-muted);
+}
+
 /* index.html */
 .index-page body { margin: 0; background: #fff; }
 @media (prefers-color-scheme: dark) { .index-page body { background: #0d1117; } }

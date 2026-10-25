@@ -1,4 +1,9 @@
 <!DOCTYPE html>
+<!--
+  Copyright (c) 2024-2026 Marcin Kowalski.
+  SPDX-License-Identifier: GPL-3.0-only
+  See LICENSE for the full license text. Distributed without warranty.
+-->
 <html lang="pl">
   <head>
     <meta charset="UTF-8">
@@ -11,7 +16,7 @@
     <a class="skip" href="#visualization">Przejdź do wizualizacji</a>
     <main class="shell">
       <header class="masthead">
-        <a class="brand" href="index.html"><span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i></span>AlgorithmsLab <span class="graph-brand-note"> / edukacja</span></a>
+        <a class="brand" href="index.html"><span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i></span>AlgorithmsLab <span class="graph-brand-note"> / wizualizacje</span></a>
         <span class="meta">Programowanie dynamiczne · Plecak 0/1</span>
       </header>
       <section class="intro" aria-labelledby="pageTitle">
@@ -63,7 +68,13 @@
         <section class="panel lab-table-panel" aria-labelledby="resultTitle"><h2 id="resultTitle">Zawartość plecaka</h2><p id="phaseText">Najpierw wypełnimy tabelę, potem odtworzymy wybór.</p><ol id="chosen" class="graph-tokens" aria-label="Wybrane przedmioty"></ol><p id="resultText" class="lab-result" role="status">Wynik pojawi się po zakończeniu.</p></section>
         <details class="data-details"><summary>Dane wejściowe i reguła przejścia</summary><p id="dataText"></p><p>DP[0, c] = DP[i, 0] = 0. Jeśli przedmiot i mieści się: DP[i, c] = max(DP[i − 1, c], wartość[i] + DP[i − 1, c − waga[i]]). W przeciwnym razie: DP[i, c] = DP[i − 1, c].</p></details>
       </div>
-      <footer><span>AlgorithmsLab · Interaktywna nauka algorytmów</span><a href="index.html">Wszystkie symulacje</a></footer>
+      <footer class="project-notice" aria-label="Informacje o projekcie / Project information">
+        <p>Materiał pokazowy, niezweryfikowany. Nie jest materiałem edukacyjnym. Może zawierać błędy lub uproszczenia.</p>
+        <p lang="en">Unverified demonstration material. Not educational material. It may contain errors or simplifications.</p>
+        <p>README i symulacje powstają z użyciem AI. <a href="index.html#polski">O projekcie i ograniczeniach</a>. <span lang="en">The README and simulations are created using AI. <a href="index.html#english">About the project and its limitations</a>.</span></p>
+        <p>Copyright (c) 2024-2026 Marcin Kowalski. <a href="LICENSE" rel="license">GNU GPL v3 (GPL-3.0-only)</a>.</p>
+        <p><a href="index.html">Wszystkie moduły</a></p>
+      </footer>
     </main>
     <script>
 (() => {

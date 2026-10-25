@@ -1,4 +1,9 @@
 <!DOCTYPE html>
+<!--
+  Copyright (c) 2024-2026 Marcin Kowalski.
+  SPDX-License-Identifier: GPL-3.0-only
+  See LICENSE for the full license text. Distributed without warranty.
+-->
 <html lang="pl">
   <head>
     <meta charset="UTF-8">
@@ -11,7 +16,7 @@
     <a class="skip" href="#visualization">Przejdź do wizualizacji</a>
     <main class="shell">
       <header class="masthead">
-        <a class="brand" href="index.html"><span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i></span>AlgorithmsLab <span class="graph-brand-note"> / edukacja</span></a>
+        <a class="brand" href="index.html"><span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i></span>AlgorithmsLab <span class="graph-brand-note"> / wizualizacje</span></a>
         <span class="meta">Struktury danych · Zbiory rozłączne</span>
       </header>
       <section class="intro" aria-labelledby="pageTitle">
@@ -61,7 +66,13 @@
         <section class="panel lab-table-panel" aria-labelledby="arrayTitle"><h2 id="arrayTitle">Tablica rodziców</h2><p>parent[i] wskazuje rodzica elementu i. Korzeń wskazuje na siebie.</p><table id="parentTable" class="graph-table"><caption>Element · rodzic · ranga</caption><thead id="parentHead"></thead><tbody id="parentBody"></tbody></table><p id="resultText" class="lab-result" role="status">Wynik pojawi się po zakończeniu.</p></section>
         <details class="data-details"><summary>Reguły operacji</summary><p>find(x): idź do rodzica, aż trafisz na korzeń; przy kompresji ścieżek podepnij każdy odwiedzony element bezpośrednio pod korzeń. union(a, b): znajdź korzenie obu elementów i podepnij korzeń niższego drzewa (o mniejszej randze) pod korzeń wyższego.</p></details>
       </div>
-      <footer><span>AlgorithmsLab · Interaktywna nauka algorytmów</span><a href="index.html">Wszystkie symulacje</a></footer>
+      <footer class="project-notice" aria-label="Informacje o projekcie / Project information">
+        <p>Materiał pokazowy, niezweryfikowany. Nie jest materiałem edukacyjnym. Może zawierać błędy lub uproszczenia.</p>
+        <p lang="en">Unverified demonstration material. Not educational material. It may contain errors or simplifications.</p>
+        <p>README i symulacje powstają z użyciem AI. <a href="index.html#polski">O projekcie i ograniczeniach</a>. <span lang="en">The README and simulations are created using AI. <a href="index.html#english">About the project and its limitations</a>.</span></p>
+        <p>Copyright (c) 2024-2026 Marcin Kowalski. <a href="LICENSE" rel="license">GNU GPL v3 (GPL-3.0-only)</a>.</p>
+        <p><a href="index.html">Wszystkie moduły</a></p>
+      </footer>
     </main>
     <script>
 /* Shared controls and accessible drawing helpers for the step-by-step labs. */
