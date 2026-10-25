@@ -65,14 +65,11 @@
         <section class="panel lab-table-panel" aria-labelledby="distTitle"><h2 id="distTitle">Odległości od startu</h2><p>Dla każdego wierzchołka: aktualna odległość i poprzednik na najlepszej znanej drodze.</p><table id="distTable" class="graph-table"><caption>Wierzchołki · odległość · poprzednik</caption><thead id="distHead"></thead><tbody id="distBody"></tbody></table><p id="resultText" class="lab-result" role="status">Wynik pojawi się po zakończeniu.</p></section>
         <details class="data-details"><summary>Dane wejściowe i reguła relaksacji</summary><p id="dataText"></p><p>Początkowo d[start] = 0, a pozostałe d[v] = ∞. Dla krawędzi (u, v) o wadze w: jeśli u jest osiągalny i d[u] + w &lt; d[v], ustaw d[v] = d[u] + w i poprzednik[v] = u. Jeśli ze startu nie można dojść do ujemnego cyklu, po V − 1 rundach odległości są ostateczne. Poprawa w kolejnej rundzie oznacza ujemny cykl osiągalny ze startu.</p></details>
       </div>
-      <footer class="project-notice" aria-label="Informacje o projekcie / Project information">
-        <p>Materiał pokazowy, niezweryfikowany. Nie jest materiałem edukacyjnym. Może zawierać błędy lub uproszczenia.</p>
-        <p lang="en">Unverified demonstration material. Not educational material. It may contain errors or simplifications.</p>
-        <p>README i symulacje powstają z użyciem AI. <a href="index.html#polski">O projekcie i ograniczeniach</a>. <span lang="en">The README and simulations are created using AI. <a href="index.html#english">About the project and its limitations</a>.</span></p>
-        <p>Copyright (c) 2024-2026 Marcin Kowalski. <a href="LICENSE" rel="license">GNU GPL v3 (GPL-3.0-only)</a>.</p>
-        <p><a href="index.html">Wszystkie moduły</a></p>
-      </footer>
     </main>
+    <footer class="project-notice" aria-label="Informacje o projekcie / Project information">
+      <p>Materiał pokazowy, niezweryfikowany. Nie jest materiałem edukacyjnym. Może zawierać błędy lub uproszczenia. | Unverified demonstration material. Not educational material. It may contain errors or simplifications. </p>
+      <p>Copyright (c) 2026 Marcin Kowalski. <a href="LICENSE" rel="license">GNU GPL v3</a>.</p>
+    </footer>
     <script>
 /* Shared controls and accessible drawing helpers for the step-by-step labs. */
 'use strict';
