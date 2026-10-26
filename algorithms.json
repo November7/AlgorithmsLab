@@ -106,5 +106,107 @@
     "description": "Operatory arytmetyczne, relacji, logiczne, bitowe i przypisania krok po kroku, z różnicami między językami.",
     "url": "operators.html",
     "status": "published"
+  },
+  {
+    "title": "Algorytm Kadane’a",
+    "description": "Znajdowanie spójnego podciągu o maksymalnej sumie w tablicy.",
+    "url": "kadane.html",
+    "status": "planned"
+  },
+  {
+    "title": "Sumy prefiksowe i algorytm dwóch wskaźników",
+    "description": "Szybkie obliczanie sum na przedziałach oraz rozwiązywanie zadań na tablicach z użyciem dwóch wskaźników.",
+    "url": "prefix-sums-two-pointers.html",
+    "status": "planned"
+  },
+  {
+    "title": "Algorytm Euklidesa",
+    "description": "Wyznaczanie największego wspólnego dzielnika oraz rozszerzony algorytm Euklidesa.",
+    "url": "euclidean.html",
+    "status": "planned"
+  },
+  {
+    "title": "Szybkie potęgowanie",
+    "description": "Obliczanie potęgi w czasie logarytmicznym, także modulo zadaną liczbę.",
+    "url": "fast-exponentiation.html",
+    "status": "planned"
+  },
+  {
+    "title": "Algorytm Floyda-Warshalla",
+    "description": "Wyznaczanie najkrótszych ścieżek między wszystkimi parami wierzchołków.",
+    "url": "floyd-warshall.html",
+    "status": "planned"
+  },
+  {
+    "title": "Algorytm Prima",
+    "description": "Wyznaczanie minimalnego drzewa rozpinającego przez iteracyjne dołączanie najtańszej krawędzi.",
+    "url": "prim.html",
+    "status": "planned"
+  },
+  {
+    "title": "Silnie spójne składowe",
+    "description": "Znajdowanie silnie spójnych składowych grafu skierowanego algorytmem Kosaraju lub Tarjana.",
+    "url": "strongly-connected-components.html",
+    "status": "planned"
+  },
+  {
+    "title": "Drzewo przedziałowe",
+    "description": "Efektywne wykonywanie zapytań o przedziały i aktualizacji elementów tablicy.",
+    "url": "segment-tree.html",
+    "status": "planned"
+  },
+  {
+    "title": "Drzewo Fenwicka",
+    "description": "Obliczanie sum prefiksowych i aktualizacja elementów tablicy w czasie logarytmicznym.",
+    "url": "fenwick-tree.html",
+    "status": "planned"
+  },
+  {
+    "title": "Trie (drzewo prefiksowe)",
+    "description": "Przechowywanie słów i wyszukiwanie prefiksów z użyciem drzewa znaków.",
+    "url": "trie.html",
+    "status": "planned"
+  },
+  {
+    "title": "Algorytm Rabina-Karpa",
+    "description": "Wyszukiwanie wzorca w tekście przez porównywanie skrótów kroczących.",
+    "url": "rabin-karp.html",
+    "status": "planned"
+  },
+  {
+    "title": "Najdłuższy wspólny podciąg (LCS)",
+    "description": "Wyznaczanie najdłuższego podciągu wspólnego dla dwóch sekwencji za pomocą programowania dynamicznego.",
+    "url": "lcs.html",
+    "status": "planned"
+  },
+  {
+    "title": "Najdłuższy rosnący podciąg (LIS)",
+    "description": "Wyznaczanie najdłuższego rosnącego podciągu w sekwencji.",
+    "url": "lis.html",
+    "status": "planned"
+  },
+  {
+    "title": "Wydawanie reszty",
+    "description": "Znajdowanie minimalnej liczby monet potrzebnych do uzyskania zadanej kwoty.",
+    "url": "coin-change.html",
+    "status": "planned"
+  },
+  {
+    "title": "Przeszukiwanie z nawrotami",
+    "description": "Rozwiązywanie problemów kombinatorycznych, takich jak problem N hetmanów, przez budowanie i odrzucanie kandydatów.",
+    "url": "backtracking.html",
+    "status": "planned"
+  },
+  {
+    "title": "Algorytm zachłanny wyboru zadań",
+    "description": "Wybieranie maksymalnej liczby niepokrywających się zadań przez uporządkowanie ich według czasu zakończenia.",
+    "url": "activity-selection.html",
+    "status": "planned"
+  },
+  {
+    "title": "Algorytm Huffmana",
+    "description": "Interaktywna budowa drzewa kodów prefiksowych i kodowanie tekstu według częstości znaków.",
+    "url": "huffman.html",
+    "status": "published"
   }
 ]

@@ -18,7 +18,7 @@
       <header class="masthead">
         <a class="brand" href="index.html">
           <span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i></span>
-          AlgorithmsLab <span class="graph-brand-note"> / wizualizacje</span>
+          AlgorithmsLab <span class="brand-note"> / wizualizacje</span>
         </a>
         <span class="meta">Grafy ważone - Dijkstra</span>
       </header>
@@ -64,8 +64,8 @@
           </div>
         </div>
       </section>
-      <section class="panel dijkstra-controls" aria-label="Ustawienia i sterowanie">
-        <div class="dijkstra-fields">
+      <section class="panel controls" aria-label="Ustawienia i sterowanie">
+        <div class="lab-fields">
           <div class="field">
             <label for="startVertex">Wierzchołek startowy</label>
             <select id="startVertex"></select>
@@ -99,7 +99,7 @@
         <p class="control-hint" id="selectionHint">Kliknij wierzchołek na grafie, aby wybrać start; kolejne kliknięcie wybiera cel. Wybór możesz też zmienić listami powyżej.</p>
         <p class="control-hint">Przeciągnij węzeł, aby zmienić graf. Wagi aktualizują się na bieżąco: 100 px między środkami węzłów to waga 1, z dokładnością do jednego miejsca po przecinku. Zmiana położenia resetuje przebieg algorytmu. Graf ma pięć warstw, a połączenia powstają tylko między sąsiednimi warstwami. Wagi są nieujemne.</p>
       </section>
-      <div class="main-column dijkstra-results">
+      <div class="main-column lab-results">
         <section class="panel visualizer" id="visualization" tabindex="-1" aria-labelledby="chartTitle">
           <div class="chart-heading">
             <div><div class="eyebrow">02 / Obserwuj działanie</div><h2 id="chartTitle">Graf i badane krawędzie</h2></div>
@@ -110,7 +110,7 @@
               <canvas id="board" role="img" aria-label="Ważony graf. Kliknij wierzchołki kolejno, aby wybrać start i cel. Przeciągnij węzeł, aby zmienić położenie i wagi krawędzi." aria-describedby="chartDescription operation selectionHint">Graf z wagami krawędzi.</canvas>
             </div>
           </div>
-          <div class="chart-caption dijkstra-legend" id="chartDescription">
+          <div class="chart-caption lab-legend" id="chartDescription">
             <span><i class="dijkstra-key source" aria-hidden="true"></i>Start</span>
             <span><i class="dijkstra-key target" aria-hidden="true"></i>Cel</span>
             <span><i class="dijkstra-key current" aria-hidden="true"></i>Wybrany teraz · </span>
@@ -120,13 +120,13 @@
           </div>
           <p id="operation" role="status" aria-live="polite">Wybierz Start lub wykonaj pierwszy krok.</p>
         </section>
-        <section class="stats dijkstra-stats" aria-label="Statystyki algorytmu">
+        <section class="stats" aria-label="Statystyki algorytmu">
           <div class="stat"><span>Ustalono</span><output id="settledCount">0</output><small id="vertexCount">z 8 wierzchołków</small></div>
           <div class="stat"><span>Sprawdzone krawędzie</span><output id="edgeCount">0</output><small>relaksacje i porównania</small></div>
           <div class="stat"><span>Odległość do celu</span><output id="targetDistance">∞</output><small id="targetPath">Brak znanej trasy</small></div>
           <div class="stat"><span>Wykonane kroki</span><output id="stepCount">0</output><small>operacje algorytmu</small></div>
         </section>
-        <section class="panel dijkstra-table-panel" aria-labelledby="distanceTitle">
+        <section class="panel lab-table-panel dijkstra-table-panel" aria-labelledby="distanceTitle">
           <h2 id="distanceTitle">Odległości i poprzednicy</h2>
           <p>„Tymczasowa” oznacza najlepszą trasę znaną do tej pory. Wartość staje się ostateczna po wybraniu wierzchołka.</p>
           <div class="graph-table-wrap">

@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<!--
+  Copyright (c) 2024-2026 Marcin Kowalski.
+  SPDX-License-Identifier: GPL-3.0-only
+  See LICENSE for the full license text. Distributed without warranty.
+-->
+<html lang="pl">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Interaktywna wizualizacja algorytmu Huffmana: częstości znaków, łączenie węzłów, kody prefiksowe i kodowanie tekstu.">
+    <title>Algorytm Huffmana · AlgorithmsLab</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body class="step-lab interactive-lab huffman-lab">
+    <a class="skip" href="#visualization">Przejdź do wizualizacji</a>
+    <main class="shell">
+      <header class="masthead">
+        <a class="brand" href="index.html"><span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i></span>AlgorithmsLab <span class="brand-note"> / wizualizacje</span></a>
+        <span class="meta">Kodowanie · Huffman</span>
+      </header>
+      <section class="intro" aria-labelledby="pageTitle">
+        <div><span class="eyebrow">Zrozum, zanim zapamiętasz</span><h1 id="pageTitle">Algorytm Huffmana</h1><p>Buduj optymalne drzewo kodów prefiksowych, łącząc najrzadsze znaki. Śledź powstawanie drzewa i sprawdź, jak częstość znaku wpływa na długość jego kodu.</p></div>
+        <span class="badge">Kodowanie zachłanne · krok po kroku</span>
+      </section>
+      <section class="panel lesson" aria-labelledby="lessonTitle">
+        <div class="lesson-header"><div><p class="eyebrow">01 / Zrozum algorytm</p><h2 id="lessonTitle">Kodowanie Huffmana</h2></div><span class="tag">Kompresja bezstratna</span></div>
+        <dl class="complexity"><div><dt>Budowa drzewa</dt><dd>O(k log k)</dd></div><div><dt>Kodowanie tekstu</dt><dd>O(n + b)</dd></div><div><dt>Pamięć</dt><dd>O(k + b)</dd></div><div><dt>Wymóg</dt><dd>Znane częstości</dd></div><div><dt>Wynik</dt><dd>Kody prefiksowe</dd></div></dl>
+        <p class="complexity-note">n oznacza liczbę znaków (punktów kodowych Unicode), k liczbę różnych znaków, a b długość zakodowanego ciągu bitów. Zliczanie częstości zajmuje O(n). Podane złożoności dotyczą algorytmu z kopcem, bez zapisywania i sortowania klatek animacji. Żaden kod znaku nie jest prefiksem kodu innego znaku. Dla jednego rodzaju znaku używamy kodu 0.</p>
+        <div class="lesson-columns">
+          <div><h3>Jak to działa?</h3><p>Znaki występujące częściej dostają zwykle krótsze kody, a rzadsze – dłuższe. Kody są zapisami ścieżek od korzenia do liści: lewa krawędź oznacza 0, prawa 1.</p><ol>
+            <li>Policz wystąpienia każdego znaku i utwórz po jednym liściu o wadze równej jego częstości.</li>
+            <li>Umieść liście w kolejce priorytetowej. Powtarzaj, dopóki pozostaje więcej niż jeden węzeł.</li>
+            <li>Wyjmij dwa węzły o najmniejszych wagach, połącz je nowym rodzicem o wadze będącej ich sumą i wstaw rodzica z powrotem do kolejki.</li>
+            <li>Odczytaj kod znaku z drogi od korzenia do liścia i zastąp każdy znak jego kodem.</li>
+          </ol></div>
+          <div><h3>Dlaczego to działa?</h3><p>Dwa najrzadsze znaki można umieścić jako rodzeństwo na najgłębszym poziomie optymalnego drzewa. Zastąpienie ich wspólnym węzłem zmniejsza problem do mniejszego drzewa, co uzasadnia zachłanny wybór.</p><h3>Remisy</h3><p>Przy równych częstościach może powstać więcej niż jedno optymalne drzewo. Wizualizacja rozstrzyga remisy stabilnie, według kolejności utworzenia węzłów.</p></div>
+          <div><h3>Kiedy się przydaje?</h3><p>Huffman jest używany jako etap kodowania entropijnego w formatach kompresji. Samo kodowanie nie przechowuje słownika ani częstości, więc pełny format musi przekazać je odbiorcy.</p><div class="exercise"><h3>Sprawdź samodzielnie</h3><p>Porównaj kody dla tekstu „BANANA BANDANA”. Następnie wpisz powtarzający się jeden znak i zobacz, jak obsługiwany jest przypadek bez rozgałęzień.</p></div></div>
+        </div>
+      </section>
+      <section class="panel controls" aria-label="Ustawienia i sterowanie">
+        <div class="lab-fields lab-fields-text">
+          <div class="field"><label for="sourceText">Tekst do zakodowania <output id="symbolCount" for="sourceText">0 różnych znaków</output></label><textarea id="sourceText" class="lab-textarea" rows="2" aria-describedby="sourceHint" spellcheck="false">BANANA BANDANA</textarea></div>
+          <div class="field"><label for="speed">Tempo <output id="speedLabel" for="speed">3 op./s</output></label><input id="speed" type="range" min="1" max="12" value="3"></div>
+        </div>
+        <div class="actions"><button type="button" id="startBtn" class="btn primary">Start</button><button type="button" id="pauseBtn" class="btn" disabled>Pauza</button><button type="button" id="backBtn" class="btn" disabled>Krok wstecz</button><button type="button" id="stepBtn" class="btn">Krok naprzód</button><button type="button" id="stopBtn" class="btn" disabled>Reset</button><button type="button" id="randomBtn" class="btn">Losuj tekst</button></div>
+        <p id="sourceHint" class="control-hint">Wpisz tekst o długości do 80 znaków (punktów kodowych Unicode), zawierający najwyżej 12 różnych znaków. Każdy krok wybiera dwa najlżejsze węzły albo łączy je w nowego rodzica.</p>
+      </section>
+      <div class="main-column lab-results">
+        <section class="panel visualizer" id="visualization" tabindex="-1" aria-labelledby="chartTitle">
+          <div class="chart-heading"><div><div class="eyebrow">02 / Obserwuj działanie</div><h2 id="chartTitle">Kolejka węzłów i budowane drzewo</h2></div><span id="statusText" role="status">Gotowy</span></div>
+          <div class="lab-viewport huffman-viewport" tabindex="0" role="region" aria-label="Przewijany widok drzewa Huffmana"><svg id="board" class="lab-board huffman-board" viewBox="0 0 640 220" role="img" aria-label="Drzewo Huffmana"></svg></div>
+          <div class="chart-caption lab-legend"><span><i class="lab-key current" aria-hidden="true"></i>Węzeł wybrany do połączenia</span><span><i class="lab-key accepted" aria-hidden="true"></i>Nowy węzeł</span><span><i class="lab-key" aria-hidden="true"></i>Pozostały węzeł</span></div>
+          <p id="operation" role="status" aria-live="polite">Ustaw tekst i wybierz Start albo wykonaj pierwszy krok.</p>
+        </section>
+        <section class="stats" aria-label="Statystyki kodowania">
+          <div class="stat"><span>Znaki wejściowe</span><output id="inputCount">0</output><small>łącznie w tekście</small></div>
+          <div class="stat"><span>Połączenia</span><output id="mergeCount">0</output><small>zbudowane węzły wewnętrzne</small></div>
+          <div class="stat"><span>Bity kodu</span><output id="bitCount">0</output><small>długość zakodowanego tekstu</small></div>
+          <div class="stat"><span>Średnia długość</span><output id="averageLength">—</output><small>bitów na znak</small></div>
+        </section>
+        <section class="panel lab-table-panel" aria-labelledby="codesTitle">
+          <h2 id="codesTitle">Częstości i kody</h2>
+          <div class="graph-table-wrap huffman-table-wrap"><table class="graph-table huffman-table"><caption>Kodowanie znaków w bieżącym tekście</caption><thead><tr><th scope="col">Znak</th><th scope="col">Częstość</th><th scope="col">Kod</th></tr></thead><tbody id="codeRows"></tbody></table></div>
+          <p class="lab-output-label">Zakodowane bity</p><output id="encodedText" class="lab-code-output" aria-label="Zakodowany tekst">Kod pojawi się po zakończeniu budowy drzewa.</output>
+          <p id="resultText" class="lab-result" role="status">Wynik pojawi się po zakończeniu.</p>
+        </section>
+      </div>
+    </main>
+    <footer class="project-notice" aria-label="Informacje o projekcie / Project information">
+      <p>Materiał pokazowy, niezweryfikowany. Nie jest materiałem edukacyjnym. Może zawierać błędy lub uproszczenia. | Unverified demonstration material. Not educational material. It may contain errors or simplifications.</p>
+      <p>Copyright (c) 2026 Marcin Kowalski. <a href="LICENSE" rel="license">GNU GPL v3</a>.</p>
+    </footer>
+    <script>
+(() => {
+  'use strict';
+
+  const $ = id => document.getElementById(id);
+  const state = { frames: [], step: 0, done: false, running: false, started: false, timer: null, source: '', error: '' };
+  const maximumSymbols = 12;
+  const maximumLength = 80;
+  let frequencies = [];
+
+  function symbolLabel(symbol) {
+    if (symbol === ' ') return '␠';
+    if (symbol === '\n') return '↵';
+    if (symbol === '\t') return '⇥';
+    const codePoint = symbol.codePointAt(0);
+    return codePoint < 32 || codePoint === 127
+      ? `U+${codePoint.toString(16).toUpperCase()}`
+      : symbol;
+  }
+
+  function makeFrames(source) {
+    state.error = '';
+    const symbols = Array.from(source);
+    const counts = new Map();
+    for (const symbol of symbols) counts.set(symbol, (counts.get(symbol) || 0) + 1);
+    frequencies = [...counts].map(([symbol, frequency]) => ({ symbol, frequency }));
+    if (symbols.length > maximumLength) {
+      state.error = `Tekst zawiera ${symbols.length} znaków. Skróć go do ${maximumLength} znaków, aby kontynuować.`;
+      return [];
+    }
+    if (frequencies.length > maximumSymbols) {
+      state.error = `Tekst zawiera ${frequencies.length} różnych znaków. Limit wynosi ${maximumSymbols}. Usuń część z nich, aby kontynuować.`;
+      return [];
+    }
+    if (!frequencies.length) {
+      state.error = 'Tekst nie może być pusty.';
+      return [];
+    }
+
+    let nextId = 0;
+    const compare = (a, b) => a.frequency - b.frequency || a.id - b.id;
+    const queue = [];
+    function enqueue(node) {
+      queue.push(node);
+      let index = queue.length - 1;
+      while (index > 0) {
+        const parent = Math.floor((index - 1) / 2);
+        if (compare(queue[parent], queue[index]) <= 0) break;
+        [queue[parent], queue[index]] = [queue[index], queue[parent]];
+        index = parent;
+      }
+    }
+    function dequeue() {
+      const minimum = queue[0], last = queue.pop();
+      if (queue.length) {
+        queue[0] = last;
+        let index = 0;
+        while (2 * index + 1 < queue.length) {
+          let child = 2 * index + 1;
+          if (child + 1 < queue.length && compare(queue[child + 1], queue[child]) < 0) child++;
+          if (compare(queue[index], queue[child]) <= 0) break;
+          [queue[index], queue[child]] = [queue[child], queue[index]];
+          index = child;
+        }
+      }
+      return minimum;
+    }
+    for (const { symbol, frequency } of frequencies) {
+      enqueue({ id: nextId++, symbol, frequency, left: null, right: null });
+    }
+    const frames = [{
+      roots: [...queue].sort(compare),
+      selected: [],
+      merged: null,
+      codes: null,
+      bits: '',
+      message: `Policz częstości i utwórz ${queue.length} liści. Kolejka jest uporządkowana od najmniejszej wagi.`
+    }];
+
+    while (queue.length > 1) {
+      const roots = [...queue].sort(compare);
+      const left = dequeue(), right = dequeue();
+      frames.push({
+        roots,
+        selected: [left.id, right.id],
+        merged: null,
+        codes: null,
+        bits: '',
+        message: `Pobierz z kolejki dwa najmniejsze węzły o wagach ${left.frequency} i ${right.frequency}.`
+      });
+      const parent = {
+        id: nextId++,
+        symbol: null,
+        frequency: left.frequency + right.frequency,
+        left,
+        right
+      };
+      enqueue(parent);
+      frames.push({
+        roots: [...queue].sort(compare),
+        selected: [],
+        merged: parent.id,
+        codes: null,
+        bits: '',
+        message: `Połącz węzły o wagach ${left.frequency} i ${right.frequency}. Wstaw do kolejki rodzica o wadze ${parent.frequency}.`
+      });
+    }
+
+    const root = queue[0];
+    const codes = {};
+    function assignCodes(node, prefix) {
+      if (!node.left && !node.right) {
+        codes[node.symbol] = prefix || '0';
+        return;
+      }
+      assignCodes(node.left, `${prefix}0`);
+      assignCodes(node.right, `${prefix}1`);
+    }
+    assignCodes(root, '');
+    const bits = Array.from(source, symbol => codes[symbol]).join('');
+    const decoded = decode(root, bits);
+    frames.push({
+      roots: [root],
+      selected: [],
+      merged: null,
+      codes,
+      bits,
+      message: decoded === source
+        ? 'Odczytaj kody z drzewa i zakoduj tekst. Dekodowanie odtwarza oryginał.'
+        : 'Błąd: odkodowany tekst różni się od wejściowego.'
+    });
+    return frames;
+  }
+
+  function decode(root, bits) {
+    if (!root.left && !root.right) {
+      return bits === '0'.repeat(root.frequency) ? root.symbol.repeat(root.frequency) : '';
+    }
+    let node = root, result = '';
+    for (const bit of bits) {
+      node = bit === '0' ? node.left : node.right;
+      if (!node.left && !node.right) {
+        result += node.symbol;
+        node = root;
+      }
+    }
+    return result;
+  }
+
+  function svgElement(name, attributes = {}, content = '') {
+    const element = document.createElementNS('http://www.w3.org/2000/svg', name);
+    for (const [key, value] of Object.entries(attributes)) element.setAttribute(key, value);
+    if (content !== '') element.textContent = content;
+    return element;
+  }
+
+  function layoutTree(root, startX) {
+    const nodes = [], edges = [];
+    let leafX = startX;
+    function visit(node, depth) {
+      if (!node.left && !node.right) {
+        const position = { node, x: leafX, y: 38 + depth * 76 };
+        leafX += 76;
+        nodes.push(position);
+        return position;
+      }
+      const left = visit(node.left, depth + 1);
+      const right = visit(node.right, depth + 1);
+      const position = { node, x: (left.x + right.x) / 2, y: 38 + depth * 76 };
+      edges.push({ parent: position, child: left, bit: '0' }, { parent: position, child: right, bit: '1' });
+      nodes.push(position);
+      return position;
+    }
+    visit(root, 0);
+    return { nodes, edges, nextX: leafX };
+  }
+
+  function renderTree(frame) {
+    const layouts = [];
+    let cursor = 42, maximumDepth = 0;
+    for (const root of frame.roots) {
+      const layout = layoutTree(root, cursor);
+      layouts.push(layout);
+      cursor = layout.nextX + 24;
+      maximumDepth = Math.max(maximumDepth, ...layout.nodes.map(position => (position.y - 38) / 76));
+    }
+    const width = Math.max(600, cursor - 8);
+    const height = Math.max(210, 116 + maximumDepth * 76);
+    const board = $('board');
+    board.setAttribute('viewBox', `0 0 ${width} ${height}`);
+    board.setAttribute('width', width);
+    board.setAttribute('height', height);
+    board.setAttribute('aria-label', !frame.roots.length ? 'Puste drzewo Huffmana'
+      : frame.codes ? 'Gotowe drzewo Huffmana' : 'Drzewo i las Huffmana w budowie');
+    board.replaceChildren();
+    if (!frame.roots.length) {
+      board.append(svgElement('text', { x: 320, y: 90, class: 'lab-node-note' }, 'Brak znaków do zakodowania.'));
+      return;
+    }
+    for (const layout of layouts) {
+      for (const edge of layout.edges) {
+        board.append(svgElement('line', {
+          x1: edge.parent.x, y1: edge.parent.y + 20, x2: edge.child.x, y2: edge.child.y - 20,
+          class: 'lab-edge'
+        }));
+        const labelX = (edge.parent.x + edge.child.x) / 2;
+        const labelY = (edge.parent.y + edge.child.y) / 2;
+        board.append(svgElement('text', { x: labelX, y: labelY, class: 'huffman-branch' }, edge.bit));
+      }
+    }
+    for (const layout of layouts) {
+      for (const position of layout.nodes) {
+        const { node, x, y } = position;
+        const selected = frame.selected.includes(node.id);
+        const style = selected ? 'current' : frame.merged === node.id ? 'accepted' : '';
+        const group = svgElement('g');
+        group.append(svgElement('circle', { cx: x, cy: y, r: 20, class: `lab-node ${style}` }));
+        group.append(svgElement('text', {
+          x, y: y + 4, class: `lab-number ${style}${node.symbol ? ' huffman-symbol' : ''}`
+        }, node.symbol === null ? String(node.frequency) : symbolLabel(node.symbol)));
+        if (node.symbol !== null) group.append(svgElement('text', {
+          x, y: y + 36, class: 'lab-node-note'
+        }, `× ${node.frequency}`));
+        group.append(svgElement('title', {}, node.symbol === null
+          ? `Węzeł wewnętrzny, waga ${node.frequency}`
+          : `Znak ${symbolLabel(node.symbol)}, częstość ${node.frequency}`));
+        board.append(group);
+      }
+    }
+  }
+
+  function renderTable(frame) {
+    const body = $('codeRows');
+    body.replaceChildren();
+    for (const { symbol, frequency } of frequencies) {
+      const row = document.createElement('tr');
+      const values = [symbolLabel(symbol), String(frequency), frame.codes?.[symbol] || '—'];
+      for (const value of values) {
+        const cell = document.createElement('td');
+        cell.textContent = value;
+        row.append(cell);
+      }
+      body.append(row);
+    }
+  }
+
+  function stopPlayback() {
+    if (state.timer !== null) clearInterval(state.timer);
+    state.timer = null;
+    state.running = false;
+  }
+
+  function render() {
+    const valid = state.frames.length > 0;
+    const frame = valid ? state.frames[state.step] : null;
+    $('symbolCount').textContent = `${frequencies.length} różnych znaków`;
+    $('inputCount').textContent = Array.from(state.source).length;
+    $('mergeCount').textContent = valid ? Math.floor(state.step / 2) : 0;
+    $('bitCount').textContent = frame?.codes ? frame.bits.length : 0;
+    $('averageLength').textContent = frame?.codes
+      ? (frame.bits.length / Array.from(state.source).length).toFixed(2)
+      : '—';
+    $('operation').textContent = frame?.message || state.error;
+    $('sourceText').setAttribute('aria-invalid', String(!valid));
+    $('encodedText').textContent = frame?.codes ? frame.bits : 'Kod pojawi się po zakończeniu budowy drzewa.';
+    $('resultText').textContent = frame?.codes
+      ? frame.message
+      : 'Wynik pojawi się po zakończeniu.';
+    if (frame) renderTree(frame);
+    else renderTree({ roots: [], selected: [], merged: null });
+    renderTable(frame || {});
+    $('statusText').textContent = !valid ? 'Wymagane dane'
+      : state.running ? 'W trakcie'
+        : state.done ? 'Zakończono'
+          : state.started ? 'Pauza'
+            : state.step ? 'Gotowy do kroku'
+              : 'Gotowy';
+    $('pauseBtn').textContent = state.started && !state.running && !state.done ? 'Wznów' : 'Pauza';
+    $('startBtn').disabled = !valid || state.running;
+    $('pauseBtn').disabled = !state.started || state.done;
+    $('stepBtn').disabled = !valid || state.running || state.done;
+    $('backBtn').disabled = !valid || state.running || state.step === 0;
+    $('stopBtn').disabled = !valid || (!state.running && state.step === 0);
+    $('randomBtn').disabled = state.running;
+    $('sourceText').disabled = state.running;
+    $('speed').disabled = false;
+  }
+
+  function reset() {
+    stopPlayback();
+    state.source = $('sourceText').value;
+    state.step = 0;
+    state.done = false;
+    state.started = false;
+    state.frames = makeFrames(state.source);
+    render();
+  }
+
+  function nextStep() {
+    if (!state.frames.length || state.done) return;
+    state.step++;
+    if (state.step >= state.frames.length - 1) {
+      state.step = state.frames.length - 1;
+      state.done = true;
+      stopPlayback();
+    }
+    render();
+  }
+
+  function start() {
+    if (!state.frames.length || state.running) return;
+    if (state.done) reset();
+    state.started = true;
+    state.running = true;
+    nextStep();
+    if (!state.done) state.timer = setInterval(nextStep, 1000 / Number($('speed').value));
+    render();
+  }
+
+  function generateData() {
+    const alphabet = 'AAABBBCCDE';
+    $('sourceText').value = Array.from({ length: 24 }, () => alphabet[Math.floor(Math.random() * alphabet.length)]).join('');
+    reset();
+  }
+
+  $('startBtn').addEventListener('click', start);
+  $('pauseBtn').addEventListener('click', () => {
+    if (state.running) {
+      stopPlayback();
+      render();
+    } else start();
+  });
+  $('stepBtn').addEventListener('click', nextStep);
+  $('backBtn').addEventListener('click', () => {
+    stopPlayback();
+    state.done = false;
+    state.step = Math.max(0, state.step - 1);
+    render();
+  });
+  $('stopBtn').addEventListener('click', reset);
+  $('randomBtn').addEventListener('click', generateData);
+  $('sourceText').addEventListener('input', reset);
+  $('speed').addEventListener('input', () => {
+    $('speedLabel').textContent = `${$('speed').value} op./s`;
+    if (state.running) {
+      clearInterval(state.timer);
+      state.timer = setInterval(nextStep, 1000 / Number($('speed').value));
+    }
+  });
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden && state.running) {
+      stopPlayback();
+      render();
+    }
+  });
+
+  reset();
+})();
+    </script>
+  </body>
+</html>

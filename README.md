@@ -45,6 +45,7 @@ Przed wykorzystaniem pomysłów lub kodu we własnych materiałach należy nieza
 | [Sito Eratostenesa](sieve.html) | Znajdowanie liczb pierwszych przez wykreślanie wielokrotności. |
 | [Wieże Hanoi](hanoi.html) | Rekurencyjne przenoszenie krążków i stos wywołań. |
 | [Operatory](operators.html) | Operatory arytmetyczne, relacji, logiczne, bitowe i przypisania oraz różnice między językami. |
+| [Algorytm Huffmana](huffman.html) | Budowanie drzewa kodów prefiksowych i kodowanie tekstu według częstości znaków. |
 
 Wybierz moduł, ustaw dane lub scenariusz i uruchom animację albo przechodź między krokami. Dostępne ustawienia zależą od przykładu. Katalog wyświetlany na stronie głównej pochodzi z pliku [algorithms.json](algorithms.json).
 
@@ -163,6 +164,7 @@ Before reusing ideas or code in your own materials, independently verify algorit
 | [Sieve of Eratosthenes](sieve.html) | Finding primes by crossing out multiples. |
 | [Towers of Hanoi](hanoi.html) | Recursive disk movement and the call stack. |
 | [Operators](operators.html) | Arithmetic, relational, logical, bitwise, and assignment operators, including differences between languages. |
+| [Huffman coding](huffman.html) | Building a prefix-code tree and encoding text according to character frequencies. |
 
 Choose a module, set the input or scenario, and start the animation or move between steps. Available settings depend on the example. The home page catalog comes from [algorithms.json](algorithms.json).
 

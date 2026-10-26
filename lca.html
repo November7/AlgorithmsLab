@@ -18,7 +18,7 @@
       <header class="masthead">
         <a class="brand" href="index.html">
           <span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i></span>
-          AlgorithmsLab <span class="graph-brand-note"> / wizualizacje</span>
+          AlgorithmsLab <span class="brand-note"> / wizualizacje</span>
         </a>
         <span class="meta">Drzewa · LCA</span>
       </header>
@@ -69,8 +69,8 @@
           <p>„Najniższy” oznacza najdalszy od korzenia spośród wspólnych przodków A i B. Każdy wierzchołek jest własnym przodkiem, więc gdy A = B, wynikiem jest ten wierzchołek.</p>
         </details>
       </section>
-      <section class="panel lca-controls" aria-label="Ustawienia zapytania LCA">
-        <div class="lca-fields">
+      <section class="panel controls" aria-label="Ustawienia zapytania LCA">
+        <div class="lab-fields">
           <div class="field">
             <label for="method">Algorytm</label>
             <select id="method">
@@ -91,7 +91,7 @@
             <input type="range" id="size" min="5" max="40" value="15" step="1">
           </div>
         </div>
-        <div class="lca-actions">
+        <div class="actions">
           <button type="button" id="startBtn" class="btn primary">Start</button>
           <button type="button" id="pauseBtn" class="btn" disabled>Pauza</button>
           <button type="button" id="backBtn" class="btn" disabled>Krok wstecz</button>
@@ -101,7 +101,7 @@
         </div>
         <p class="control-hint">Wierzchołek 1 jest korzeniem. Drzewo jest ukorzenione; każdy pozostały wierzchołek ma dokładnie jednego rodzica. Klikaj węzły, aby wybierać kolejno A i B.</p>
       </section>
-      <div class="main-column lca-results">
+      <div class="main-column lab-results">
         <section class="panel visualizer" id="visualization" tabindex="-1" aria-labelledby="treeTitle">
           <div class="chart-heading">
             <div><div class="eyebrow">02 / Obserwuj działanie</div><h2 id="treeTitle">Drzewo i ścieżki do korzenia</h2></div>
@@ -121,14 +121,14 @@
           <div class="tree-viewport" id="treeViewport" tabindex="0" role="region" aria-label="Ukorzenione drzewo - przewijany widok">
             <svg id="treeBoard" class="tree-board" role="group" aria-labelledby="treeTitle treeDescription"></svg>
           </div>
-          <div class="tree-legend" id="treeDescription">
+          <div class="chart-caption lab-legend" id="treeDescription">
             <span><i class="legend-dot a" aria-hidden="true"></i>Wierzchołek A / jego ścieżka</span>
             <span><i class="legend-dot b" aria-hidden="true"></i>Wierzchołek B / jego ścieżka</span>
             <span><i class="legend-dot answer" aria-hidden="true"></i>Najniższy wspólny przodek</span>
           </div>
-          <p class="lca-operation" id="operation" role="status" aria-live="polite">Wybierz wierzchołki i uruchom algorytm lub wykonaj jeden krok.</p>
+          <p id="operation" role="status" aria-live="polite">Wybierz wierzchołki i uruchom algorytm lub wykonaj jeden krok.</p>
         </section>
-        <section class="lca-stats" aria-label="Wynik i statystyki">
+        <section class="stats stats-three" aria-label="Wynik i statystyki">
           <div class="stat"><span>Głębokość A</span><output id="depthA">0</output><small id="vertexNameA">Wierzchołek 1</small></div>
           <div class="stat"><span>Głębokość B</span><output id="depthB">0</output><small id="vertexNameB">Wierzchołek 1</small></div>
           <div class="stat"><span>Wspólny przodek</span><output id="answer">-</output><small id="stepCount">Kroki: 0</small></div>
