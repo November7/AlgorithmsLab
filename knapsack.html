@@ -73,12 +73,17 @@
       <p>Materiał pokazowy, niezweryfikowany. Nie jest materiałem edukacyjnym. Może zawierać błędy lub uproszczenia. | Unverified demonstration material. Not educational material. It may contain errors or simplifications. </p>
       <p>Copyright (c) 2026 Marcin Kowalski. <a href="LICENSE" rel="license">GNU GPL v3</a>.</p>
     </footer>
+    <script src="scripts/lab-animation.js"></script>
     <script>
 (() => {
   'use strict';
   const $ = id => document.getElementById(id);
   const state = { items: [], capacity: 10, dp: [], choices: [], active: null, dependencies: new Set(), path: new Set(), selected: [], considered: new Set(), cells: 0, phase: 'ready', steps: 0, running: false, paused: false, done: false, iterator: null };
-  let frameId = null, lastTime = null, budget = 0;
+  const animation = LabAnimation.create({
+    isRunning: () => state.running && !state.paused,
+    getSpeed: () => Number($('speed').value),
+    step: nextStep
+  });
   let autoStarted = false;
   const controls = ['scenario', 'size', 'capacity', 'randomBtn'];
   const key = (i, c) => `${i}-${c}`;
@@ -197,10 +202,7 @@
     updateControls();
   }
 
-  function stopClock() {
-    if (frameId !== null) cancelAnimationFrame(frameId);
-    frameId = null; lastTime = null; budget = 0;
-  }
+  function stopClock() { animation.stop(); }
   function updateControls() {
     $('statusText').textContent = state.done ? 'Zakończono' : state.running ? state.paused ? 'Pauza' : state.phase === 'trace' ? 'Odtwarzanie' : 'W trakcie' : 'Gotowy';
     $('startBtn').disabled = autoStarted && !state.done || state.running && !state.paused && !autoStarted;
@@ -230,18 +232,11 @@
     }
     autoStarted = wasAutoStarted && target > 0; updateControls();
   }
-  function animate(time) {
-    frameId = null;
-    if (!state.running || state.paused || document.hidden) { lastTime = null; return; }
-    if (lastTime === null) lastTime = time;
-    budget += Math.min(time - lastTime, 100) * Number($('speed').value) / 1000; lastTime = time;
-    while (budget >= 1 && state.running) { budget--; nextStep(); }
-    if (state.running && !state.paused) frameId = requestAnimationFrame(animate);
-  }
+
   function start() {
     if (state.running && !state.paused) return;
     if (state.done) reset();
-    stopClock(); state.running = true; state.paused = false; autoStarted = true; updateControls(); frameId = requestAnimationFrame(animate);
+    stopClock(); state.running = true; state.paused = false; autoStarted = true; updateControls(); animation.request();
   }
   $('startBtn').addEventListener('click', start);
   $('pauseBtn').addEventListener('click', () => {
@@ -272,7 +267,7 @@
   $('speed').addEventListener('input', () => { $('speedLabel').textContent = `${$('speed').value} op./s`; });
   document.addEventListener('visibilitychange', () => {
     stopClock();
-    if (!document.hidden && state.running && !state.paused) frameId = requestAnimationFrame(animate);
+    if (!document.hidden && state.running && !state.paused) animation.request();
   });
   generateData();
 })();

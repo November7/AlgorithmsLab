@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<!--
+  Copyright (c) 2024-2026 Marcin Kowalski.
+  SPDX-License-Identifier: GPL-3.0-only
+  See LICENSE for the full license text. Distributed without warranty.
+-->
+<html lang="pl">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Zbadaj odległości między wszystkimi parami albo podziel graf na grupy wzajemnie osiągalnych wierzchołków. Dane grafu można edytować.">
+    <title>Analiza grafów skierowanych · AlgorithmsLab</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body class="step-lab interactive-lab algorithm-lab">
+    <a class="skip" href="#visualization">Przejdź do wizualizacji</a>
+    <main class="shell">
+      <header class="masthead">
+        <a class="brand" href="index.html"><span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i></span>AlgorithmsLab <span class="brand-note"> / wizualizacje</span></a>
+        <span class="meta">Grafy</span>
+      </header>
+      <section class="intro" aria-labelledby="pageTitle">
+        <div><span class="eyebrow">Zrozum, zanim zapamiętasz</span><h1 id="pageTitle">Analiza grafów skierowanych</h1><p>Zbadaj odległości między wszystkimi parami albo podziel graf na grupy wzajemnie osiągalnych wierzchołków. Dane grafu można edytować.</p></div>
+        <span class="badge">Algorytmy · krok po kroku</span>
+      </section>
+      <section class="panel lesson" aria-labelledby="lessonTitle">
+        <div class="lesson-header"><div><p class="eyebrow">01 / Zrozum algorytm</p><h2 id="lessonTitle">Algorytm Floyda-Warshalla</h2></div><span class="tag">Grafy</span></div>
+        <dl class="complexity"><div><dt>Czas</dt><dd id="timeComplexity">O(V³)</dd></div><div><dt>Pamięć</dt><dd id="spaceComplexity">O(V² + E)</dd></div></dl>
+        <p class="complexity-note" id="complexityNote">V to liczba wierzchołków, E to liczba krawędzi wejściowych. Numery od 0; graf skierowany, wagi od −100 do 100. Złożoność nie obejmuje historii wizualizacji.</p>
+        <div class="lesson-columns">
+          <div><h3>Jak to działa?</h3><p id="explanation">Macierz d zawiera bieżące odległości. W iteracji k dopuszczamy wierzchołek k jako pośredni i sprawdzamy, czy droga i → k → j jest lepsza.</p><ol id="steps"><li>Zainicjalizuj macierz wagami, zerami i ∞.</li><li>Dla każdego k sprawdź wszystkie pary (i, j).</li><li>Zapisuj pierwszy krok poprawionej ścieżki.</li><li>Oznacz wpływ ujemnych cykli i odtwórz wybrane połączenie.</li></ol></div>
+          <div><h3>Dlaczego to działa?</h3><p id="correctness">Ścieżka używająca wierzchołków pośrednich do k albo omija k, albo składa się z dwóch ścieżek przez mniejsze numery. Minimum tych możliwości daje kolejną macierz. Ujemna przekątna po obliczeniach wskazuje ujemny cykl.</p></div>
+          <div><h3>Zastosowania i ograniczenia</h3><p id="applications">Odległości między wszystkimi parami w małych lub gęstych grafach. Ujemne cykle wymagają oznaczenia par, dla których minimum nie istnieje.</p></div>
+        </div>
+      </section>
+      <section class="panel controls" aria-label="Ustawienia i sterowanie">
+        <div class="lab-fields">
+          <div class="field"><label for="method">Algorytm</label><select id="method"></select></div>
+          <div class="field"><label for="scenario">Przykład</label><select id="scenario"></select></div>
+          <div class="field"><label for="speed">Tempo <output id="speedLabel" for="speed">6 op./s</output></label><input id="speed" type="range" min="1" max="30" value="6"></div>
+        </div>
+        <div class="lab-fields" id="inputFields"></div>
+        <p id="inputError" role="alert"></p>
+        <div class="actions"><button type="button" id="startBtn" class="btn primary">Start</button><button type="button" id="pauseBtn" class="btn" disabled>Pauza</button><button type="button" id="backBtn" class="btn" disabled>Krok wstecz</button><button type="button" id="stepBtn" class="btn">Krok naprzód</button><button type="button" id="stopBtn" class="btn">Reset</button></div>
+        <p class="control-hint">Start odtwarza kolejne kroki. Po pauzie użyj Start, aby wznowić. Strzałki ← i → zmieniają krok, spacja uruchamia lub zatrzymuje animację. Zmiana danych rozpoczyna nową symulację.</p>
+        <noscript><p>Włącz JavaScript, aby korzystać z interaktywnej symulacji.</p></noscript>
+      </section>
+      <div class="main-column lab-results">
+        <section class="panel visualizer" id="visualization" tabindex="-1" aria-labelledby="chartTitle">
+          <div class="chart-heading"><div><div class="eyebrow">02 / Obserwuj działanie</div><h2 id="chartTitle">Stan algorytmu</h2></div><span id="statusText" role="status">Gotowe</span></div>
+          <p id="operation" role="status" aria-live="polite">Wybierz Start lub wykonaj pierwszy krok.</p>
+          <div id="panels"></div>
+          <div class="chart-caption lab-legend"><span><i class="lab-key current" aria-hidden="true"></i>Bieżący element</span><span><i class="lab-key accepted" aria-hidden="true"></i>Wybrane elementy</span></div>
+          <p class="lab-progress">Wykonane kroki: <output id="stepCount">0</output>. Licznik dotyczy wizualizacji, nie pomiaru wydajności.</p>
+        </section>
+        <section class="panel lab-table-panel" aria-labelledby="resultTitle"><h2 id="resultTitle">Wynik</h2><p id="resultText" class="lab-result" role="status">Wynik pojawi się po zakończeniu.</p></section>
+        <details class="data-details"><summary>Reguła algorytmu</summary><p id="rule" class="lab-rule">for k, i, j:
+  d[i][j] = min(d[i][j], d[i][k] + d[k][j])</p></details>
+      </div>
+    </main>
+    <footer class="project-notice" aria-label="Informacje o projekcie / Project information">
+      <p>Materiał pokazowy, niezweryfikowany. Nie jest materiałem edukacyjnym. Może zawierać błędy lub uproszczenia. | Unverified demonstration material. Not educational material. It may contain errors or simplifications. </p>
+      <p>Copyright (c) 2026 Marcin Kowalski. <a href="LICENSE" rel="license">GNU GPL v3</a>.</p>
+    </footer>
+    <script src="scripts/lab-dom.js"></script>
+    <script src="scripts/lab-core.js"></script>
+    <script>
+/* Copyright (c) 2026 Marcin Kowalski. SPDX-License-Identifier: GPL-3.0-only */
+'use strict';
+(() => {
+  const { graph, integer, table, frame, field, example } = LabCore;
+  const edgeTable = edges => table('Krawędzie skierowane', ['Nr', 'Od', 'Do', 'Waga'], edges.map((edge, index) => [index + 1, edge.from, edge.to, edge.weight ?? '·']));
+  function* floyd(input) {
+    const { size, edges } = graph(input);
+    const source = integer(input.source, 'Początek ścieżki', 0, size - 1), target = integer(input.target, 'Koniec ścieżki', 0, size - 1);
+    const distances = Array.from({ length: size }, (_, i) => Array.from({ length: size }, (_, j) => i === j ? 0 : Infinity));
+    const next = Array.from({ length: size }, () => Array(size).fill(null));
+    for (const { from, to, weight } of edges) if (weight < distances[from][to]) { distances[from][to] = weight; next[from][to] = to; }
+    const panels = (active = []) => [table('Macierz odległości: wiersz = początek, kolumna = koniec', ['Od / do', ...distances.map((_, i) => i)], distances.map((row, i) => [i, ...row]), active), edgeTable(edges)];
+    yield frame('Zera na przekątnej, wagi krawędzi bezpośrednich i ∞ dla pozostałych par.', panels(), { graph: { size, edges } });
+    for (let k = 0; k < size; k++) {
+      yield frame(`Dopuszczamy wierzchołek ${k} jako kolejny wierzchołek pośredni.`, panels(), { graph: { size, edges, activeNodes: [k] } });
+      for (let i = 0; i < size; i++) for (let j = 0; j < size; j++) {
+        if (distances[i][k] === Infinity || distances[k][j] === Infinity) continue;
+        const candidate = distances[i][k] + distances[k][j];
+        const improve = candidate < distances[i][j];
+        if (improve) { distances[i][j] = candidate; next[i][j] = next[i][k]; }
+        yield frame(`Przez ${k}: ${i} → ${k} → ${j}, koszt ${candidate}. ${improve ? 'Poprawiamy odległość.' : 'Pozostawiamy dotychczasową wartość.'}`, panels([[i, j + 1]]), { graph: { size, edges, activeNodes: [i, k, j] } });
+      }
+    }
+    const negative = distances.map((row, i) => row[i] < 0 ? i : -1).filter(i => i >= 0);
+    // Use a fixed reachability snapshot; only affected pairs have no finite minimum.
+    const reachable = distances.map(row => row.map(value => value !== Infinity));
+    for (const k of negative) for (let i = 0; i < size; i++) for (let j = 0; j < size; j++) {
+      if (reachable[i][k] && reachable[k][j]) { distances[i][j] = -Infinity; next[i][j] = null; }
+    }
+    let path = null;
+    const cost = distances[source][target];
+    if (Number.isFinite(cost)) {
+      path = [source];
+      let vertex = source;
+      while (vertex !== target) { vertex = next[vertex][target]; path.push(vertex); }
+    }
+    const result = cost === Infinity ? `Brak ścieżki ${source} → ${target}.` : cost === -Infinity ? `Dla ${source} → ${target} nie ma skończonej najkrótszej ścieżki: można przejść przez ujemny cykl.` : `Ścieżka ${path.join(' → ')}, koszt ${cost}.`;
+    yield frame(negative.length ? '−∞ oznacza parę, której koszt można dowolnie zmniejszać przez ujemny cykl. Pozostałe pary zachowują swoje wyniki.' : 'Sprawdzono wszystkie wierzchołki pośrednie.', panels(), { graph: { size, edges, acceptedNodes: path || [] }, done: true, result, data: { distances, path, negative } });
+  }
+  function* kosaraju(input) {
+    const { size, edges } = graph(input, false);
+    const adjacency = Array.from({ length: size }, () => []), reversed = Array.from({ length: size }, () => []);
+    edges.forEach(({ from, to }, index) => { adjacency[from].push({ to, index }); reversed[to].push({ to: from, index }); });
+    const seen = Array(size).fill(false), order = [], components = Array(size).fill(-1), stack = [];
+    let count = 0, transposed = false;
+    const panels = active => [table('Wierzchołki i składowe (numeracja składowych od 0)', ['Wierzchołek', 'Odwiedzony w I przejściu', 'Składowa'], components.map((component, vertex) => [vertex, seen[vertex] ? 'tak' : 'nie', component < 0 ? '·' : component]), active === undefined ? [] : [[active, 2]]), table('Kolejność i stos DFS', ['Stan', 'Wierzchołki'], [['Zakończone (najwcześniejsze po lewej)', order.join(', ') || '∅'], ['Stos wywołań', stack.join(' → ') || '∅']]), edgeTable(transposed ? edges.map(edge => ({ from: edge.to, to: edge.from })) : edges)];
+    const picture = (activeNodes = [], activeEdges = []) => ({ size, edges: transposed ? edges.map(edge => ({ from: edge.to, to: edge.from })) : edges, activeNodes, activeEdges });
+    function* firstDfs(vertex) {
+      seen[vertex] = true; stack.push(vertex);
+      yield frame(`I przejście: wchodzimy do ${vertex}.`, panels(vertex), { graph: picture([vertex]) });
+      for (const { to, index } of adjacency[vertex]) {
+        yield frame(`Sprawdzamy krawędź ${vertex} → ${to}.`, panels(vertex), { graph: picture([vertex, to], [index]) });
+        if (!seen[to]) yield* firstDfs(to);
+      }
+      stack.pop(); order.push(vertex);
+      yield frame(`Kończymy ${vertex} i dopisujemy go do kolejności wyjścia.`, panels(vertex), { graph: picture([vertex]) });
+    }
+    function* secondDfs(vertex) {
+      components[vertex] = count; stack.push(vertex);
+      yield frame(`II przejście: ${vertex} należy do składowej ${count}.`, panels(vertex), { graph: picture([vertex]) });
+      for (const { to, index } of reversed[vertex]) {
+        yield frame(`W grafie odwróconym sprawdzamy ${vertex} → ${to}.`, panels(vertex), { graph: picture([vertex, to], [index]) });
+        if (components[to] < 0) yield* secondDfs(to);
+      }
+      stack.pop();
+    }
+    yield frame('Algorytm Kosaraju wykonuje dwa pełne przejścia DFS, także dla grafu niespójnego.', panels(), { graph: picture() });
+    for (let vertex = 0; vertex < size; vertex++) if (!seen[vertex]) yield* firstDfs(vertex);
+    transposed = true;
+    yield frame('Odwracamy wszystkie krawędzie i czytamy kolejność wyjścia od końca.', panels(), { graph: picture() });
+    for (const vertex of order.slice().reverse()) if (components[vertex] < 0) { yield* secondDfs(vertex); count++; }
+    const groups = Array.from({ length: count }, (_, component) => components.flatMap((value, vertex) => value === component ? [vertex] : []));
+    yield frame('Każde drzewo drugiego przejścia jest jedną silnie spójną składową.', panels(), { graph: picture(), done: true, result: `Składowe (${count}): ${groups.map(group => `{${group.join(', ')}}`).join('; ')}.`, data: { components, groups } });
+  }
+  const definition = { title: 'Analiza grafów skierowanych', category: 'Grafy', intro: 'Zbadaj odległości między wszystkimi parami albo podziel graf na grupy wzajemnie osiągalnych wierzchołków. Dane grafu można edytować.', modes: {
+    floyd: {
+      title: 'Algorytm Floyda-Warshalla',
+      fields: [field('size', 'Liczba wierzchołków (1…8)', '4', { type: 'number', min: 1, max: 8 }), field('edges', 'Krawędzie: od do waga, po jednej w wierszu; do 40', '0 1 3\n0 3 10\n1 2 -2\n2 3 4\n3 1 1', { multiline: true }), field('source', 'Początek odtwarzanej ścieżki', '0', { type: 'number', min: 0, max: 7 }), field('target', 'Koniec odtwarzanej ścieżki', '3', { type: 'number', min: 0, max: 7 })],
+      examples: [example('Ujemna krawędź bez ujemnego cyklu', { size: '4', edges: '0 1 3\n0 3 10\n1 2 -2\n2 3 4\n3 1 1', source: '0', target: '3' }), example('Ujemny cykl', { size: '4', edges: '0 1 1\n1 2 -3\n2 1 1\n2 3 2', source: '0', target: '3' }), example('Nieosiągalny cel', { size: '3', edges: '0 1 5', source: '0', target: '2' })],
+      time: 'O(V³)',
+      space: 'O(V² + E)',
+      note: 'V to liczba wierzchołków, E to liczba krawędzi wejściowych. Numery od 0; graf skierowany, wagi od −100 do 100. Złożoność nie obejmuje historii wizualizacji.',
+      explanation: 'Macierz d zawiera bieżące odległości. W iteracji k dopuszczamy wierzchołek k jako pośredni i sprawdzamy, czy droga i → k → j jest lepsza.',
+      correctness: 'Ścieżka używająca wierzchołków pośrednich do k albo omija k, albo składa się z dwóch ścieżek przez mniejsze numery. Minimum tych możliwości daje kolejną macierz. Ujemna przekątna po obliczeniach wskazuje ujemny cykl.',
+      applications: 'Odległości między wszystkimi parami w małych lub gęstych grafach. Ujemne cykle wymagają oznaczenia par, dla których minimum nie istnieje.',
+      steps: ['Zainicjalizuj macierz wagami, zerami i ∞.', 'Dla każdego k sprawdź wszystkie pary (i, j).', 'Zapisuj pierwszy krok poprawionej ścieżki.', 'Oznacz wpływ ujemnych cykli i odtwórz wybrane połączenie.'],
+      rule: 'for k, i, j:\n  d[i][j] = min(d[i][j], d[i][k] + d[k][j])',
+      run: floyd
+    },
+    scc: {
+      title: 'Silnie spójne składowe: Kosaraju',
+      fields: [field('size', 'Liczba wierzchołków (1…8)', '6', { type: 'number', min: 1, max: 8 }), field('edges', 'Krawędzie: od do, po jednej w wierszu; do 40', '0 1\n1 2\n2 0\n2 3\n3 4\n4 3\n4 5', { multiline: true })],
+      examples: [example('Trzy składowe', { size: '6', edges: '0 1\n1 2\n2 0\n2 3\n3 4\n4 3\n4 5' }), example('Graf acykliczny', { size: '4', edges: '0 1\n1 2\n1 3' }), example('Wierzchołki izolowane', { size: '3', edges: '' })],
+      time: 'O(V + E)',
+      space: 'O(V + E)',
+      note: 'V to liczba wierzchołków, E to liczba krawędzi. Dwa przejścia korzystają z list sąsiedztwa. Historia i rysowanie nie są wliczone.',
+      explanation: 'Silnie spójna składowa to maksymalna grupa wierzchołków wzajemnie osiągalnych. Pierwszy DFS zapisuje kolejność zakończeń, drugi działa na odwróconych krawędziach w odwrotnej kolejności.',
+      correctness: 'Po zwinięciu składowych powstaje DAG. Porządek zakończeń pierwszego DFS pozwala w transponowanym grafie zaczynać od składowej bez wyjścia do jeszcze nieodwiedzonych składowych. Drugi DFS nie wyjdzie wtedy poza właściwą grupę.',
+      applications: 'Wykrywanie grup cyklicznych zależności i upraszczanie grafu do DAG. Pojedynczy wierzchołek też może być składową.',
+      steps: ['Wykonaj DFS ze wszystkich nieodwiedzonych wierzchołków.', 'Zapisuj wierzchołki przy wyjściu z rekurencji.', 'Odwróć krawędzie.', 'Uruchamiaj DFS od końca zapisanej listy i oznaczaj nowe składowe.'],
+      rule: 'order = kolejność zakończeń DFS(G)\nfor v in reverse(order):\n  jeśli v nie ma składowej: DFS(Gᵀ, v) tworzy nową składową',
+      run: kosaraju
+    }
+  } };
+  window.LabDefinition = definition;
+})();
+    </script>
+    <script src="scripts/lab-player.js"></script>
+  </body>
+</html>

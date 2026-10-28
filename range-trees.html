@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<!--
+  Copyright (c) 2024-2026 Marcin Kowalski.
+  SPDX-License-Identifier: GPL-3.0-only
+  See LICENSE for the full license text. Distributed without warranty.
+-->
+<html lang="pl">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Wykonaj te same zapytania i aktualizacje za pomocą dwóch struktur. Obserwuj, które fragmenty tablicy składają się na wynik.">
+    <title>Sumy przedziałowe: Fenwick i drzewo przedziałowe · AlgorithmsLab</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body class="step-lab interactive-lab algorithm-lab">
+    <a class="skip" href="#visualization">Przejdź do wizualizacji</a>
+    <main class="shell">
+      <header class="masthead">
+        <a class="brand" href="index.html"><span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i></span>AlgorithmsLab <span class="brand-note"> / wizualizacje</span></a>
+        <span class="meta">Struktury danych</span>
+      </header>
+      <section class="intro" aria-labelledby="pageTitle">
+        <div><span class="eyebrow">Zrozum, zanim zapamiętasz</span><h1 id="pageTitle">Sumy przedziałowe: Fenwick i drzewo przedziałowe</h1><p>Wykonaj te same zapytania i aktualizacje za pomocą dwóch struktur. Obserwuj, które fragmenty tablicy składają się na wynik.</p></div>
+        <span class="badge">Algorytmy · krok po kroku</span>
+      </section>
+      <section class="panel lesson" aria-labelledby="lessonTitle">
+        <div class="lesson-header"><div><p class="eyebrow">01 / Zrozum algorytm</p><h2 id="lessonTitle">Drzewo Fenwicka</h2></div><span class="tag">Struktury danych</span></div>
+        <dl class="complexity"><div><dt>Czas</dt><dd id="timeComplexity">Budowa O(n); operacja O(log n)</dd></div><div><dt>Pamięć</dt><dd id="spaceComplexity">O(n)</dd></div></dl>
+        <p class="complexity-note" id="complexityNote">n oznacza liczbę elementów. Indeksy wejściowe zaczynają się od 1; oba końce zapytania są włączone. Złożoność nie obejmuje zapisywania historii animacji.</p>
+        <div class="lesson-columns">
+          <div><h3>Jak to działa?</h3><p id="explanation">BIT[i] przechowuje sumę bloku kończącego się w i. Długość bloku to lowbit(i) = i &amp; −i, czyli wartość najmłodszego ustawionego bitu.</p><ol id="steps"><li>Zbuduj sumy bloków i przekaż każdy blok do jego rodzica.</li><li>Dla prefiksu dodawaj BIT[i] i wykonuj i -= lowbit(i).</li><li>Sumę [l, r] oblicz jako prefiks(r) − prefiks(l − 1).</li><li>Przy dodawaniu przyrostu wykonuj i += lowbit(i).</li></ol></div>
+          <div><h3>Dlaczego to działa?</h3><p id="correctness">Odejmowanie lowbit usuwa ostatni ustawiony bit i wybiera rozłączne bloki pokrywające prefiks. Aktualizacja odwiedza dokładnie te bloki, które zawierają zmieniony element.</p></div>
+          <div><h3>Zastosowania i ograniczenia</h3><p id="applications">Sumy na zmieniającej się tablicy: liczniki zdarzeń, statystyki i zadania z wieloma zapytaniami. W tym module aktualizacja dodaje przyrost do jednego elementu.</p></div>
+        </div>
+      </section>
+      <section class="panel controls" aria-label="Ustawienia i sterowanie">
+        <div class="lab-fields">
+          <div class="field"><label for="method">Algorytm</label><select id="method"></select></div>
+          <div class="field"><label for="scenario">Przykład</label><select id="scenario"></select></div>
+          <div class="field"><label for="speed">Tempo <output id="speedLabel" for="speed">6 op./s</output></label><input id="speed" type="range" min="1" max="30" value="6"></div>
+        </div>
+        <div class="lab-fields" id="inputFields"></div>
+        <p id="inputError" role="alert"></p>
+        <div class="actions"><button type="button" id="startBtn" class="btn primary">Start</button><button type="button" id="pauseBtn" class="btn" disabled>Pauza</button><button type="button" id="backBtn" class="btn" disabled>Krok wstecz</button><button type="button" id="stepBtn" class="btn">Krok naprzód</button><button type="button" id="stopBtn" class="btn">Reset</button></div>
+        <p class="control-hint">Start odtwarza kolejne kroki. Po pauzie użyj Start, aby wznowić. Strzałki ← i → zmieniają krok, spacja uruchamia lub zatrzymuje animację. Zmiana danych rozpoczyna nową symulację.</p>
+        <noscript><p>Włącz JavaScript, aby korzystać z interaktywnej symulacji.</p></noscript>
+      </section>
+      <div class="main-column lab-results">
+        <section class="panel visualizer" id="visualization" tabindex="-1" aria-labelledby="chartTitle">
+          <div class="chart-heading"><div><div class="eyebrow">02 / Obserwuj działanie</div><h2 id="chartTitle">Stan algorytmu</h2></div><span id="statusText" role="status">Gotowe</span></div>
+          <p id="operation" role="status" aria-live="polite">Wybierz Start lub wykonaj pierwszy krok.</p>
+          <div id="panels"></div>
+          <div class="chart-caption lab-legend"><span><i class="lab-key current" aria-hidden="true"></i>Bieżący element</span><span><i class="lab-key accepted" aria-hidden="true"></i>Wybrane elementy</span></div>
+          <p class="lab-progress">Wykonane kroki: <output id="stepCount">0</output>. Licznik dotyczy wizualizacji, nie pomiaru wydajności.</p>
+        </section>
+        <section class="panel lab-table-panel" aria-labelledby="resultTitle"><h2 id="resultTitle">Wynik</h2><p id="resultText" class="lab-result" role="status">Wynik pojawi się po zakończeniu.</p></section>
+        <details class="data-details"><summary>Reguła algorytmu</summary><p id="rule" class="lab-rule">prefix(i): s = 0; while i &gt; 0: s += BIT[i]; i -= i &amp; −i
+add(i, d): while i ≤ n: BIT[i] += d; i += i &amp; −i</p></details>
+      </div>
+    </main>
+    <footer class="project-notice" aria-label="Informacje o projekcie / Project information">
+      <p>Materiał pokazowy, niezweryfikowany. Nie jest materiałem edukacyjnym. Może zawierać błędy lub uproszczenia. | Unverified demonstration material. Not educational material. It may contain errors or simplifications. </p>
+      <p>Copyright (c) 2026 Marcin Kowalski. <a href="LICENSE" rel="license">GNU GPL v3</a>.</p>
+    </footer>
+    <script src="scripts/lab-dom.js"></script>
+    <script src="scripts/lab-core.js"></script>
+    <script>
+/* Copyright (c) 2026 Marcin Kowalski. SPDX-License-Identifier: GPL-3.0-only */
+'use strict';
+(() => {
+  const { numbers, integer, table, frame: captureFrame, field, example } = LabCore;
+  const fields = [
+    field('values', 'Tablica: od 1 do 16 liczb (−100…100)', '3 2 -1 6 5 4 2 7'),
+    field('operations', 'Operacje: sum lewy prawy lub add indeks przyrost (indeksy od 1)', 'sum 2 7\nadd 3 5\nsum 1 4', { multiline: true })
+  ];
+  const examples = [
+    example('Sumy i aktualizacja', { values: fields[0].value, operations: fields[1].value }),
+    example('Jeden element', { values: '-4', operations: 'sum 1 1\nadd 1 9\nsum 1 1' }),
+    example('Końce tablicy', { values: '5 -2 0 3 1', operations: 'add 5 -6\nsum 1 5\nsum 5 5' })
+  ];
+  function parse(input) {
+    const values = numbers(input.values);
+    const lines = input.operations.trim().split(/\n|;/).filter(line => line.trim());
+    if (!lines.length || lines.length > 12) throw new Error('Podaj od 1 do 12 operacji.');
+    const operations = lines.map(line => {
+      const parts = line.trim().split(/\s+/);
+      if (parts.length !== 3 || !['sum', 'add'].includes(parts[0])) throw new Error('Format operacji: sum lewy prawy albo add indeks przyrost.');
+      const first = integer(parts[1], 'Indeks', 1, values.length);
+      const second = parts[0] === 'sum' ? integer(parts[2], 'Prawy koniec', first, values.length) : integer(parts[2], 'Przyrost', -100, 100);
+      return { type: parts[0], first, second };
+    });
+    return { values, operations };
+  }
+  function inputTable(values, active = []) {
+    return table('Tablica źródłowa (indeksy od 1)', ['i', ...values.map((_, i) => i + 1)], [['A[i]', ...values]], active.map(i => [0, i]));
+  }
+  function* fenwick(input) {
+    const { values, operations } = parse(input);
+    const size = values.length, tree = Array(size + 1).fill(0), answers = [];
+    const lowbit = index => index & -index;
+    const frame = (message, panels, extra = {}) => captureFrame(message, panels, {
+      ...extra,
+      tree: { nodes: [
+        { id: 0, parent: null, label: 'BIT', note: 'sumy bloków' },
+        ...tree.slice(1).map((value, index) => {
+          const i = index + 1, parent = i + lowbit(i);
+          return { id: i, parent: parent <= size ? parent : 0, label: value, note: `${i}: [${i - lowbit(i) + 1}, ${i}]`, active: panels[1].active.some(([row]) => row === index) };
+        })
+      ] }
+    });
+    const panels = (active = 0) => [inputTable(values), table('BIT[i] przechowuje sumę [i − lowbit(i) + 1, i]', ['i', 'Binarnie', 'lowbit(i)', 'Przedział', 'BIT[i]'], tree.slice(1).map((value, index) => {
+      const i = index + 1;
+      return [i, i.toString(2).padStart(5, '0'), lowbit(i), `[${i - lowbit(i) + 1}, ${i}]`, value];
+    }), active ? [[active - 1, 4]] : [])];
+    yield frame('Zaczynamy od pustego drzewa BIT. Indeks 0 jest wartownikiem.', panels());
+    // Linear construction: each complete block is propagated once to its parent.
+    for (let i = 1; i <= size; i++) {
+      tree[i] += values[i - 1];
+      const parent = i + lowbit(i);
+      if (parent <= size) tree[parent] += tree[i];
+      yield frame(`Budowa: BIT[${i}] = ${tree[i]}.${parent <= size ? ` Przekazujemy ten blok do BIT[${parent}].` : ' Brak rodzica w tablicy.'}`, panels(i));
+    }
+    for (const operation of operations) {
+      const { first, second } = operation;
+      if (operation.type === 'add') {
+        values[first - 1] += second;
+        for (let i = first; i <= size; i += lowbit(i)) {
+          tree[i] += second;
+          yield frame(`add(${first}, ${second}): BIT[${i}] += ${second}. Następny indeks: ${i} + ${lowbit(i)}.`, panels(i));
+        }
+      } else {
+        let rightSum = 0, leftSum = 0;
+        for (let i = second; i > 0; i -= lowbit(i)) {
+          rightSum += tree[i];
+          yield frame(`Prefiks(${second}): dodajemy BIT[${i}] = ${tree[i]}; suma = ${rightSum}. Następny indeks: ${i - lowbit(i)}.`, panels(i));
+        }
+        for (let i = first - 1; i > 0; i -= lowbit(i)) {
+          leftSum += tree[i];
+          yield frame(`Prefiks(${first - 1}): dodajemy BIT[${i}] = ${tree[i]}; suma = ${leftSum}.`, panels(i));
+        }
+        answers.push({ left: first, right: second, sum: rightSum - leftSum });
+        yield frame(`sum(${first}, ${second}) = ${rightSum} − ${leftSum} = ${rightSum - leftSum}.`, panels(), { result: answers.map(a => `[${a.left}, ${a.right}]: ${a.sum}`).join('; ') });
+      }
+    }
+    yield frame('Wszystkie operacje wykonane.', panels(), { done: true, result: answers.length ? answers.map(a => `Suma [${a.left}, ${a.right}] = ${a.sum}`).join('; ') : 'Zaktualizowano tablicę.', data: { values, tree, answers } });
+  }
+  function* segment(input) {
+    const { values, operations } = parse(input);
+    let base = 1;
+    while (base < values.length) base *= 2;
+    const tree = Array(2 * base).fill(0), ranges = Array(2 * base), answers = [];
+    for (let i = 0; i < base; i++) ranges[base + i] = [i + 1, i + 1];
+    for (let i = base - 1; i > 0; i--) ranges[i] = [ranges[2 * i][0], ranges[2 * i + 1][1]];
+    const frame = (message, panels, extra = {}) => captureFrame(message, panels, {
+      ...extra,
+      tree: { nodes: tree.slice(1).map((value, index) => ({
+        id: index + 1, parent: index === 0 ? null : Math.floor((index + 1) / 2),
+        label: value, note: `[${ranges[index + 1].join(', ')}]`, active: panels[1].active.some(([row]) => row === index)
+      })) }
+    });
+    const panels = active => [inputTable(values), table('Drzewo: dzieci węzła v to 2v oraz 2v + 1; dodatkowe liście mają wartość 0', ['Węzeł v', 'Przedział', 'Suma', 'Dzieci'], tree.slice(1).map((sum, i) => [i + 1, ranges[i + 1].join('…'), sum, i + 1 < base ? `${2 * (i + 1)}, ${2 * (i + 1) + 1}` : 'liść']), (active || []).map(i => [i - 1, 2]))];
+    yield frame('Uzupełniamy liczbę liści do potęgi dwójki.', panels());
+    for (let i = 0; i < values.length; i++) tree[base + i] = values[i];
+    yield frame('Wpisujemy wartości tablicy do liści.', panels(values.map((_, i) => base + i)));
+    for (let i = base - 1; i > 0; i--) {
+      tree[i] = tree[2 * i] + tree[2 * i + 1];
+      yield frame(`Węzeł ${i}: ${tree[2 * i]} + ${tree[2 * i + 1]} = ${tree[i]}.`, panels([i]));
+    }
+    for (const { type, first, second } of operations) {
+      if (type === 'add') {
+        values[first - 1] += second;
+        let node = base + first - 1;
+        tree[node] += second;
+        yield frame(`Zmieniamy liść ${node}: A[${first}] = ${values[first - 1]}.`, panels([node]));
+        for (node = Math.floor(node / 2); node; node = Math.floor(node / 2)) {
+          tree[node] = tree[2 * node] + tree[2 * node + 1];
+          yield frame(`Aktualizujemy sumę rodzica ${node}: ${tree[node]}.`, panels([node]));
+        }
+      } else {
+        let left = base + first - 1, right = base + second - 1, sum = 0;
+        while (left <= right) {
+          const included = [];
+          if (left % 2 === 1) { included.push(left); sum += tree[left++]; }
+          if (right % 2 === 0) { included.push(right); sum += tree[right--]; }
+          yield frame(`Zapytanie [${first}, ${second}]: ${included.length ? `dodajemy bloki ${included.join(', ')}` : 'przechodzimy do rodziców'}; suma = ${sum}.`, panels(included));
+          left = Math.floor(left / 2); right = Math.floor(right / 2);
+        }
+        answers.push({ left: first, right: second, sum });
+        yield frame(`Suma [${first}, ${second}] = ${sum}.`, panels());
+      }
+    }
+    yield frame('Zakończono budowę i operacje.', panels(), { done: true, result: answers.length ? answers.map(a => `Suma [${a.left}, ${a.right}] = ${a.sum}`).join('; ') : 'Zaktualizowano tablicę.', data: { values, tree, answers } });
+  }
+  const shared = { fields, examples, space: 'O(n)', applications: 'Sumy na zmieniającej się tablicy: liczniki zdarzeń, statystyki i zadania z wieloma zapytaniami. W tym module aktualizacja dodaje przyrost do jednego elementu.', note: 'n oznacza liczbę elementów. Indeksy wejściowe zaczynają się od 1; oba końce zapytania są włączone. Złożoność nie obejmuje zapisywania historii animacji.' };
+  const definition = { title: 'Sumy przedziałowe: Fenwick i drzewo przedziałowe', category: 'Struktury danych', intro: 'Wykonaj te same zapytania i aktualizacje za pomocą dwóch struktur. Obserwuj, które fragmenty tablicy składają się na wynik.', modes: {
+    fenwick: {
+      ...shared,
+      title: 'Drzewo Fenwicka',
+      time: 'Budowa O(n); operacja O(log n)',
+      explanation: 'BIT[i] przechowuje sumę bloku kończącego się w i. Długość bloku to lowbit(i) = i & −i, czyli wartość najmłodszego ustawionego bitu.',
+      correctness: 'Odejmowanie lowbit usuwa ostatni ustawiony bit i wybiera rozłączne bloki pokrywające prefiks. Aktualizacja odwiedza dokładnie te bloki, które zawierają zmieniony element.',
+      steps: ['Zbuduj sumy bloków i przekaż każdy blok do jego rodzica.', 'Dla prefiksu dodawaj BIT[i] i wykonuj i -= lowbit(i).', 'Sumę [l, r] oblicz jako prefiks(r) − prefiks(l − 1).', 'Przy dodawaniu przyrostu wykonuj i += lowbit(i).'],
+      rule: 'prefix(i): s = 0; while i > 0: s += BIT[i]; i -= i & −i\nadd(i, d): while i ≤ n: BIT[i] += d; i += i & −i',
+      run: fenwick
+    },
+    segment: {
+      ...shared,
+      title: 'Drzewo przedziałowe',
+      time: 'Budowa O(n); operacja O(log n)',
+      explanation: 'Liście zawierają elementy tablicy, a każdy rodzic sumuje dwóch synów. Rozmiar dopełniamy zerami do potęgi dwójki. Drzewo dzieli zakres na połówki.',
+      correctness: 'Węzeł zawsze przechowuje sumę swojego przedziału. Zapytanie wybiera rozłączne węzły pokrywające dokładnie żądany zakres, a aktualizacja odtwarza sumy na drodze do korzenia.',
+      steps: ['Wpisz dane w liściach i policz rodziców od dołu.', 'W zapytaniu dołącz prawy syn na lewej granicy i lewy syn na prawej granicy.', 'Przesuń obie granice do rodziców.', 'Po zmianie liścia przelicz jego przodków.'],
+      rule: 'tree[v] = tree[2v] + tree[2v + 1]\nquery(l, r): dołącz skrajne pełne bloki, następnie przejdź do rodziców',
+      run: segment
+    }
+  } };
+  window.LabDefinition = definition;
+})();
+    </script>
+    <script src="scripts/lab-player.js"></script>
+  </body>
+</html>

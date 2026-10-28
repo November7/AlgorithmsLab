@@ -176,6 +176,9 @@
       <p>Copyright (c) 2026 Marcin Kowalski. <a href="LICENSE" rel="license">GNU GPL v3</a>.</p>
     </footer>
                       <p id="stepAnnouncement" class="sr-only" role="status"></p>
+<script src="scripts/lab-dom.js"></script>
+<script src="scripts/lab-animation.js"></script>
+<script src="scripts/lab-canvas.js"></script>
 <script>
 (() => {
   'use strict';
@@ -236,7 +239,14 @@
   const canvas = $('board'), ctx = canvas.getContext('2d');
   const sizeInput = $('size'), speedInput = $('speed');
   const state = { data: [], original: [], active: new Set(), sorted: new Set(), comparisons: 0, swaps: 0, writes: 0, auxWrites: 0, running: false, paused: false, done: false, selected: 'bubble', iterator: null };
-  let frameId = null, lastTime = null, budget = 0, dirty = true, viewWidth = 1, viewHeight = 1, historySteps = 0, autoStarted = false;
+  let dirty = true, viewWidth = 1, viewHeight = 1, historySteps = 0, autoStarted = false;
+  const animation = LabAnimation.create({
+    isRunning: () => state.running && !state.paused,
+    getSpeed: () => Number(speedInput.value),
+    step: nextStep,
+    render: () => { if (dirty) { updateInfo(); draw(); dirty = false; } },
+    maxSteps: 20
+  });
 
   function renderLesson() {
     const info = ALGO_INFO[state.selected];
@@ -288,32 +298,20 @@
     $('operation').textContent = 'Wybierz Start lub wykonaj pierwszy krok.';
     rafDraw();
   }
-  function rafDraw() { dirty = true; if (frameId === null) frameId = requestAnimationFrame(frame); }
+  function rafDraw() { dirty = true; animation.request(); }
   function resizeCanvas() {
-    const rect = canvas.parentElement.getBoundingClientRect(), dpr = Math.min(window.devicePixelRatio || 1, 2);
-    viewWidth = Math.max(1, rect.width); viewHeight = Math.max(1, rect.height);
-    canvas.width = Math.round(viewWidth * dpr); canvas.height = Math.round(viewHeight * dpr);
-    ctx.setTransform(dpr, 0, 0, dpr, 0, 0); rafDraw();
+    ({ width: viewWidth, height: viewHeight } = LabCanvas.resize(canvas, ctx));
+    rafDraw();
   }
   function draw() {
     const width = viewWidth, height = viewHeight, left = 28, right = 12, top = 30, bottom = 24;
-    ctx.clearRect(0, 0, width, height);
-    const chartHeight = Math.max(1, height - top - bottom), chartWidth = Math.max(1, width - left - right);
-    ctx.font = '10px "Segoe UI", sans-serif'; ctx.textAlign = 'right';
-    for (let value = 0; value <= 100; value += 25) {
-      const y = top + chartHeight * (1 - value / 100);
-      ctx.fillStyle = '#657995'; ctx.fillText(String(value), left - 7, y + 3);
-      ctx.fillStyle = '#e7edf6'; ctx.fillRect(left, y, chartWidth, 1);
-    }
+    const { chartHeight, chartWidth } = LabCanvas.axis(ctx, { width, height, left, right, top, bottom, maximum: 100, interval: 25 });
     const slot = chartWidth / Math.max(1, state.data.length), barWidth = Math.max(.4, slot - Math.min(3, slot * .22));
     for (let i = 0; i < state.data.length; i++) {
       const h = state.data[i] / 100 * chartHeight, x = left + i * slot, y = height - bottom - h;
       const active = state.active.has(i), sorted = state.sorted.has(i), radius = Math.min(3, barWidth / 2, h / 2);
       ctx.fillStyle = active ? '#21457e' : sorted ? '#437c88' : '#779bce';
-      ctx.beginPath(); ctx.moveTo(x, y + h); ctx.lineTo(x, y + radius);
-      ctx.quadraticCurveTo(x, y, x + radius, y); ctx.lineTo(x + barWidth - radius, y);
-      ctx.quadraticCurveTo(x + barWidth, y, x + barWidth, y + radius);
-      ctx.lineTo(x + barWidth, y + h); ctx.closePath(); ctx.fill();
+      LabCanvas.bar(ctx, x, y, barWidth, h, radius);
       ctx.textAlign = 'center'; ctx.fillStyle = '#253f63';
       if (slot >= 20) ctx.fillText(String(state.data[i]), x + barWidth / 2, y - 7);
       if (active) { ctx.beginPath(); ctx.arc(x + barWidth / 2, height - 12, Math.min(2.5, barWidth / 2), 0, 2 * Math.PI); ctx.fill(); }
@@ -649,7 +647,7 @@
     historySteps = 0;
     autoStarted = !paused;
     state.iterator = SORTERS[state.selected](); state.running = true; state.paused = paused;
-    lastTime = null; budget = 0; updateControls(); setStatus(paused ? 'Pauza' : 'Sortowanie'); rafDraw();
+    animation.resetTime(); updateControls(); setStatus(paused ? 'Pauza' : 'Sortowanie'); rafDraw();
   }
   function finish() {
     state.running = false; state.paused = false; state.iterator = null;
@@ -681,45 +679,29 @@
     begin(true);
     for (let i = 0; i < target; i++) nextStep();
     autoStarted = wasAutoStarted; updateControls();
-    updateControls(); rafDraw();
+    rafDraw();
   }
   function stop() {
     if (!state.running && !historySteps && !state.done) return;
     // During insertion or merge the visible array may temporarily not be a
     // permutation. Restore the full snapshot, including on unexpected errors.
     state.iterator = null; state.data = state.original.slice();
-    state.running = false; state.paused = false; lastTime = null; budget = 0;
+    state.running = false; state.paused = false; animation.resetTime();
     clearCounters(); historySteps = 0; updateControls(); setStatus('Zatrzymano');
     $('operation').textContent = 'Przywrócono dane sprzed uruchomienia i wyzerowano liczniki.'; rafDraw();
   }
   function togglePause() {
     if (!state.running) return;
-    state.paused = !state.paused; lastTime = null; budget = 0;
+    state.paused = !state.paused; animation.resetTime();
     setStatus(state.paused ? 'Pauza' : 'Sortowanie'); updateControls(); rafDraw();
   }
-  function frame(now) {
-    frameId = null;
-    if (state.running && !state.paused && !document.hidden) {
-      if (lastTime !== null) budget += Math.min((now - lastTime) / 1000, .1) * Number(speedInput.value);
-      lastTime = now;
-      let count = 0;
-      while (budget >= 1 && state.running && count++ < 20) { nextStep(); budget--; }
-    } else lastTime = null;
-    if (dirty) { updateInfo(); draw(); dirty = false; }
-    if (state.running && !state.paused && !document.hidden && frameId === null) frameId = requestAnimationFrame(frame);
-  }
 
-  for (const [index, [key, info]] of Object.entries(ALGO_INFO).entries()) {
-    const row = document.createElement('div'); row.className = 'algorithm-row';
-    const pick = document.createElement('button'); pick.type = 'button'; pick.className = 'algorithm-pick'; pick.dataset.algorithm = key;
-    pick.innerHTML = `<span class="ordinal" aria-hidden="true">${String(index + 1).padStart(2, '0')}</span><span>${info.name}</span>`;
-    pick.addEventListener('click', () => {
-      if (state.running) return;
-      state.selected = key; clearCounters(); renderLesson(); setStatus('Gotowy');
-      $('operation').textContent = 'Algorytm zmieniony. Dane pozostały bez zmian.'; rafDraw();
-    });
-    row.append(pick); $('algorithmList').append(row);
-  }
+
+  LabDom.algorithmPicker('algorithmList', ALGO_INFO, key => {
+    if (state.running) return;
+    state.selected = key; clearCounters(); renderLesson(); setStatus('Gotowy');
+    $('operation').textContent = 'Algorytm zmieniony. Dane pozostały bez zmian.'; rafDraw();
+  });
   $('startBtn').addEventListener('click', () => begin());
   $('pauseBtn').addEventListener('click', togglePause);
   $('stepBtn').addEventListener('click', () => { if (!state.running) begin(true); if (state.paused) { nextStep(); $('stepAnnouncement').textContent = $('operation').textContent; rafDraw(); } });
@@ -730,7 +712,7 @@
   $('dataset').addEventListener('change', () => generateData(Number(sizeInput.value)));
   speedInput.addEventListener('input', () => { $('speedLabel').textContent = `${speedInput.value} op./s`; speedInput.setAttribute('aria-valuetext', `${speedInput.value} kroków na sekundę`); });
   $('dataDetails').addEventListener('toggle', updateInfo);
-  document.addEventListener('visibilitychange', () => { lastTime = null; budget = 0; if (!document.hidden) rafDraw(); });
+  document.addEventListener('visibilitychange', () => { animation.resetTime(); if (!document.hidden) rafDraw(); });
   document.addEventListener('keydown', event => {
     if (event.target.closest('input, select, textarea') || event.altKey || event.ctrlKey || event.metaKey) return;
     if (event.key !== 'ArrowLeft' && event.key !== 'ArrowRight') return;

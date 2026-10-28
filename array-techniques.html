@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<!--
+  Copyright (c) 2024-2026 Marcin Kowalski.
+  SPDX-License-Identifier: GPL-3.0-only
+  See LICENSE for the full license text. Distributed without warranty.
+-->
+<html lang="pl">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Wybierz maksymalny fragment, sumy prefiksowe lub szukanie pary dwoma wskaźnikami. Każda metoda wykorzystuje inne własności danych.">
+    <title>Techniki pracy na tablicach · AlgorithmsLab</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body class="step-lab interactive-lab algorithm-lab">
+    <a class="skip" href="#visualization">Przejdź do wizualizacji</a>
+    <main class="shell">
+      <header class="masthead">
+        <a class="brand" href="index.html"><span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i></span>AlgorithmsLab <span class="brand-note"> / wizualizacje</span></a>
+        <span class="meta">Tablice</span>
+      </header>
+      <section class="intro" aria-labelledby="pageTitle">
+        <div><span class="eyebrow">Zrozum, zanim zapamiętasz</span><h1 id="pageTitle">Techniki pracy na tablicach</h1><p>Wybierz maksymalny fragment, sumy prefiksowe lub szukanie pary dwoma wskaźnikami. Każda metoda wykorzystuje inne własności danych.</p></div>
+        <span class="badge">Algorytmy · krok po kroku</span>
+      </section>
+      <section class="panel lesson" aria-labelledby="lessonTitle">
+        <div class="lesson-header"><div><p class="eyebrow">01 / Zrozum algorytm</p><h2 id="lessonTitle">Algorytm Kadane’a</h2></div><span class="tag">Tablice</span></div>
+        <dl class="complexity"><div><dt>Czas</dt><dd id="timeComplexity">O(n)</dd></div><div><dt>Pamięć</dt><dd id="spaceComplexity">O(1) pomocniczej</dd></div></dl>
+        <p class="complexity-note" id="complexityNote">Indeksy od 0; oba końce przedziału są włączone. n to liczba elementów. Koszt historii i rysowania nie wchodzi w podaną złożoność.</p>
+        <div class="lesson-columns">
+          <div><h3>Jak to działa?</h3><p id="explanation">Dla każdej pozycji wybieramy: zacząć nowy fragment czy przedłużyć poprzedni. Zapamiętujemy najlepszy wynik oraz jego granice.</p><ol id="steps"><li>Ustaw sumę bieżącą i najlepszą na A[0].</li><li>Dla kolejnego elementu wybierz max(A[i], suma + A[i]).</li><li>Jeżeli wynik jest większy od rekordu, zapisz go i jego granice.</li></ol></div>
+          <div><h3>Dlaczego to działa?</h3><p id="correctness">Każdy fragment kończący się w i składa się z A[i] albo z fragmentu kończącego się w i − 1 i A[i]. Ujemny poprzedni wynik pogarsza nowy fragment, więc można go odrzucić.</p></div>
+          <div><h3>Zastosowania i ograniczenia</h3><p id="applications">Najlepszy spójny okres zysków i strat. Szukamy fragmentu niepustego, a nie dowolnego podzbioru.</p></div>
+        </div>
+      </section>
+      <section class="panel controls" aria-label="Ustawienia i sterowanie">
+        <div class="lab-fields">
+          <div class="field"><label for="method">Algorytm</label><select id="method"></select></div>
+          <div class="field"><label for="scenario">Przykład</label><select id="scenario"></select></div>
+          <div class="field"><label for="speed">Tempo <output id="speedLabel" for="speed">6 op./s</output></label><input id="speed" type="range" min="1" max="30" value="6"></div>
+        </div>
+        <div class="lab-fields" id="inputFields"></div>
+        <p id="inputError" role="alert"></p>
+        <div class="actions"><button type="button" id="startBtn" class="btn primary">Start</button><button type="button" id="pauseBtn" class="btn" disabled>Pauza</button><button type="button" id="backBtn" class="btn" disabled>Krok wstecz</button><button type="button" id="stepBtn" class="btn">Krok naprzód</button><button type="button" id="stopBtn" class="btn">Reset</button></div>
+        <p class="control-hint">Start odtwarza kolejne kroki. Po pauzie użyj Start, aby wznowić. Strzałki ← i → zmieniają krok, spacja uruchamia lub zatrzymuje animację. Zmiana danych rozpoczyna nową symulację.</p>
+        <noscript><p>Włącz JavaScript, aby korzystać z interaktywnej symulacji.</p></noscript>
+      </section>
+      <div class="main-column lab-results">
+        <section class="panel visualizer" id="visualization" tabindex="-1" aria-labelledby="chartTitle">
+          <div class="chart-heading"><div><div class="eyebrow">02 / Obserwuj działanie</div><h2 id="chartTitle">Stan algorytmu</h2></div><span id="statusText" role="status">Gotowe</span></div>
+          <p id="operation" role="status" aria-live="polite">Wybierz Start lub wykonaj pierwszy krok.</p>
+          <div id="panels"></div>
+          <div class="chart-caption lab-legend"><span><i class="lab-key current" aria-hidden="true"></i>Bieżący element</span><span><i class="lab-key accepted" aria-hidden="true"></i>Wybrane elementy</span></div>
+          <p class="lab-progress">Wykonane kroki: <output id="stepCount">0</output>. Licznik dotyczy wizualizacji, nie pomiaru wydajności.</p>
+        </section>
+        <section class="panel lab-table-panel" aria-labelledby="resultTitle"><h2 id="resultTitle">Wynik</h2><p id="resultText" class="lab-result" role="status">Wynik pojawi się po zakończeniu.</p></section>
+        <details class="data-details"><summary>Reguła algorytmu</summary><p id="rule" class="lab-rule">current = max(A[i], current + A[i])
+best = max(best, current)</p></details>
+      </div>
+    </main>
+    <footer class="project-notice" aria-label="Informacje o projekcie / Project information">
+      <p>Materiał pokazowy, niezweryfikowany. Nie jest materiałem edukacyjnym. Może zawierać błędy lub uproszczenia. | Unverified demonstration material. Not educational material. It may contain errors or simplifications. </p>
+      <p>Copyright (c) 2026 Marcin Kowalski. <a href="LICENSE" rel="license">GNU GPL v3</a>.</p>
+    </footer>
+    <script src="scripts/lab-dom.js"></script>
+    <script src="scripts/lab-core.js"></script>
+    <script>
+/* Copyright (c) 2026 Marcin Kowalski. SPDX-License-Identifier: GPL-3.0-only */
+'use strict';
+(() => {
+  const { numbers, integer, table, arrayTable, frame, field, example } = LabCore;
+  const valuesField = field('values', 'Tablica: od 1 do 16 liczb (−100…100)', '-2 1 -3 4 -1 2 1 -5 4');
+  function* kadane(input) {
+    const values = numbers(input.values);
+    let current = values[0], best = values[0], start = 0, bestLeft = 0, bestRight = 0;
+    const rows = [];
+    const panels = index => [arrayTable(values, [index], Array.from({ length: bestRight - bestLeft + 1 }, (_, i) => i + bestLeft)), table('Najlepszy niepusty fragment kończący się w i', ['i', 'A[i]', 'Suma kończąca się w i', 'Najlepsza suma', 'Najlepszy zakres'], rows)];
+    yield frame('Szukamy niepustego spójnego fragmentu. Przy samych liczbach ujemnych wynik też jest ujemny.', [arrayTable(values)]);
+    for (let i = 0; i < values.length; i++) {
+      if (i > 0) {
+        if (current < 0) { current = values[i]; start = i; }
+        else current += values[i];
+      }
+      if (current > best) { best = current; bestLeft = start; bestRight = i; }
+      rows.push([i, values[i], current, best, `${bestLeft}…${bestRight}`]);
+      yield frame(`i = ${i}: najlepszy fragment kończący się tutaj ma sumę ${current}. Maksimum dotąd: ${best}.`, panels(i));
+    }
+    yield frame('Przejrzeliśmy całą tablicę.', panels(-1), { done: true, result: `Maksymalna suma = ${best}, zakres [${bestLeft}, ${bestRight}], fragment: ${values.slice(bestLeft, bestRight + 1).join(', ')}.`, data: { sum: best, left: bestLeft, right: bestRight } });
+  }
+  function* prefix(input) {
+    const values = numbers(input.values);
+    const left = integer(input.left, 'Lewy indeks', 0, values.length - 1);
+    const right = integer(input.right, 'Prawy indeks', left, values.length - 1);
+    const sums = [0];
+    const panels = index => [arrayTable(values, index >= 0 ? [index] : []), arrayTable(sums, index >= 0 ? [index + 1] : [], [], 'P[k] = suma pierwszych k elementów; P[0] = 0')];
+    yield frame('Dodatkowe zero na początku pozwala pytać również o zakres zaczynający się w 0.', panels(-1));
+    for (let i = 0; i < values.length; i++) {
+      sums.push(sums[i] + values[i]);
+      yield frame(`P[${i + 1}] = P[${i}] + A[${i}] = ${sums[i]} + ${values[i]} = ${sums[i + 1]}.`, panels(i));
+    }
+    const sum = sums[right + 1] - sums[left];
+    yield frame(`Odejmujemy prefiks przed zakresem od prefiksu kończącego się za zakresem.`, panels(-1), { done: true, result: `Suma [${left}, ${right}] = P[${right + 1}] − P[${left}] = ${sum}.`, data: { sums, sum } });
+  }
+  function* twoPointers(input) {
+    const values = numbers(input.values);
+    if (values.some((value, i) => i > 0 && value < values[i - 1])) throw new Error('Dwa wskaźniki wymagają tutaj tablicy posortowanej niemalejąco.');
+    const target = integer(input.target, 'Szukana suma', -200, 200);
+    let left = 0, right = values.length - 1;
+    const rows = [];
+    const panels = () => [arrayTable(values, [left, right]), table('Porównania sum skrajnych elementów', ['Lewy', 'Prawy', 'Suma', 'Decyzja'], rows)];
+    yield frame(`Szukamy dwóch różnych indeksów o sumie ${target}.`, panels());
+    while (left < right) {
+      const sum = values[left] + values[right];
+      rows.push([left, right, sum, sum === target ? 'znaleziono' : sum < target ? 'zwiększ lewy' : 'zmniejsz prawy']);
+      yield frame(`A[${left}] + A[${right}] = ${sum}. ${sum < target ? 'Suma jest za mała.' : sum > target ? 'Suma jest za duża.' : 'Dopasowanie.'}`, panels());
+      if (sum === target) {
+        yield frame('Znaleziono parę.', panels(), { done: true, result: `Indeksy ${left} i ${right}: ${values[left]} + ${values[right]} = ${target}.`, data: { pair: [left, right] } });
+        return;
+      }
+      if (sum < target) left++; else right--;
+    }
+    yield frame('Wskaźniki się spotkały.', panels(), { done: true, result: 'Brak pary różnych indeksów o podanej sumie.', data: { pair: null } });
+  }
+  const note = 'Indeksy od 0; oba końce przedziału są włączone. n to liczba elementów. Koszt historii i rysowania nie wchodzi w podaną złożoność.';
+  const definition = { title: 'Techniki pracy na tablicach', category: 'Tablice', intro: 'Wybierz maksymalny fragment, sumy prefiksowe lub szukanie pary dwoma wskaźnikami. Każda metoda wykorzystuje inne własności danych.', modes: {
+    kadane: {
+      title: 'Algorytm Kadane’a',
+      fields: [valuesField],
+      examples: [example('Mieszane wartości', { values: valuesField.value }), example('Same ujemne', { values: '-8 -3 -6 -2 -5' }), example('Jeden element', { values: '7' })],
+      time: 'O(n)',
+      space: 'O(1) pomocniczej',
+      note,
+      explanation: 'Dla każdej pozycji wybieramy: zacząć nowy fragment czy przedłużyć poprzedni. Zapamiętujemy najlepszy wynik oraz jego granice.',
+      correctness: 'Każdy fragment kończący się w i składa się z A[i] albo z fragmentu kończącego się w i − 1 i A[i]. Ujemny poprzedni wynik pogarsza nowy fragment, więc można go odrzucić.',
+      applications: 'Najlepszy spójny okres zysków i strat. Szukamy fragmentu niepustego, a nie dowolnego podzbioru.',
+      steps: ['Ustaw sumę bieżącą i najlepszą na A[0].', 'Dla kolejnego elementu wybierz max(A[i], suma + A[i]).', 'Jeżeli wynik jest większy od rekordu, zapisz go i jego granice.'],
+      rule: 'current = max(A[i], current + A[i])\nbest = max(best, current)',
+      run: kadane
+    },
+    prefix: {
+      title: 'Sumy prefiksowe',
+      fields: [valuesField, field('left', 'Lewy indeks', '2', { type: 'number', min: 0, max: 15 }), field('right', 'Prawy indeks', '6', { type: 'number', min: 0, max: 15 })],
+      examples: [example('Suma środkowego zakresu', { values: valuesField.value, left: '2', right: '6' }), example('Cała tablica', { values: '2 -5 3 7', left: '0', right: '3' }), example('Jeden element', { values: '-4', left: '0', right: '0' })],
+      time: 'Budowa O(n); zapytanie O(1)',
+      space: 'O(n)',
+      note,
+      explanation: 'P[k] przechowuje sumę pierwszych k elementów. Różnica dwóch prefiksów usuwa wszystko przed interesującym nas zakresem.',
+      correctness: 'W P[r + 1] i P[l] występują te same elementy o indeksach mniejszych od l. Odejmowanie je usuwa, pozostawiając dokładnie A[l]…A[r].',
+      applications: 'Wiele zapytań o sumy w niezmiennej tablicy. Przy częstych aktualizacjach porównaj drzewo Fenwicka lub przedziałowe.',
+      steps: ['Przyjmij P[0] = 0.', 'Oblicz P[i + 1] = P[i] + A[i].', 'Odpowiedz P[r + 1] − P[l].'],
+      rule: 'P[0] = 0\nP[i + 1] = P[i] + A[i]\nsum(l, r) = P[r + 1] − P[l]',
+      run: prefix
+    },
+    'two-pointers': {
+      title: 'Dwa wskaźniki: para o zadanej sumie',
+      fields: [field('values', 'Tablica posortowana niemalejąco', '-5 -2 0 1 3 6 9'), field('target', 'Szukana suma (−200…200)', '7', { type: 'number', min: -200, max: 200 })],
+      examples: [example('Para w środku', { values: '-5 -2 0 1 3 6 9', target: '7' }), example('Brak pary', { values: '1 2 4 8', target: '20' }), example('Powtarzające się wartości', { values: '2 2 2', target: '4' })],
+      time: 'O(n) dla posortowanych danych',
+      space: 'O(1) pomocniczej',
+      note,
+      explanation: 'Wskaźniki zaczynają na końcach posortowanej tablicy. Za mała suma przesuwa lewy wskaźnik, za duża przesuwa prawy.',
+      correctness: 'Jeżeli suma jest za mała, lewy element nie utworzy rozwiązania z żadnym mniejszym prawym elementem. Analogicznie odrzucamy prawy element przy zbyt dużej sumie.',
+      applications: 'Wyszukiwanie pary o zadanej sumie. Dane muszą być posortowane; sortowanie nie jest częścią tej symulacji. Ujemne liczby i duplikaty są dozwolone.',
+      steps: ['Ustaw l = 0 i r = n − 1.', 'Porównaj A[l] + A[r] z celem.', 'Przesuń odpowiedni wskaźnik; zakończ przy dopasowaniu albo l ≥ r.'],
+      rule: 'while l < r:\n  s = A[l] + A[r]\n  if s == target: return (l, r)\n  if s < target: l++\n  else: r--',
+      run: twoPointers
+    }
+  } };
+  window.LabDefinition = definition;
+})();
+    </script>
+    <script src="scripts/lab-player.js"></script>
+  </body>
+</html>

@@ -71,6 +71,7 @@
       <p>Materiał pokazowy, niezweryfikowany. Nie jest materiałem edukacyjnym. Może zawierać błędy lub uproszczenia. | Unverified demonstration material. Not educational material. It may contain errors or simplifications.</p>
       <p>Copyright (c) 2026 Marcin Kowalski. <a href="LICENSE" rel="license">GNU GPL v3</a>.</p>
     </footer>
+    <script src="scripts/lab-dom.js"></script>
     <script>
 (() => {
   'use strict';
@@ -220,12 +221,7 @@
     return result;
   }
 
-  function svgElement(name, attributes = {}, content = '') {
-    const element = document.createElementNS('http://www.w3.org/2000/svg', name);
-    for (const [key, value] of Object.entries(attributes)) element.setAttribute(key, value);
-    if (content !== '') element.textContent = content;
-    return element;
-  }
+  const svgElement = LabDom.svg;
 
   function layoutTree(root, startX) {
     const nodes = [], edges = [];

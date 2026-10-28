@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<!--
+  Copyright (c) 2024-2026 Marcin Kowalski.
+  SPDX-License-Identifier: GPL-3.0-only
+  See LICENSE for the full license text. Distributed without warranty.
+-->
+<html lang="pl">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Obserwuj, jak dzielenie z resztą i zapis binarny zastępują długie ciągi prostych operacji.">
+    <title>Algorytmy arytmetyczne · AlgorithmsLab</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body class="step-lab interactive-lab algorithm-lab">
+    <a class="skip" href="#visualization">Przejdź do wizualizacji</a>
+    <main class="shell">
+      <header class="masthead">
+        <a class="brand" href="index.html"><span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i></span>AlgorithmsLab <span class="brand-note"> / wizualizacje</span></a>
+        <span class="meta">Teoria liczb</span>
+      </header>
+      <section class="intro" aria-labelledby="pageTitle">
+        <div><span class="eyebrow">Zrozum, zanim zapamiętasz</span><h1 id="pageTitle">Algorytmy arytmetyczne</h1><p>Obserwuj, jak dzielenie z resztą i zapis binarny zastępują długie ciągi prostych operacji.</p></div>
+        <span class="badge">Algorytmy · krok po kroku</span>
+      </section>
+      <section class="panel lesson" aria-labelledby="lessonTitle">
+        <div class="lesson-header"><div><p class="eyebrow">01 / Zrozum algorytm</p><h2 id="lessonTitle">Euklides i rozszerzony algorytm Euklidesa</h2></div><span class="tag">Teoria liczb</span></div>
+        <dl class="complexity"><div><dt>Czas</dt><dd id="timeComplexity">O(log min(|a|, |b|)) dla a,b ≠ 0</dd></div><div><dt>Pamięć</dt><dd id="spaceComplexity">O(1) liczb</dd></div></dl>
+        <p class="complexity-note" id="complexityNote">Dla zer algorytm kończy się w stałej liczbie kroków. Złożoność liczy operacje arytmetyczne, bez kosztu zapisu historii. Współczynniki nie muszą być jedyne.</p>
+        <div class="lesson-columns">
+          <div><h3>Jak to działa?</h3><p id="explanation">Zastępuj parę (a, b) parą (b, a mod b), aż druga liczba będzie zerem. Wersja rozszerzona równolegle zapisuje każdą resztę jako kombinację liczb wejściowych.</p><ol id="steps"><li>Rozpocznij od wartości bezwzględnych a i b.</li><li>Oblicz iloraz i resztę, przesuń parę reszt.</li><li>Wykonaj identyczne przekształcenie współczynników.</li><li>Przywróć znaki współczynników zgodnie z wejściem.</li></ol></div>
+          <div><h3>Dlaczego to działa?</h3><p id="correctness">Wspólne dzielniki a i b są dokładnie wspólnymi dzielnikami b i a − q·b. Te same przekształcenia współczynników zachowują r = a·x + b·y.</p></div>
+          <div><h3>Zastosowania i ograniczenia</h3><p id="applications">Skracanie ułamków, równania diofantyczne i odwrotność modulo. Gdy NWD(a, m) = 1, współczynnik x jest odwrotnością a modulo m.</p></div>
+        </div>
+      </section>
+      <section class="panel controls" aria-label="Ustawienia i sterowanie">
+        <div class="lab-fields">
+          <div class="field"><label for="method">Algorytm</label><select id="method"></select></div>
+          <div class="field"><label for="scenario">Przykład</label><select id="scenario"></select></div>
+          <div class="field"><label for="speed">Tempo <output id="speedLabel" for="speed">6 op./s</output></label><input id="speed" type="range" min="1" max="30" value="6"></div>
+        </div>
+        <div class="lab-fields" id="inputFields"></div>
+        <p id="inputError" role="alert"></p>
+        <div class="actions"><button type="button" id="startBtn" class="btn primary">Start</button><button type="button" id="pauseBtn" class="btn" disabled>Pauza</button><button type="button" id="backBtn" class="btn" disabled>Krok wstecz</button><button type="button" id="stepBtn" class="btn">Krok naprzód</button><button type="button" id="stopBtn" class="btn">Reset</button></div>
+        <p class="control-hint">Start odtwarza kolejne kroki. Po pauzie użyj Start, aby wznowić. Strzałki ← i → zmieniają krok, spacja uruchamia lub zatrzymuje animację. Zmiana danych rozpoczyna nową symulację.</p>
+        <noscript><p>Włącz JavaScript, aby korzystać z interaktywnej symulacji.</p></noscript>
+      </section>
+      <div class="main-column lab-results">
+        <section class="panel visualizer" id="visualization" tabindex="-1" aria-labelledby="chartTitle">
+          <div class="chart-heading"><div><div class="eyebrow">02 / Obserwuj działanie</div><h2 id="chartTitle">Stan algorytmu</h2></div><span id="statusText" role="status">Gotowe</span></div>
+          <p id="operation" role="status" aria-live="polite">Wybierz Start lub wykonaj pierwszy krok.</p>
+          <div id="panels"></div>
+          <div class="chart-caption lab-legend"><span><i class="lab-key current" aria-hidden="true"></i>Bieżący element</span><span><i class="lab-key accepted" aria-hidden="true"></i>Wybrane elementy</span></div>
+          <p class="lab-progress">Wykonane kroki: <output id="stepCount">0</output>. Licznik dotyczy wizualizacji, nie pomiaru wydajności.</p>
+        </section>
+        <section class="panel lab-table-panel" aria-labelledby="resultTitle"><h2 id="resultTitle">Wynik</h2><p id="resultText" class="lab-result" role="status">Wynik pojawi się po zakończeniu.</p></section>
+        <details class="data-details"><summary>Reguła algorytmu</summary><p id="rule" class="lab-rule">(r₀, r₁) ← (r₁, r₀ − q·r₁)
+(x₀, x₁) ← (x₁, x₀ − q·x₁)
+(y₀, y₁) ← (y₁, y₀ − q·y₁)</p></details>
+      </div>
+    </main>
+    <footer class="project-notice" aria-label="Informacje o projekcie / Project information">
+      <p>Materiał pokazowy, niezweryfikowany. Nie jest materiałem edukacyjnym. Może zawierać błędy lub uproszczenia. | Unverified demonstration material. Not educational material. It may contain errors or simplifications. </p>
+      <p>Copyright (c) 2026 Marcin Kowalski. <a href="LICENSE" rel="license">GNU GPL v3</a>.</p>
+    </footer>
+    <script src="scripts/lab-dom.js"></script>
+    <script src="scripts/lab-core.js"></script>
+    <script>
+/* Copyright (c) 2026 Marcin Kowalski. SPDX-License-Identifier: GPL-3.0-only */
+'use strict';
+(() => {
+  const { integer, table, frame, field, example } = LabCore;
+  function* euclid(input) {
+    const a = integer(input.first, 'a', -1000000, 1000000), b = integer(input.second, 'b', -1000000, 1000000);
+    let oldR = Math.abs(a), r = Math.abs(b), oldX = 1, x = 0, oldY = 0, y = 1;
+    const rows = [];
+    const panels = () => [table('Dzielenie z resztą i współczynniki dla |a|, |b|', ['Krok', 'Iloraz q', 'r₀', 'r₁', 'x₀', 'y₀'], rows)];
+    rows.push([0, '·', oldR, r, oldX, oldY]);
+    yield frame('Niezmiennik: r₀ = |a|·x₀ + |b|·y₀. Liczymy NWD oraz współczynniki Bézouta.', panels());
+    while (r !== 0) {
+      const quotient = Math.floor(oldR / r);
+      const remainder = oldR - quotient * r;
+      [oldR, r] = [r, remainder];
+      [oldX, x] = [x, oldX - quotient * x];
+      [oldY, y] = [y, oldY - quotient * y];
+      rows.push([rows.length, quotient, oldR, r, oldX, oldY]);
+      yield frame(`Iloraz q = ${quotient}; nowa reszta = ${remainder}. Przesuwamy parę reszt i współczynników.`, panels());
+    }
+    const coefficientA = a < 0 ? -oldX : oldX, coefficientB = b < 0 ? -oldY : oldY;
+    yield frame('Ostatnia niezerowa reszta jest NWD. Dla pary (0, 0) przyjmujemy NWD = 0.', panels(), { done: true, result: `NWD(${a}, ${b}) = ${oldR}; ${a} · (${coefficientA}) + ${b} · (${coefficientB}) = ${oldR}.`, data: { gcd: oldR, x: coefficientA, y: coefficientB } });
+  }
+  function* power(input) {
+    const base = BigInt(integer(input.base, 'Podstawa', -1000, 1000));
+    const exponent = integer(input.exponent, 'Wykładnik', 0, 1000);
+    const modulus = BigInt(integer(input.modulus, 'Moduł (0 oznacza bez modulo)', 0, 1000000000));
+    const reduce = value => modulus ? (value % modulus + modulus) % modulus : value;
+    let factor = reduce(base), remaining = exponent, result = reduce(1n);
+    const rows = [];
+    const panels = () => [table('Potęgowanie binarne (dokładne liczby całkowite BigInt)', ['Krok', 'Pozostały wykładnik', 'Bieżąca potęga', 'Wynik', 'Operacja'], rows)];
+    rows.push([0, remaining, String(factor), String(result), 'inicjalizacja']);
+    yield frame('Wynik zaczyna od 1 (po redukcji modulo, jeśli wybrano moduł).', panels());
+    while (remaining > 0) {
+      const odd = remaining % 2 === 1;
+      if (odd) result = reduce(result * factor);
+      rows.push([rows.length, remaining, String(factor), String(result), odd ? 'bit 1: pomnóż wynik' : 'bit 0: pomiń mnożenie wyniku']);
+      yield frame(`Wykładnik ${remaining} jest ${odd ? 'nieparzysty: mnożymy wynik przez bieżącą potęgę' : 'parzysty: pozostawiamy wynik'}.`, panels());
+      remaining = Math.floor(remaining / 2);
+      // No unused final square: this matters for large exact integers.
+      if (remaining > 0) factor = reduce(factor * factor);
+    }
+    yield frame('Wykorzystano wszystkie bity wykładnika.', panels(), { done: true, result: `${base}^${exponent}${modulus ? ` mod ${modulus}` : ''} = ${result}.`, data: { value: String(result) } });
+  }
+  const definition = { title: 'Algorytmy arytmetyczne', category: 'Teoria liczb', intro: 'Obserwuj, jak dzielenie z resztą i zapis binarny zastępują długie ciągi prostych operacji.', modes: {
+    euclid: {
+      title: 'Euklides i rozszerzony algorytm Euklidesa',
+      fields: [field('first', 'a (−1 000 000…1 000 000)', '240', { type: 'number', min: -1000000, max: 1000000 }), field('second', 'b (−1 000 000…1 000 000)', '46', { type: 'number', min: -1000000, max: 1000000 })],
+      examples: [example('NWD i współczynniki', { first: '240', second: '46' }), example('Liczba ujemna', { first: '-35', second: '15' }), example('Jedno zero', { first: '0', second: '18' }), example('Dwa zera', { first: '0', second: '0' })],
+      time: 'O(log min(|a|, |b|)) dla a,b ≠ 0',
+      space: 'O(1) liczb',
+      note: 'Dla zer algorytm kończy się w stałej liczbie kroków. Złożoność liczy operacje arytmetyczne, bez kosztu zapisu historii. Współczynniki nie muszą być jedyne.',
+      explanation: 'Zastępuj parę (a, b) parą (b, a mod b), aż druga liczba będzie zerem. Wersja rozszerzona równolegle zapisuje każdą resztę jako kombinację liczb wejściowych.',
+      correctness: 'Wspólne dzielniki a i b są dokładnie wspólnymi dzielnikami b i a − q·b. Te same przekształcenia współczynników zachowują r = a·x + b·y.',
+      applications: 'Skracanie ułamków, równania diofantyczne i odwrotność modulo. Gdy NWD(a, m) = 1, współczynnik x jest odwrotnością a modulo m.',
+      steps: ['Rozpocznij od wartości bezwzględnych a i b.', 'Oblicz iloraz i resztę, przesuń parę reszt.', 'Wykonaj identyczne przekształcenie współczynników.', 'Przywróć znaki współczynników zgodnie z wejściem.'],
+      rule: '(r₀, r₁) ← (r₁, r₀ − q·r₁)\n(x₀, x₁) ← (x₁, x₀ − q·x₁)\n(y₀, y₁) ← (y₁, y₀ − q·y₁)',
+      run: euclid
+    },
+    power: {
+      title: 'Szybkie potęgowanie',
+      fields: [field('base', 'Podstawa (−1000…1000)', '3', { type: 'number', min: -1000, max: 1000 }), field('exponent', 'Wykładnik (0…1000)', '13', { type: 'number', min: 0, max: 1000 }), field('modulus', 'Modulo: 0 = bez modulo; maks. 1 000 000 000', '0', { type: 'number', min: 0, max: 1000000000 })],
+      examples: [example('Dokładna potęga', { base: '3', exponent: '13', modulus: '0' }), example('Potęgowanie modulo', { base: '7', exponent: '128', modulus: '19' }), example('Ujemna podstawa', { base: '-3', exponent: '5', modulus: '7' }), example('Wykładnik zero', { base: '0', exponent: '0', modulus: '0' })],
+      time: 'O(log(e + 1)) mnożeń',
+      space: 'O(1) liczb BigInt',
+      note: 'e to wykładnik. Koszt mnożenia zależy od długości liczb; bez modulo wynik może mieć wiele cyfr. Umownie przyjmujemy 0⁰ = 1. Modulo 1 każdy wynik wynosi 0.',
+      explanation: 'Rozkładamy wykładnik na bity. Kolejne kwadraty podstawy odpowiadają potęgom o wykładnikach 1, 2, 4, 8… Do wyniku trafiają tylko potęgi odpowiadające bitom 1.',
+      correctness: 'Iloczyn wyniku i bieżącej podstawy podniesionej do pozostałego wykładnika jest równy zadanej potędze (lub przystaje do niej modulo m). Każdy krok zachowuje ten niezmiennik.',
+      applications: 'Duże potęgi całkowite i obliczenia modularne. Używamy BigInt, aby uniknąć zaokrągleń typu Number.',
+      steps: ['Ustaw wynik na 1 i podstawę na a.', 'Jeśli wykładnik jest nieparzysty, pomnóż wynik przez podstawę.', 'Podziel wykładnik całkowicie przez 2 i podnieś podstawę do kwadratu.', 'Powtarzaj do wyzerowania wykładnika; po mnożeniu stosuj modulo, jeśli wybrano.'],
+      rule: 'while e > 0:\n  if e mod 2 == 1: result *= base\n  e = floor(e / 2)\n  base *= base\nKażde mnożenie można redukować modulo m.',
+      run: power
+    }
+  } };
+  window.LabDefinition = definition;
+})();
+    </script>
+    <script src="scripts/lab-player.js"></script>
+  </body>
+</html>

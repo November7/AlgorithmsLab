@@ -149,11 +149,11 @@
       <p>Materiał pokazowy, niezweryfikowany. Nie jest materiałem edukacyjnym. Może zawierać błędy lub uproszczenia. | Unverified demonstration material. Not educational material. It may contain errors or simplifications. </p>
       <p>Copyright (c) 2026 Marcin Kowalski. <a href="LICENSE" rel="license">GNU GPL v3</a>.</p>
     </footer>
+    <script src="scripts/lab-dom.js"></script>
     <script>
 (() => {
   'use strict';
   const $ = id => document.getElementById(id);
-  const svgNS = 'http://www.w3.org/2000/svg';
   const state = {
     parent: [], depth: [], children: [], positions: [], size: 15,
     currentA: 0, currentB: 0, originalA: 0, originalB: 0, nextSelection: 'A',
@@ -473,11 +473,7 @@
     animate();
   }
 
-  function createSvgElement(name, attributes) {
-    const element = document.createElementNS(svgNS, name);
-    for (const [key, value] of Object.entries(attributes)) element.setAttribute(key, String(value));
-    return element;
-  }
+  const createSvgElement = LabDom.svg;
 
   function drawTree() {
     const svg = $('treeBoard');

@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<!--
+  Copyright (c) 2024-2026 Marcin Kowalski.
+  SPDX-License-Identifier: GPL-3.0-only
+  See LICENSE for the full license text. Distributed without warranty.
+-->
+<html lang="pl">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Buduj ustawienie po jednym rzędzie. Odrzuć konflikt od razu, a gdy utkniesz, cofnij ostatnią decyzję.">
+    <title>Przeszukiwanie z nawrotami: N hetmanów · AlgorithmsLab</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body class="step-lab interactive-lab algorithm-lab">
+    <a class="skip" href="#visualization">Przejdź do wizualizacji</a>
+    <main class="shell">
+      <header class="masthead">
+        <a class="brand" href="index.html"><span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i></span>AlgorithmsLab <span class="brand-note"> / wizualizacje</span></a>
+        <span class="meta">Rekurencja · Backtracking</span>
+      </header>
+      <section class="intro" aria-labelledby="pageTitle">
+        <div><span class="eyebrow">Zrozum, zanim zapamiętasz</span><h1 id="pageTitle">Przeszukiwanie z nawrotami: N hetmanów</h1><p>Buduj ustawienie po jednym rzędzie. Odrzuć konflikt od razu, a gdy utkniesz, cofnij ostatnią decyzję.</p></div>
+        <span class="badge">Algorytmy · krok po kroku</span>
+      </section>
+      <section class="panel lesson" aria-labelledby="lessonTitle">
+        <div class="lesson-header"><div><p class="eyebrow">01 / Zrozum algorytm</p><h2 id="lessonTitle">Problem N hetmanów</h2></div><span class="tag">Rekurencja · Backtracking</span></div>
+        <dl class="complexity"><div><dt>Czas</dt><dd id="timeComplexity">O(n · n!) jako górne oszacowanie</dd></div><div><dt>Pamięć</dt><dd id="spaceComplexity">O(n) pomocniczej</dd></div></dl>
+        <p class="complexity-note" id="complexityNote">Sprawdzamy n kolumn na każdym odwiedzonym poziomie; zajętość kolumn i przekątnych sprawdzają zbiory. Kończymy na pierwszym rozwiązaniu, nie liczymy wszystkich ustawień. Pamięć tabel i historii animacji jest dodatkowa.</p>
+        <div class="lesson-columns">
+          <div><h3>Jak to działa?</h3><p id="explanation">W każdym rzędzie ustawiamy dokładnie jednego hetmana. Kandydat jest poprawny, jeśli nie zajmuje użytej kolumny ani przekątnej. Bezpieczną decyzję rozwijamy rekurencyjnie.</p><ol id="steps"><li>Wybierz kolejną kolumnę bieżącego rzędu.</li><li>Sprawdź kolumnę oraz przekątne r − c i r + c.</li><li>Jeżeli pole jest bezpieczne, przejdź rekurencyjnie do następnego rzędu.</li><li>Po niepowodzeniu usuń hetmana i kontynuuj próby.</li></ol></div>
+          <div><h3>Dlaczego to działa?</h3><p id="correctness">Każde poprawne ustawienie ma jeden wybór kolumny w każdym rzędzie. Algorytm rozpatruje wszystkie takie wybory, odcinając tylko te, które już zawierają konflikt. Żadne ich przedłużenie nie może być rozwiązaniem.</p></div>
+          <div><h3>Zastosowania i ograniczenia</h3><p id="applications">Problemy ograniczeń: łamigłówki, układanie harmonogramów i generowanie kombinacji. Odcinanie gałęzi pomaga, ale pesymistycznie liczba prób pozostaje bardzo duża.</p></div>
+        </div>
+      </section>
+      <section class="panel controls" aria-label="Ustawienia i sterowanie">
+        <div class="lab-fields">
+          <div class="field"><label for="method">Algorytm</label><select id="method"></select></div>
+          <div class="field"><label for="scenario">Przykład</label><select id="scenario"></select></div>
+          <div class="field"><label for="speed">Tempo <output id="speedLabel" for="speed">6 op./s</output></label><input id="speed" type="range" min="1" max="30" value="6"></div>
+        </div>
+        <div class="lab-fields" id="inputFields"></div>
+        <p id="inputError" role="alert"></p>
+        <div class="actions"><button type="button" id="startBtn" class="btn primary">Start</button><button type="button" id="pauseBtn" class="btn" disabled>Pauza</button><button type="button" id="backBtn" class="btn" disabled>Krok wstecz</button><button type="button" id="stepBtn" class="btn">Krok naprzód</button><button type="button" id="stopBtn" class="btn">Reset</button></div>
+        <p class="control-hint">Start odtwarza kolejne kroki. Po pauzie użyj Start, aby wznowić. Strzałki ← i → zmieniają krok, spacja uruchamia lub zatrzymuje animację. Zmiana danych rozpoczyna nową symulację.</p>
+        <noscript><p>Włącz JavaScript, aby korzystać z interaktywnej symulacji.</p></noscript>
+      </section>
+      <div class="main-column lab-results">
+        <section class="panel visualizer" id="visualization" tabindex="-1" aria-labelledby="chartTitle">
+          <div class="chart-heading"><div><div class="eyebrow">02 / Obserwuj działanie</div><h2 id="chartTitle">Stan algorytmu</h2></div><span id="statusText" role="status">Gotowe</span></div>
+          <p id="operation" role="status" aria-live="polite">Wybierz Start lub wykonaj pierwszy krok.</p>
+          <div id="panels"></div>
+          <div class="chart-caption lab-legend"><span><i class="lab-key current" aria-hidden="true"></i>Bieżący element</span><span><i class="lab-key accepted" aria-hidden="true"></i>Wybrane elementy</span></div>
+          <p class="lab-progress">Wykonane kroki: <output id="stepCount">0</output>. Licznik dotyczy wizualizacji, nie pomiaru wydajności.</p>
+        </section>
+        <section class="panel lab-table-panel" aria-labelledby="resultTitle"><h2 id="resultTitle">Wynik</h2><p id="resultText" class="lab-result" role="status">Wynik pojawi się po zakończeniu.</p></section>
+        <details class="data-details"><summary>Reguła algorytmu</summary><p id="rule" class="lab-rule">search(row):
+  if row == n: sukces
+  for column in 0…n−1:
+    jeśli bez konfliktu: postaw; search(row+1); w razie porażki usuń</p></details>
+      </div>
+    </main>
+    <footer class="project-notice" aria-label="Informacje o projekcie / Project information">
+      <p>Materiał pokazowy, niezweryfikowany. Nie jest materiałem edukacyjnym. Może zawierać błędy lub uproszczenia. | Unverified demonstration material. Not educational material. It may contain errors or simplifications. </p>
+      <p>Copyright (c) 2026 Marcin Kowalski. <a href="LICENSE" rel="license">GNU GPL v3</a>.</p>
+    </footer>
+    <script src="scripts/lab-dom.js"></script>
+    <script src="scripts/lab-core.js"></script>
+    <script>
+/* Copyright (c) 2026 Marcin Kowalski. SPDX-License-Identifier: GPL-3.0-only */
+'use strict';
+(() => {
+  const { integer, table, frame, field, example } = LabCore;
+  function* run(input) {
+    const size = integer(input.size, 'Rozmiar planszy', 1, 8);
+    const queens = [], columns = new Set(), descending = new Set(), ascending = new Set();
+    let attempts = 0, retreats = 0;
+    const panels = (row = -1, column = -1) => [table('Szachownica: ♛ = hetman, × = sprawdzane pole w konflikcie', ['Rząd / kolumna', ...Array.from({ length: size }, (_, i) => i)], Array.from({ length: size }, (_, r) => [r, ...Array.from({ length: size }, (_, c) => queens[r] === c ? '♛' : r === row && c === column ? '×' : (r + c) % 2 ? '▪' : '▫')]), row < 0 ? [] : [[row, column + 1]], queens.map((c, r) => [r, c + 1])), table('Przeszukiwanie', ['Próby pól', 'Wycofania', 'Stos: kolumna hetmana w kolejnych rzędach'], [[attempts, retreats, queens.join(', ') || '∅']])];
+    function* search(row) {
+      if (row === size) return true;
+      for (let column = 0; column < size; column++) {
+        attempts++;
+        const safe = !columns.has(column) && !descending.has(row - column) && !ascending.has(row + column);
+        if (!safe) { yield frame(`Pole (${row}, ${column}) odpada: konflikt kolumny lub przekątnej.`, panels(row, column)); continue; }
+        queens.push(column); columns.add(column); descending.add(row - column); ascending.add(row + column);
+        yield frame(`Stawiamy hetmana w (${row}, ${column}) i przechodzimy do następnego rzędu.`, panels());
+        if (yield* search(row + 1)) return true;
+        queens.pop(); columns.delete(column); descending.delete(row - column); ascending.delete(row + column); retreats++;
+        yield frame(`Brak rozwiązania z hetmanem w (${row}, ${column}). Usuwamy go i próbujemy następnej kolumny.`, panels());
+      }
+      return false;
+    }
+    yield frame('Szukamy pierwszego ustawienia n nieatakujących się hetmanów. Numery rzędów i kolumn zaczynają się od 0.', panels());
+    const found = yield* search(0);
+    yield frame(found ? 'Znaleziono pierwsze poprawne ustawienie.' : 'Sprawdzono wszystkie dopuszczalne gałęzie.', panels(), { done: true, result: found ? `Kolumny hetmanów w kolejnych rzędach: ${queens.join(', ')}. Próby: ${attempts}, wycofania: ${retreats}.` : `Dla n = ${size} rozwiązanie nie istnieje.`, data: { found, queens, attempts, retreats } });
+  }
+  const definition = { title: 'Przeszukiwanie z nawrotami: N hetmanów', category: 'Rekurencja · Backtracking', intro: 'Buduj ustawienie po jednym rzędzie. Odrzuć konflikt od razu, a gdy utkniesz, cofnij ostatnią decyzję.', modes: {
+    queens: {
+      title: 'Problem N hetmanów',
+      fields: [field('size', 'Rozmiar planszy n (1…8)', '4', { type: 'number', min: 1, max: 8 })],
+      examples: [example('Czterech hetmanów', { size: '4' }), example('Brak rozwiązania: n = 3', { size: '3' }), example('Ośmiu hetmanów', { size: '8' }), example('Jeden hetman', { size: '1' })],
+      time: 'O(n · n!) jako górne oszacowanie',
+      space: 'O(n) pomocniczej',
+      note: 'Sprawdzamy n kolumn na każdym odwiedzonym poziomie; zajętość kolumn i przekątnych sprawdzają zbiory. Kończymy na pierwszym rozwiązaniu, nie liczymy wszystkich ustawień. Pamięć tabel i historii animacji jest dodatkowa.',
+      explanation: 'W każdym rzędzie ustawiamy dokładnie jednego hetmana. Kandydat jest poprawny, jeśli nie zajmuje użytej kolumny ani przekątnej. Bezpieczną decyzję rozwijamy rekurencyjnie.',
+      correctness: 'Każde poprawne ustawienie ma jeden wybór kolumny w każdym rzędzie. Algorytm rozpatruje wszystkie takie wybory, odcinając tylko te, które już zawierają konflikt. Żadne ich przedłużenie nie może być rozwiązaniem.',
+      applications: 'Problemy ograniczeń: łamigłówki, układanie harmonogramów i generowanie kombinacji. Odcinanie gałęzi pomaga, ale pesymistycznie liczba prób pozostaje bardzo duża.',
+      steps: ['Wybierz kolejną kolumnę bieżącego rzędu.', 'Sprawdź kolumnę oraz przekątne r − c i r + c.', 'Jeżeli pole jest bezpieczne, przejdź rekurencyjnie do następnego rzędu.', 'Po niepowodzeniu usuń hetmana i kontynuuj próby.'],
+      rule: 'search(row):\n  if row == n: sukces\n  for column in 0…n−1:\n    jeśli bez konfliktu: postaw; search(row+1); w razie porażki usuń',
+      run
+    }
+  } };
+  window.LabDefinition = definition;
+})();
+    </script>
+    <script src="scripts/lab-player.js"></script>
+  </body>
+</html>

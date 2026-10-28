@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<!--
+  Copyright (c) 2024-2026 Marcin Kowalski.
+  SPDX-License-Identifier: GPL-3.0-only
+  See LICENSE for the full license text. Distributed without warranty.
+-->
+<html lang="pl">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Buduj rozwiązanie z wcześniej obliczonych mniejszych problemów. Na końcu prześledź wskaźniki, aby odtworzyć wybrany podciąg lub monety.">
+    <title>Programowanie dynamiczne: podciągi i monety · AlgorithmsLab</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body class="step-lab interactive-lab algorithm-lab">
+    <a class="skip" href="#visualization">Przejdź do wizualizacji</a>
+    <main class="shell">
+      <header class="masthead">
+        <a class="brand" href="index.html"><span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i></span>AlgorithmsLab <span class="brand-note"> / wizualizacje</span></a>
+        <span class="meta">Programowanie dynamiczne</span>
+      </header>
+      <section class="intro" aria-labelledby="pageTitle">
+        <div><span class="eyebrow">Zrozum, zanim zapamiętasz</span><h1 id="pageTitle">Programowanie dynamiczne: podciągi i monety</h1><p>Buduj rozwiązanie z wcześniej obliczonych mniejszych problemów. Na końcu prześledź wskaźniki, aby odtworzyć wybrany podciąg lub monety.</p></div>
+        <span class="badge">Algorytmy · krok po kroku</span>
+      </section>
+      <section class="panel lesson" aria-labelledby="lessonTitle">
+        <div class="lesson-header"><div><p class="eyebrow">01 / Zrozum algorytm</p><h2 id="lessonTitle">Najdłuższy wspólny podciąg (LCS)</h2></div><span class="tag">Programowanie dynamiczne</span></div>
+        <dl class="complexity"><div><dt>Czas</dt><dd id="timeComplexity">O(n · m)</dd></div><div><dt>Pamięć</dt><dd id="spaceComplexity">O(n · m)</dd></div></dl>
+        <p class="complexity-note" id="complexityNote">Złożoności dotyczą algorytmu, bez zapisu historii animacji. Podciąg zachowuje kolejność elementów, ale nie musi być spójny. n i m to długości napisów w punktach kodowych Unicode.</p>
+        <div class="lesson-columns">
+          <div><h3>Jak to działa?</h3><p id="explanation">dp[i][j] to długość wspólnego podciągu prefiksów długości i oraz j. Równe końcowe znaki przedłużają rozwiązanie z przekątnej. Przy różnych znakach pomijamy jeden z nich.</p><ol id="steps"><li>Wypełnij zerami brzeg tabeli.</li><li>Oblicz komórki kolejno według zgodności znaków.</li><li>Od prawego dolnego rogu odtwórz znaki wybrane na przekątnych.</li></ol></div>
+          <div><h3>Dlaczego to działa?</h3><p id="correctness">Przy zgodnych końcach istnieje rozwiązanie optymalne używające obu końcowych znaków. Przy różnych końcach co najmniej jeden nie należy do wspólnego podciągu, więc wystarczy wybrać lepszy z dwóch krótszych problemów.</p></div>
+          <div><h3>Zastosowania i ograniczenia</h3><p id="applications">Porównywanie sekwencji i podstawy narzędzi różnicowych. Wiele różnych podciągów może mieć tę samą maksymalną długość.</p></div>
+        </div>
+      </section>
+      <section class="panel controls" aria-label="Ustawienia i sterowanie">
+        <div class="lab-fields">
+          <div class="field"><label for="method">Algorytm</label><select id="method"></select></div>
+          <div class="field"><label for="scenario">Przykład</label><select id="scenario"></select></div>
+          <div class="field"><label for="speed">Tempo <output id="speedLabel" for="speed">6 op./s</output></label><input id="speed" type="range" min="1" max="30" value="6"></div>
+        </div>
+        <div class="lab-fields" id="inputFields"></div>
+        <p id="inputError" role="alert"></p>
+        <div class="actions"><button type="button" id="startBtn" class="btn primary">Start</button><button type="button" id="pauseBtn" class="btn" disabled>Pauza</button><button type="button" id="backBtn" class="btn" disabled>Krok wstecz</button><button type="button" id="stepBtn" class="btn">Krok naprzód</button><button type="button" id="stopBtn" class="btn">Reset</button></div>
+        <p class="control-hint">Start odtwarza kolejne kroki. Po pauzie użyj Start, aby wznowić. Strzałki ← i → zmieniają krok, spacja uruchamia lub zatrzymuje animację. Zmiana danych rozpoczyna nową symulację.</p>
+        <noscript><p>Włącz JavaScript, aby korzystać z interaktywnej symulacji.</p></noscript>
+      </section>
+      <div class="main-column lab-results">
+        <section class="panel visualizer" id="visualization" tabindex="-1" aria-labelledby="chartTitle">
+          <div class="chart-heading"><div><div class="eyebrow">02 / Obserwuj działanie</div><h2 id="chartTitle">Stan algorytmu</h2></div><span id="statusText" role="status">Gotowe</span></div>
+          <p id="operation" role="status" aria-live="polite">Wybierz Start lub wykonaj pierwszy krok.</p>
+          <div id="panels"></div>
+          <div class="chart-caption lab-legend"><span><i class="lab-key current" aria-hidden="true"></i>Bieżący element</span><span><i class="lab-key accepted" aria-hidden="true"></i>Wybrane elementy</span></div>
+          <p class="lab-progress">Wykonane kroki: <output id="stepCount">0</output>. Licznik dotyczy wizualizacji, nie pomiaru wydajności.</p>
+        </section>
+        <section class="panel lab-table-panel" aria-labelledby="resultTitle"><h2 id="resultTitle">Wynik</h2><p id="resultText" class="lab-result" role="status">Wynik pojawi się po zakończeniu.</p></section>
+        <details class="data-details"><summary>Reguła algorytmu</summary><p id="rule" class="lab-rule">A[i−1] == B[j−1]: dp[i][j] = dp[i−1][j−1] + 1
+w przeciwnym razie: max(dp[i−1][j], dp[i][j−1])</p></details>
+      </div>
+    </main>
+    <footer class="project-notice" aria-label="Informacje o projekcie / Project information">
+      <p>Materiał pokazowy, niezweryfikowany. Nie jest materiałem edukacyjnym. Może zawierać błędy lub uproszczenia. | Unverified demonstration material. Not educational material. It may contain errors or simplifications. </p>
+      <p>Copyright (c) 2026 Marcin Kowalski. <a href="LICENSE" rel="license">GNU GPL v3</a>.</p>
+    </footer>
+    <script src="scripts/lab-dom.js"></script>
+    <script src="scripts/lab-core.js"></script>
+    <script>
+/* Copyright (c) 2026 Marcin Kowalski. SPDX-License-Identifier: GPL-3.0-only */
+'use strict';
+(() => {
+  const { numbers, characters, integer, table, arrayTable, frame, field, example } = LabCore;
+  function* lcs(input) {
+    const first = characters(input.first, 'Pierwszy napis', 12), second = characters(input.second, 'Drugi napis', 12);
+    const dp = Array.from({ length: first.length + 1 }, () => Array(second.length + 1).fill(0));
+    const path = [];
+    const panels = (active = []) => [table('Długość LCS prefiksów; ∅ oznacza pusty prefiks', ['A / B', '∅', ...second], dp.map((row, i) => [i ? first[i - 1] : '∅', ...row]), active, path)];
+    yield frame('Dla pustego prefiksu długość wspólnego podciągu wynosi 0.', panels());
+    for (let i = 1; i <= first.length; i++) for (let j = 1; j <= second.length; j++) {
+      const equal = first[i - 1] === second[j - 1];
+      dp[i][j] = equal ? dp[i - 1][j - 1] + 1 : Math.max(dp[i - 1][j], dp[i][j - 1]);
+      yield frame(`A[${i - 1}] ${equal ? '=' : '≠'} B[${j - 1}]: dp[${i}][${j}] = ${dp[i][j]} (${equal ? 'przekątna + 1' : 'maksimum z góry i z lewej'}).`, panels([[i, j + 1]]));
+    }
+    const sequence = [];
+    let i = first.length, j = second.length;
+    while (i > 0 && j > 0) {
+      path.push([i, j + 1]);
+      if (first[i - 1] === second[j - 1]) { sequence.push(first[i - 1]); i--; j--; }
+      else if (dp[i - 1][j] >= dp[i][j - 1]) i--;
+      else j--;
+      yield frame(`Odtwarzamy podciąg od końca: ${sequence.slice().reverse().join('') || '∅'}.`, panels([[i, j + 1]]));
+    }
+    sequence.reverse();
+    yield frame('Odtworzono jeden z najdłuższych wspólnych podciągów.', panels(), { done: true, result: `LCS: „${sequence.join('')}”, długość ${sequence.length}.`, data: { length: sequence.length, sequence: sequence.join(''), dp } });
+  }
+  function* lis(input) {
+    const values = numbers(input.values);
+    const lengths = Array(values.length).fill(1), parents = Array(values.length).fill(-1);
+    const chosen = [];
+    const panels = (active = []) => [arrayTable(values, active, chosen), table('Najlepszy ściśle rosnący podciąg kończący się w i', ['i', 'A[i]', 'Długość', 'Poprzednik'], values.map((value, i) => [i, value, lengths[i], parents[i] < 0 ? '·' : parents[i]]), active.map(i => [i, 2]))];
+    yield frame('Każdy element tworzy podciąg długości 1.', panels());
+    for (let i = 0; i < values.length; i++) for (let j = 0; j < i; j++) {
+      const improve = values[j] < values[i] && lengths[j] + 1 > lengths[i];
+      if (improve) { lengths[i] = lengths[j] + 1; parents[i] = j; }
+      yield frame(`Porównujemy A[${j}] = ${values[j]} i A[${i}] = ${values[i]}: ${improve ? `wydłużamy podciąg do ${lengths[i]}` : 'brak poprawy'}.`, panels([i, j]));
+    }
+    let end = lengths.indexOf(Math.max(...lengths));
+    while (end >= 0) {
+      chosen.unshift(end);
+      yield frame(`Odtwarzamy indeks ${end} i przechodzimy do jego poprzednika.`, panels([end]));
+      end = parents[end];
+    }
+    yield frame('Odtworzono najdłuższy rosnący podciąg.', panels(), { done: true, result: `LIS: ${chosen.map(i => values[i]).join(', ')}; długość ${chosen.length}; indeksy ${chosen.join(', ')}.`, data: { length: chosen.length, indices: chosen, sequence: chosen.map(i => values[i]) } });
+  }
+  function* coins(input) {
+    const denominations = [...new Set(numbers(input.coins, { label: 'Nominały', minimum: 1, maximum: 30, limit: 8 }))].sort((a, b) => a - b);
+    const amount = integer(input.amount, 'Kwota', 0, 60);
+    const dp = Array(amount + 1).fill(Infinity), previous = Array(amount + 1).fill(null), chosen = [];
+    dp[0] = 0;
+    const panels = active => [arrayTable(denominations, [], [], 'Dostępne nominały; dowolna liczba monet każdego typu'), table('Minimalna liczba monet dla kolejnych kwot', ['Kwota', 'Minimum', 'Ostatnia moneta'], dp.map((value, i) => [i, value, previous[i] ?? '·']), active === undefined ? [] : [[active, 1]])];
+    yield frame('dp[0] = 0, a pozostałe kwoty początkowo są nieosiągalne (∞).', panels(0));
+    for (let value = 1; value <= amount; value++) {
+      for (const coin of denominations) {
+        if (coin > value) break;
+        const candidate = dp[value - coin] + 1;
+        if (candidate < dp[value]) { dp[value] = candidate; previous[value] = coin; }
+        yield frame(`Kwota ${value}, moneta ${coin}: 1 + dp[${value - coin}] = ${candidate === Infinity ? '∞' : candidate}; minimum = ${dp[value] === Infinity ? '∞' : dp[value]}.`, panels(value));
+      }
+    }
+    if (dp[amount] !== Infinity) {
+      let rest = amount;
+      while (rest > 0) {
+        const coin = previous[rest]; chosen.push(coin); rest -= coin;
+        yield frame(`Wybieramy monetę ${coin}; pozostaje ${rest}.`, panels(rest));
+      }
+    }
+    yield frame('Zakończono obliczanie reszty.', panels(), { done: true, result: dp[amount] === Infinity ? `Nie można wydać kwoty ${amount} podanymi monetami.` : `Kwota ${amount}: ${chosen.length} monet${chosen.length ? ` (${chosen.join(' + ')})` : ''}.`, data: { count: dp[amount], coins: chosen, dp } });
+  }
+  const note = 'Złożoności dotyczą algorytmu, bez zapisu historii animacji. Podciąg zachowuje kolejność elementów, ale nie musi być spójny.';
+  const definition = { title: 'Programowanie dynamiczne: podciągi i monety', category: 'Programowanie dynamiczne', intro: 'Buduj rozwiązanie z wcześniej obliczonych mniejszych problemów. Na końcu prześledź wskaźniki, aby odtworzyć wybrany podciąg lub monety.', modes: {
+    lcs: {
+      title: 'Najdłuższy wspólny podciąg (LCS)',
+      fields: [field('first', 'Pierwszy napis (do 12 znaków, może być pusty)', 'ABCBDAB'), field('second', 'Drugi napis (do 12 znaków, może być pusty)', 'BDCABA')],
+      examples: [example('Wiele poprawnych rozwiązań', { first: 'ABCBDAB', second: 'BDCABA' }), example('Brak wspólnych znaków', { first: 'ABC', second: 'XYZ' }), example('Pusty napis', { first: '', second: 'KOT' })],
+      time: 'O(n · m)',
+      space: 'O(n · m)',
+      note: `${note} n i m to długości napisów w punktach kodowych Unicode.`,
+      explanation: 'dp[i][j] to długość wspólnego podciągu prefiksów długości i oraz j. Równe końcowe znaki przedłużają rozwiązanie z przekątnej. Przy różnych znakach pomijamy jeden z nich.',
+      correctness: 'Przy zgodnych końcach istnieje rozwiązanie optymalne używające obu końcowych znaków. Przy różnych końcach co najmniej jeden nie należy do wspólnego podciągu, więc wystarczy wybrać lepszy z dwóch krótszych problemów.',
+      applications: 'Porównywanie sekwencji i podstawy narzędzi różnicowych. Wiele różnych podciągów może mieć tę samą maksymalną długość.',
+      steps: ['Wypełnij zerami brzeg tabeli.', 'Oblicz komórki kolejno według zgodności znaków.', 'Od prawego dolnego rogu odtwórz znaki wybrane na przekątnych.'],
+      rule: 'A[i−1] == B[j−1]: dp[i][j] = dp[i−1][j−1] + 1\nw przeciwnym razie: max(dp[i−1][j], dp[i][j−1])',
+      run: lcs
+    },
+    lis: {
+      title: 'Najdłuższy rosnący podciąg (LIS)',
+      fields: [field('values', 'Tablica (1…16 liczb, −100…100)', '10 9 2 5 3 7 99 18')],
+      examples: [example('Podciąg z lukami', { values: '10 9 2 5 3 7 99 18' }), example('Ciąg malejący', { values: '5 4 3 2 1' }), example('Równe elementy', { values: '3 3 3' })],
+      time: 'O(n²)',
+      space: 'O(n)',
+      note: `${note} Prezentujemy wersję kwadratową z poprzednikami; istnieje również metoda O(n log n).`,
+      explanation: 'Dla pozycji i przeglądamy wcześniejsze mniejsze elementy. Najdłuższy podciąg kończący się na jednym z nich można przedłużyć o A[i]. Zapisujemy też poprzednika.',
+      correctness: 'Przedostatni element każdego rosnącego podciągu kończącego się w i ma indeks j < i i wartość A[j] < A[i]. Rozważamy wszystkie takie możliwości.',
+      applications: 'Wykrywanie uporządkowanych trendów. Wariant jest ściśle rosnący: równych wartości nie dokładamy do siebie.',
+      steps: ['Ustaw długości na 1, poprzedników na brak.', 'Dla każdej pary j < i sprawdź A[j] < A[i].', 'Zapisz poprawę i poprzednika.', 'Odtwórz wynik od pozycji z największą długością.'],
+      rule: 'dp[i] = max(1, 1 + dp[j]) dla j < i i A[j] < A[i]',
+      run: lis
+    },
+    coins: {
+      title: 'Wydawanie reszty',
+      fields: [field('coins', 'Nominały (1…8 dodatnich liczb, do 30)', '1 3 4'), field('amount', 'Kwota (0…60)', '6', { type: 'number', min: 0, max: 60 })],
+      examples: [example('Zachłanność nie wystarcza', { coins: '1 3 4', amount: '6' }), example('Kwota nieosiągalna', { coins: '4 6', amount: '7' }), example('Kwota zero', { coins: '2 5', amount: '0' })],
+      time: 'O(k · S)',
+      space: 'O(S + k)',
+      note: 'S to kwota, k to liczba różnych nominałów. Każdej monety można użyć dowolnie wiele razy. Złożoność nie obejmuje historii animacji.',
+      explanation: 'dp[s] to najmniejsza liczba monet potrzebna do uzyskania kwoty s. Próbujemy każdy nominał jako ostatnią monetę i korzystamy z rozwiązania dla pozostałej kwoty.',
+      correctness: 'Każde niepuste rozwiązanie ma ostatnią monetę c. Usunięcie jej zostawia problem s − c. Sprawdzenie wszystkich nominałów obejmuje także monetę występującą w rozwiązaniu optymalnym.',
+      applications: 'Minimalna liczba monet dla dowolnych dodatnich nominałów. Dla monet 1, 3, 4 i kwoty 6 wybór zachłanny 4 + 1 + 1 przegrywa z 3 + 3.',
+      steps: ['Ustaw dp[0] = 0 i pozostałe wartości na ∞.', 'Dla każdej kwoty sprawdź wszystkie monety nie większe od niej.', 'Zapisz ostatnią monetę poprawiającą minimum.', 'Odtwórz monety albo zgłoś nieosiągalność.'],
+      rule: 'dp[0] = 0\ndp[s] = min(dp[s − c] + 1) dla c ≤ s',
+      run: coins
+    }
+  } };
+  window.LabDefinition = definition;
+})();
+    </script>
+    <script src="scripts/lab-player.js"></script>
+  </body>
+</html>

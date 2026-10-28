@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<!--
+  Copyright (c) 2024-2026 Marcin Kowalski.
+  SPDX-License-Identifier: GPL-3.0-only
+  See LICENSE for the full license text. Distributed without warranty.
+-->
+<html lang="pl">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Wybierz jak najwięcej niekolidujących zadań na jednym zasobie. Najwcześniejszy koniec zostawia najwięcej miejsca na następne zadania.">
+    <title>Zachłanny wybór zadań · AlgorithmsLab</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body class="step-lab interactive-lab algorithm-lab">
+    <a class="skip" href="#visualization">Przejdź do wizualizacji</a>
+    <main class="shell">
+      <header class="masthead">
+        <a class="brand" href="index.html"><span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i></span>AlgorithmsLab <span class="brand-note"> / wizualizacje</span></a>
+        <span class="meta">Algorytmy zachłanne</span>
+      </header>
+      <section class="intro" aria-labelledby="pageTitle">
+        <div><span class="eyebrow">Zrozum, zanim zapamiętasz</span><h1 id="pageTitle">Zachłanny wybór zadań</h1><p>Wybierz jak najwięcej niekolidujących zadań na jednym zasobie. Najwcześniejszy koniec zostawia najwięcej miejsca na następne zadania.</p></div>
+        <span class="badge">Algorytmy · krok po kroku</span>
+      </section>
+      <section class="panel lesson" aria-labelledby="lessonTitle">
+        <div class="lesson-header"><div><p class="eyebrow">01 / Zrozum algorytm</p><h2 id="lessonTitle">Wybór niepokrywających się zadań</h2></div><span class="tag">Algorytmy zachłanne</span></div>
+        <dl class="complexity"><div><dt>Czas</dt><dd id="timeComplexity">O(n log n); po sortowaniu O(n)</dd></div><div><dt>Pamięć</dt><dd id="spaceComplexity">O(n) na dane i wynik</dd></div></dl>
+        <p class="complexity-note" id="complexityNote">n to liczba zadań. Przedziały są lewostronnie domknięte [start, end), więc zadanie może zacząć się dokładnie po zakończeniu poprzedniego. Koszt wizualizacji nie jest wliczony.</p>
+        <div class="lesson-columns">
+          <div><h3>Jak to działa?</h3><p id="explanation">Porządkujemy zadania według końca, a potem wybieramy pierwsze zgodne z poprzednio wybranym. Zapisujemy oryginalne numery zadań, aby wynik można było odnieść do danych wejściowych.</p><ol id="steps"><li>Posortuj zadania według czasu końca.</li><li>Wybierz pierwsze zadanie.</li><li>Dla każdego następnego porównaj jego początek z końcem ostatnio wybranego.</li><li>Akceptuj zgodne zadania, odrzucaj kolidujące.</li></ol></div>
+          <div><h3>Dlaczego to działa?</h3><p id="correctness">Pierwsze zadanie dowolnego rozwiązania optymalnego można zastąpić zadaniem kończącym się najwcześniej. Nie zmniejsza to miejsca na pozostałe zadania. Ten argument stosujemy do kolejnych wyborów.</p></div>
+          <div><h3>Zastosowania i ograniczenia</h3><p id="applications">Rezerwacja jednej sali lub maszyny, gdy liczy się liczba zadań. Przy różnych zyskach potrzebny jest inny algorytm, np. programowanie dynamiczne dla ważonych przedziałów.</p></div>
+        </div>
+      </section>
+      <section class="panel controls" aria-label="Ustawienia i sterowanie">
+        <div class="lab-fields">
+          <div class="field"><label for="method">Algorytm</label><select id="method"></select></div>
+          <div class="field"><label for="scenario">Przykład</label><select id="scenario"></select></div>
+          <div class="field"><label for="speed">Tempo <output id="speedLabel" for="speed">6 op./s</output></label><input id="speed" type="range" min="1" max="30" value="6"></div>
+        </div>
+        <div class="lab-fields" id="inputFields"></div>
+        <p id="inputError" role="alert"></p>
+        <div class="actions"><button type="button" id="startBtn" class="btn primary">Start</button><button type="button" id="pauseBtn" class="btn" disabled>Pauza</button><button type="button" id="backBtn" class="btn" disabled>Krok wstecz</button><button type="button" id="stepBtn" class="btn">Krok naprzód</button><button type="button" id="stopBtn" class="btn">Reset</button></div>
+        <p class="control-hint">Start odtwarza kolejne kroki. Po pauzie użyj Start, aby wznowić. Strzałki ← i → zmieniają krok, spacja uruchamia lub zatrzymuje animację. Zmiana danych rozpoczyna nową symulację.</p>
+        <noscript><p>Włącz JavaScript, aby korzystać z interaktywnej symulacji.</p></noscript>
+      </section>
+      <div class="main-column lab-results">
+        <section class="panel visualizer" id="visualization" tabindex="-1" aria-labelledby="chartTitle">
+          <div class="chart-heading"><div><div class="eyebrow">02 / Obserwuj działanie</div><h2 id="chartTitle">Stan algorytmu</h2></div><span id="statusText" role="status">Gotowe</span></div>
+          <p id="operation" role="status" aria-live="polite">Wybierz Start lub wykonaj pierwszy krok.</p>
+          <div id="panels"></div>
+          <div class="chart-caption lab-legend"><span><i class="lab-key current" aria-hidden="true"></i>Bieżący element</span><span><i class="lab-key accepted" aria-hidden="true"></i>Wybrane elementy</span></div>
+          <p class="lab-progress">Wykonane kroki: <output id="stepCount">0</output>. Licznik dotyczy wizualizacji, nie pomiaru wydajności.</p>
+        </section>
+        <section class="panel lab-table-panel" aria-labelledby="resultTitle"><h2 id="resultTitle">Wynik</h2><p id="resultText" class="lab-result" role="status">Wynik pojawi się po zakończeniu.</p></section>
+        <details class="data-details"><summary>Reguła algorytmu</summary><p id="rule" class="lab-rule">sort by end
+lastEnd = −∞
+for job: if job.start ≥ lastEnd: wybierz job; lastEnd = job.end</p></details>
+      </div>
+    </main>
+    <footer class="project-notice" aria-label="Informacje o projekcie / Project information">
+      <p>Materiał pokazowy, niezweryfikowany. Nie jest materiałem edukacyjnym. Może zawierać błędy lub uproszczenia. | Unverified demonstration material. Not educational material. It may contain errors or simplifications. </p>
+      <p>Copyright (c) 2026 Marcin Kowalski. <a href="LICENSE" rel="license">GNU GPL v3</a>.</p>
+    </footer>
+    <script src="scripts/lab-dom.js"></script>
+    <script src="scripts/lab-core.js"></script>
+    <script>
+/* Copyright (c) 2026 Marcin Kowalski. SPDX-License-Identifier: GPL-3.0-only */
+'use strict';
+(() => {
+  const { integer, table, frame, field, example } = LabCore;
+  function* run(input) {
+    const lines = input.activities.trim().split(/[\n;]+/).filter(line => line.trim());
+    if (!lines.length || lines.length > 12) throw new Error('Wpisz od 1 do 12 zadań.');
+    const activities = lines.map((line, index) => {
+      const parts = line.trim().split(/\s+/);
+      if (parts.length !== 2) throw new Error(`Zadanie ${index + 1}: format początek koniec.`);
+      const start = integer(parts[0], 'Początek', 0, 30), end = integer(parts[1], 'Koniec', start + 1, 31);
+      return { id: index + 1, start, end, state: 'oczekuje' };
+    });
+    const selected = [];
+    let lastEnd = -Infinity;
+    const panels = current => [table('Zadania w kolejności rozpatrywania', ['Zadanie', 'Początek', 'Koniec', 'Decyzja'], activities.map(job => [job.id, job.start, job.end, job.state]), current === undefined ? [] : [[current, 3]], activities.flatMap((job, i) => job.state === 'wybrane' ? [[i, 3]] : [])), table('Oś czasu: przedziały [początek, koniec)', ['Zadanie', ...Array.from({ length: Math.max(...activities.map(job => job.end)) }, (_, t) => t)], activities.map(job => [`#${job.id}`, ...Array.from({ length: Math.max(...activities.map(job => job.end)) }, (_, t) => t >= job.start && t < job.end ? '■' : '·')]), [], activities.flatMap((job, i) => job.state === 'wybrane' ? Array.from({ length: job.end - job.start }, (_, t) => [i, job.start + t + 1]) : []))];
+    yield frame('Każde zadanie ma jednakową wartość: maksymalizujemy liczbę wykonanych zadań.', panels());
+    activities.sort((a, b) => a.end - b.end || a.start - b.start || a.id - b.id);
+    yield frame('Sortujemy zadania niemalejąco według czasu zakończenia.', panels());
+    for (let i = 0; i < activities.length; i++) {
+      const job = activities[i], compatible = job.start >= lastEnd;
+      if (compatible) { selected.push(job.id); lastEnd = job.end; job.state = 'wybrane'; }
+      else job.state = 'konflikt';
+      yield frame(`Zadanie ${job.id} [${job.start}, ${job.end}): ${compatible ? `wybieramy, nowy czas końca to ${lastEnd}` : `odrzucamy, początek jest wcześniejszy niż ${lastEnd}`}.`, panels(i));
+    }
+    yield frame('Wszystkie zadania rozpatrzone.', panels(), { done: true, result: `Maksymalnie ${selected.length} zadań: ${selected.map(id => `#${id}`).join(', ')}.`, data: { selected, count: selected.length } });
+  }
+  const definition = { title: 'Zachłanny wybór zadań', category: 'Algorytmy zachłanne', intro: 'Wybierz jak najwięcej niekolidujących zadań na jednym zasobie. Najwcześniejszy koniec zostawia najwięcej miejsca na następne zadania.', modes: {
+    activities: {
+      title: 'Wybór niepokrywających się zadań',
+      fields: [field('activities', 'Zadania: początek koniec, po jednym w wierszu (0 ≤ początek < koniec ≤ 31)', '1 4\n3 5\n0 6\n5 7\n3 9\n5 9\n6 10\n8 11\n8 12\n2 14\n12 16', { multiline: true })],
+      examples: [example('Klasyczny zestaw', { activities: '1 4\n3 5\n0 6\n5 7\n3 9\n5 9\n6 10\n8 11\n8 12\n2 14\n12 16' }), example('Stykające się końce', { activities: '0 2\n2 4\n4 6\n0 6' }), example('Wszystkie kolidują', { activities: '0 8\n1 7\n2 6' })],
+      time: 'O(n log n); po sortowaniu O(n)',
+      space: 'O(n) na dane i wynik',
+      note: 'n to liczba zadań. Przedziały są lewostronnie domknięte [start, end), więc zadanie może zacząć się dokładnie po zakończeniu poprzedniego. Koszt wizualizacji nie jest wliczony.',
+      explanation: 'Porządkujemy zadania według końca, a potem wybieramy pierwsze zgodne z poprzednio wybranym. Zapisujemy oryginalne numery zadań, aby wynik można było odnieść do danych wejściowych.',
+      correctness: 'Pierwsze zadanie dowolnego rozwiązania optymalnego można zastąpić zadaniem kończącym się najwcześniej. Nie zmniejsza to miejsca na pozostałe zadania. Ten argument stosujemy do kolejnych wyborów.',
+      applications: 'Rezerwacja jednej sali lub maszyny, gdy liczy się liczba zadań. Przy różnych zyskach potrzebny jest inny algorytm, np. programowanie dynamiczne dla ważonych przedziałów.',
+      steps: ['Posortuj zadania według czasu końca.', 'Wybierz pierwsze zadanie.', 'Dla każdego następnego porównaj jego początek z końcem ostatnio wybranego.', 'Akceptuj zgodne zadania, odrzucaj kolidujące.'],
+      rule: 'sort by end\nlastEnd = −∞\nfor job: if job.start ≥ lastEnd: wybierz job; lastEnd = job.end',
+      run
+    }
+  } };
+  window.LabDefinition = definition;
+})();
+    </script>
+    <script src="scripts/lab-player.js"></script>
+  </body>
+</html>

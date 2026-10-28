@@ -9,7 +9,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="description" content="Algorytm Knutha-Morrisa-Pratta (KMP) krok po kroku: wyszukiwanie wzorca w tekście z tablicą prefikso-sufiksów bez cofania się w tekście.">
-    <title>Wyszukiwanie wzorca (KMP) · AlgorithmsLab</title>
+    <title>Wyszukiwanie wzorca: KMP i Rabin-Karp · AlgorithmsLab</title>
     <link rel="stylesheet" href="styles.css">
   </head>
   <body class="step-lab interactive-lab">
@@ -41,6 +41,7 @@
       </section>
       <section class="panel controls" aria-label="Ustawienia i sterowanie">
         <div class="lab-fields four">
+          <div class="field"><label for="method">Algorytm</label><select id="method"><option value="kmp">Knuth-Morris-Pratt (KMP)</option><option value="rabin-karp">Rabin-Karp: skrót kroczący</option></select></div>
           <div class="field"><label for="scenario">Zestaw</label><select id="scenario"><option value="example">Przykład: ABABCABAB</option><option value="repeat">Wiele powtórzeń (AAAA…)</option><option value="none">Brak dopasowania</option><option value="custom">Własny tekst i wzorzec</option></select></div>
           <div class="field"><label for="text">Tekst</label><input id="text" type="text" maxlength="30" value="ABABDABACDABABCABAB" autocomplete="off"></div>
           <div class="field"><label for="pattern">Wzorzec</label><input id="pattern" type="text" maxlength="10" value="ABABCABAB" autocomplete="off"></div>
@@ -57,6 +58,7 @@
           <p id="operation" role="status" aria-live="polite">Wybierz Start lub wykonaj pierwszy krok.</p>
         </section>
         <section class="panel lab-table-panel" aria-labelledby="lpsTitle"><h2 id="lpsTitle">Tablica prefikso-sufiksów</h2><p>lps[i] to długość najdłuższego właściwego prefiksu wzorca[0..i], który jest też jego sufiksem. Po niezgodności na pozycji j &gt; 0 wracamy we wzorcu do indeksu lps[j − 1].</p><table id="lpsTable" class="graph-table"><caption>Pozycja · znak wzorca · lps</caption><thead id="lpsHead"></thead><tbody id="lpsBody"></tbody></table></section>
+        <section class="panel lab-table-panel" id="hashPanel" hidden aria-labelledby="hashTitle"><h2 id="hashTitle">Skróty kolejnych okien</h2><p id="hashInfo">Podstawa 257, modulo 101. Równe skróty wymagają porównania znaków.</p><table class="graph-table"><caption>Indeksy od 0; okno ma długość wzorca</caption><thead><tr><th scope="col">Początek okna</th><th scope="col">Skrót okna</th><th scope="col">Skrót wzorca</th><th scope="col">Weryfikacja</th></tr></thead><tbody id="hashBody"></tbody></table></section>
         <section class="stats" aria-label="Statystyki algorytmu">
           <div class="stat"><span>Porównania znaków</span><output id="compareCount">0</output><small>przy budowie lps i wyszukiwaniu</small></div>
           <div class="stat"><span>Znalezione dopasowania</span><output id="matchCount">0</output><small>pozycje początku w tekście (od 0)</small></div>
@@ -71,150 +73,41 @@
       <p>Materiał pokazowy, niezweryfikowany. Nie jest materiałem edukacyjnym. Może zawierać błędy lub uproszczenia. | Unverified demonstration material. Not educational material. It may contain errors or simplifications. </p>
       <p>Copyright (c) 2026 Marcin Kowalski. <a href="LICENSE" rel="license">GNU GPL v3</a>.</p>
     </footer>
-    <script>
-/* Shared controls and accessible drawing helpers for the step-by-step labs. */
-'use strict';
-window.Lab = (() => {
-  const $ = id => document.getElementById(id);
-  const text = (id, value) => { if ($(id)) $(id).textContent = value; };
-  function element(tag, attrs = {}, content) {
-    const node = document.createElement(tag);
-    for (const [key, value] of Object.entries(attrs)) node.setAttribute(key, value);
-    if (content !== undefined) node.textContent = content;
-    return node;
-  }
-  function svg(tag, attrs = {}, content) {
-    const node = document.createElementNS('http://www.w3.org/2000/svg', tag);
-    for (const [key, value] of Object.entries(attrs)) node.setAttribute(key, value);
-    if (content !== undefined) node.textContent = content;
-    return node;
-  }
-  function action(node, callback, label, key) {
-    node.setAttribute('tabindex', '0'); node.setAttribute('role', 'button');
-    node.setAttribute('aria-label', label); node.setAttribute('data-focus', key);
-    node.addEventListener('click', callback);
-    node.addEventListener('keydown', event => {
-      if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); event.stopPropagation(); callback(event); }
-    });
-    return node;
-  }
-  function paint(node, draw) {
-    const focus = node.contains(document.activeElement) ? document.activeElement.getAttribute('data-focus') : null;
-    node.replaceChildren(); draw(node);
-    if (focus !== null) [...node.querySelectorAll('[data-focus]')].find(el => el.getAttribute('data-focus') === focus)?.focus({ preventScroll: true });
-  }
-  function tokens(id, items, callback) {
-    paint($(id), root => items.forEach((item, i) => {
-      const li = element('li', { class: item.className || '' });
-      if (callback) {
-        const button = element('button', { type: 'button', 'data-focus': String(i) }, item.label ?? item);
-        button.addEventListener('click', event => callback(i, event)); li.append(button);
-      } else li.textContent = item.label ?? item;
-      root.append(li);
-    }));
-  }
-  function node(root, x, y, label, style = '', note = '', callback, key = label, radius = 19) {
-    const group = svg('g', { transform: `translate(${x} ${y})` });
-    group.append(svg('circle', { r: radius, class: `lab-node ${style}${radius < 19 ? ' compact' : ''}` }), svg('text', { y: 5, class: `lab-number ${style}` }, label));
-    if (note !== '') group.append(svg('text', { y: radius + 17, class: 'lab-node-note' }, note));
-    if (callback) action(group, callback, `${label}, ${note}`, String(key));
-    root.append(group); return group;
-  }
-  function point(board, event) {
-    return new DOMPoint(event.clientX, event.clientY).matrixTransform(board.getScreenCTM().inverse());
-  }
-  function controller({ run, render, reset, validate = () => true, locked = [], manual = () => false, update = () => {} }) {
-    let iterator = null, timer = null, replayRun = run, replayReset = reset;
-    const api = { running: false, done: false, steps: 0, started: false, autoStarted: false,
-      sync() {
-        $('startBtn').disabled = api.autoStarted && !api.done || manual();
-        $('pauseBtn').disabled = !api.started || api.done || manual();
-        text('pauseBtn', api.started && !api.running ? 'Wznów' : 'Pauza');
-        $('stepBtn').disabled = api.running || manual();
-        $('backBtn').disabled = api.running || api.steps === 0 || manual();
-        $('stopBtn').disabled = !api.started && !api.autoStarted;
-        locked.forEach(id => { $(id).disabled = api.running; $(id).setAttribute('aria-disabled', String(api.running)); });
-        $('speed').disabled = manual();
-        text('statusText', manual() ? (api.done ? 'Ukończono' : 'Tryb ręczny') : api.done ? 'Zakończono' : api.running ? 'W trakcie' : api.started ? 'Pauza' : 'Gotowe');
-        update(api);
-      },
-      refresh() { render(); api.sync(); },
-      pause() { clearTimeout(timer); timer = null; api.running = false; api.sync(); },
-      reset() { api.restart(run, reset); },
-      restart(nextRun, nextReset) {
-        api.pause(); iterator = null; api.done = false; api.started = false; api.autoStarted = false; api.steps = 0;
-        replayRun = nextRun; replayReset = nextReset;
-        text('operation', 'Wybierz Start lub wykonaj pierwszy krok.'); text('resultText', 'Wynik pojawi się po zakończeniu.');
-        replayReset(); api.refresh();
-      },
-      next() {
-        if (manual() || !validate()) return;
-        if (api.done) api.reset();
-        api.started = true; iterator ||= replayRun();
-        const result = iterator.next();
-        if (result.done) { api.done = true; api.pause(); if (result.value) text('operation', result.value); }
-        else { api.steps++; text('operation', result.value); }
-        api.refresh();
-      },
-      start() {
-        if (api.running || manual() || !validate()) return;
-        if (api.done) api.reset();
-        api.autoStarted = true;
-        api.running = true; api.next();
-        const tick = () => {
-          if (!api.running) return;
-          api.next();
-          if (api.running) timer = setTimeout(tick, 1000 / Number($('speed').value));
-        };
-        if (api.running) timer = setTimeout(tick, 1000 / Number($('speed').value));
-      },
-      replace(generator, { replay = run, restore = reset, steps = api.steps } = {}) {
-        api.pause(); iterator = generator; replayRun = replay; replayReset = restore;
-        api.steps = steps; api.done = false; api.started = false; api.autoStarted = false; api.sync();
-      },
-      // Replay from the input snapshot belonging to the current operation.
-      rewind(count) {
-        const autoStarted = api.autoStarted;
-        api.restart(replayRun, replayReset);
-        for (let i = 0; i < count; i++) api.next();
-        api.autoStarted = autoStarted && count > 0; api.sync();
-      },
-      previous() { if (api.steps > 0) api.rewind(api.steps - 1); }
-    };
-    $('startBtn').addEventListener('click', api.start);
-    $('pauseBtn').addEventListener('click', () => api.running ? api.pause() : api.start());
-    $('stepBtn').addEventListener('click', () => { api.pause(); api.next(); });
-    $('backBtn').addEventListener('click', () => { api.pause(); api.previous(); });
-    $('stopBtn').addEventListener('click', api.reset);
-    $('speed').addEventListener('input', () => text('speedLabel', `${$('speed').value} op./s`));
-    document.addEventListener('visibilitychange', () => { if (document.hidden && api.running) api.pause(); });
-    document.addEventListener('keydown', event => {
-      if (event.defaultPrevented || event.target.closest('input, select, textarea') || event.altKey || event.ctrlKey || event.metaKey) return;
-      if (event.key === 'ArrowLeft' || event.key === 'ArrowRight') {
-        event.preventDefault();
-        if (api.running) api.pause();
-        if (event.key === 'ArrowLeft') api.previous(); else api.next();
-      }
-      if (event.key === ' ' && !event.target.closest('a, button, summary, [role="button"], [role="gridcell"]')) { event.preventDefault(); api.running ? api.pause() : api.start(); }
-      if (event.key.toLowerCase() === 'n' && !api.running) api.next();
-      if (event.key.toLowerCase() === 'r') api.reset();
-    });
-    return api;
-  }
-  return { $, text, element, svg, action, paint, tokens, node, point, controller };
-})();
-    </script>
+    <script src="scripts/lab-dom.js"></script>
+    <script src="scripts/lab-controller.js"></script>
     <script>
 (() => {
   'use strict';
   const { $, text, svg, element, paint, tokens, controller } = Lab;
   let source, pattern, lps, matches, phase, comparisons, shifts, pair, offset, prefix, inspected, selected;
+  let hashRows = [];
+  const rabinKarp = () => $('method').value === 'rabin-karp';
+  const kmpLesson = document.querySelector('.lesson').innerHTML;
+  const kmpIntro = document.querySelector('.intro').innerHTML;
+  const kmpHint = document.querySelector('.control-hint').textContent;
+  const kmpRule = document.querySelector('.data-details p').textContent;
+  function updateMethod() {
+    document.querySelector('.lesson').innerHTML = rabinKarp() ? `
+      <div class="lesson-header"><div><p class="eyebrow">01 / Zrozum algorytm</p><h2 id="lessonTitle">Algorytm Rabina-Karpa</h2></div><span class="tag">Skrót kroczący</span></div>
+      <dl class="complexity"><div><dt>Bez licznych weryfikacji</dt><dd>O(n + m)</dd></div><div><dt>Pesymistycznie</dt><dd>O(n · m)</dd></div><div><dt>Pamięć skrótu</dt><dd>O(1)</dd></div><div><dt>Podstawa / moduł</dt><dd>257 / 101</dd></div></dl>
+      <p class="complexity-note">n i m to długości tekstu i wzorca. Dokładny koszt to O(n + m + liczba porównanych znaków przy zgodnych skrótach). Mały moduł pozwala obserwować kolizje; zgodny skrót nie gwarantuje zgodności napisów. Tablice znaków i wyniki zajmują dodatkowo O(n + m).</p>
+      <div class="lesson-columns"><div><h3>Jak to działa?</h3><p>Traktujemy znaki jak cyfry wielomianu modulo 101. Obliczamy skrót wzorca oraz pierwszego okna tekstu. Przesuwając okno, usuwamy wkład starego znaku, mnożymy przez podstawę i dodajemy nowy znak.</p><ol><li>Oblicz skróty i potęgę 257^(m − 1) modulo 101.</li><li>Porównaj skróty.</li><li>Przy zgodności sprawdź znaki, aby wykluczyć kolizję.</li><li>Przesuń okno o jeden znak.</li></ol></div><div><h3>Dlaczego to działa?</h3><p>Równe napisy mają równe skróty. Różne skróty pozwalają odrzucić okno, a porównanie znaków przy równych skrótach eliminuje fałszywe dopasowania. Sprawdzamy każde okno, także nakładające się.</p></div><div><h3>Kiedy się przydaje?</h3><p>Przy wyszukiwaniu i porównywaniu fragmentów tekstu. Wybierz przykład kolizji: znak A i znak ¦ mają różne kody Unicode, ale ten sam skrót modulo 101.</p></div></div>` : kmpLesson;
+    document.querySelector('.intro').innerHTML = rabinKarp() ? '<div><span class="eyebrow">Zrozum, zanim zapamiętasz</span><h1 id="pageTitle">Wyszukiwanie wzorca: Rabin-Karp</h1><p>Przesuwaj okno po tekście, aktualizuj skrót i sprawdzaj znaki tylko wtedy, gdy skróty się zgadzają.</p></div><span class="badge">Napisy · krok po kroku</span>' : kmpIntro;
+    document.querySelector('.control-hint').textContent = rabinKarp() ? 'Krok oblicza skrót okna albo porównuje znaki przy zgodnych skrótach. Tekst do 30 znaków, wzorzec do 10. Indeksy liczymy w punktach kodowych Unicode.' : kmpHint;
+    document.querySelector('.data-details p').textContent = rabinKarp() ? 'h′ = ((h − kod(stary) · 257^(m−1)) · 257 + kod(nowy)) mod 101. Wynik modulo normalizujemy do zakresu 0…100. Przy równych skrótach porównujemy wszystkie znaki.' : kmpRule;
+    $('lpsTitle').closest('section').hidden = rabinKarp();
+    $('hashPanel').hidden = !rabinKarp();
+    $('compareCount').nextElementSibling.textContent = rabinKarp() ? 'weryfikacja zgodnych skrótów' : 'przy budowie lps i wyszukiwaniu';
+    $('shiftCount').nextElementSibling.textContent = rabinKarp() ? 'kolejne okna tekstu' : 'cofnięcia wg tablicy lps';
+    ctl.reset();
+  }
   function reset() {
     source = Array.from($('text').value); pattern = Array.from($('pattern').value);
     lps = Array(pattern.length).fill(null); if (lps.length) lps[0] = 0;
-    matches = []; phase = 'lps'; comparisons = 0; shifts = 0; pair = null; offset = 0; prefix = 0; inspected = null; selected = null;
+    matches = []; phase = rabinKarp() ? 'search' : 'lps'; comparisons = 0; shifts = 0; pair = null; offset = 0; prefix = 0; inspected = null; selected = null; hashRows = [];
   }
   function* run() {
+    if (rabinKarp()) { return yield* runRabinKarp(); }
     let i = 1, j = 0;
     while (i < pattern.length) {
       const equal = pattern[i] === pattern[j]; pair = [i, j, equal]; comparisons++;
@@ -240,11 +133,14 @@ window.Lab = (() => {
     return 'Wyszukiwanie zakończone. Wybierz dopasowanie lub wartość lps.';
   }
   function inspect(index) {
-    if (ctl.running || lps[index] === null) return;
+    if (rabinKarp() || ctl.running || lps[index] === null) return;
     inspected = index; const length = lps[index];
     text('operation', `lps[${index}] = ${length}: prefiks „${pattern.slice(0, length).join('')}” = sufiks „${pattern.slice(index + 1 - length, index + 1).join('')}”. ${length ? 'Oba fragmenty są wyróżnione.' : 'Nie ma niepustego właściwego prefiksu będącego sufiksem.'}`); render();
   }
   function render() {
+    paint($('hashBody'), root => hashRows.forEach(row => {
+      const tr = element('tr'); row.forEach(value => tr.append(element('td', {}, value))); root.append(tr);
+    }));
     const building = phase === 'lps' || inspected !== null, top = building ? pattern : source;
     const width = Math.max(640, (Math.max(top.length, building ? pattern.length : offset + pattern.length) + 2) * 34);
     $('board').setAttribute('viewBox', `0 0 ${width} 200`); $('board').style.minWidth = `${width}px`;
@@ -260,7 +156,7 @@ window.Lab = (() => {
           if (!building && !isPattern && selected !== null && k >= selected && k < selected + pattern.length) cls = 'ready';
           const x = 20 + (k + shift) * 34, group = svg('g');
           group.append(svg('rect', { x, y, width: 30, height: 32, rx: 4, class: `lab-node ${cls}` }), svg('text', { x: x + 15, y: y + 21, class: `lab-number ${cls}` }, char === ' ' ? '␣' : char), svg('text', { x: x + 15, y: y + 48, class: 'lab-node-note' }, k));
-          if (isPattern) { group.append(svg('title', {}, `Indeks ${k}; lps = ${lps[k] ?? 'nieobliczone'}. Po niezgodności tutaj wróć do j = ${k ? lps[k - 1] ?? '?' : 0}.`)); Lab.action(group, () => inspect(k), `Znak ${char}, indeks ${k}, lps ${lps[k] ?? 'nieobliczone'}`, `p-${k}`); }
+          if (isPattern && !rabinKarp()) { group.append(svg('title', {}, `Indeks ${k}; lps = ${lps[k] ?? 'nieobliczone'}. Po niezgodności tutaj wróć do j = ${k ? lps[k - 1] ?? '?' : 0}.`)); Lab.action(group, () => inspect(k), `Znak ${char}, indeks ${k}, lps ${lps[k] ?? 'nieobliczone'}`, `p-${k}`); }
           root.append(group);
         });
       }
@@ -285,20 +181,59 @@ window.Lab = (() => {
     });
     if (ctl.running && pair) { inspected = null; $('board').parentElement.scrollLeft = Math.max(0, pair[0] * 34 - $('board').parentElement.clientWidth / 2); }
     text('compareCount', comparisons); text('matchCount', matches.length); text('shiftCount', shifts); text('stepCount', ctl.steps);
-    text('phaseText', phase === 'lps' ? 'Budowa tablicy lps wzorca.' : phase === 'search' ? 'Wyszukiwanie; pozycja w tekście nigdy się nie cofa.' : 'Wszystkie wystąpienia, również nakładające się. Indeksy od 0.');
+    text('phaseText', phase === 'lps' ? 'Budowa tablicy lps wzorca.' : phase === 'search' ? rabinKarp() ? 'Skróty okien i dokładna weryfikacja zgodnych skrótów.' : 'Wyszukiwanie; pozycja w tekście nigdy się nie cofa.' : 'Wszystkie wystąpienia, również nakładające się. Indeksy od 0.');
   }
-  const ctl = controller({ run, render, reset, locked: ['scenario', 'text', 'pattern', 'randomBtn'], validate: () => {
+  function* runRabinKarp() {
+    const base = 257, modulus = 101, length = pattern.length;
+    const normalize = value => (value % modulus + modulus) % modulus;
+    let factor = 1, patternHash = 0, windowHash = 0;
+    for (let i = 0; i < length; i++) {
+      patternHash = normalize(patternHash * base + pattern[i].codePointAt(0));
+      if (i < source.length) windowHash = normalize(windowHash * base + source[i].codePointAt(0));
+      if (i < length - 1) factor = normalize(factor * base);
+    }
+    yield `Skrót wzorca = ${patternHash}; 257^(${length - 1}) mod 101 = ${factor}.`;
+    for (let start = 0; start + length <= source.length; start++) {
+      offset = start; prefix = 0; pair = null;
+      const row = [start, windowHash, patternHash, windowHash === patternHash ? 'sprawdź znaki' : 'różne skróty'];
+      hashRows.push(row);
+      yield `Okno [${start}, ${start + length - 1}]: skrót ${windowHash}, wzorzec ${patternHash}. ${windowHash === patternHash ? 'Sprawdzamy znaki.' : 'Odrzucamy okno.'}`;
+      if (windowHash === patternHash) {
+        let equal = true;
+        for (let j = 0; j < length; j++) {
+          const same = source[start + j] === pattern[j]; pair = [start + j, j, same]; comparisons++;
+          if (same) prefix = j + 1; else equal = false;
+          yield `Weryfikacja: tekst[${start + j}] ${same ? '=' : '≠'} wzorzec[${j}].`;
+          if (!same) break;
+        }
+        row[3] = equal ? 'dopasowanie' : 'kolizja skrótu';
+        if (equal) matches.push(start);
+        yield equal ? `Dopasowanie na pozycji ${start}.` : 'Kolizja: skróty są równe, ale napisy różne. Odrzucamy okno.';
+      }
+      if (start + length < source.length) {
+        windowHash = normalize((windowHash - source[start].codePointAt(0) * factor) * base + source[start + length].codePointAt(0));
+        shifts++;
+      }
+    }
+    phase = 'done'; pair = null;
+    text('resultText', matches.length ? `Znaleziono ${matches.length} dopasowań na pozycjach: ${matches.join(', ')} (indeksy od 0).` : 'Brak dopasowań wzorca w tekście.');
+    return 'Wyszukiwanie zakończone. Każdy zgodny skrót sprawdzono znak po znaku.';
+  }
+  const ctl = controller({ run, render, reset, locked: ['method', 'scenario', 'text', 'pattern', 'randomBtn'], validate: () => {
     if (!pattern.length) { text('operation', 'Wpisz niepusty wzorzec. Pusty tekst jest dozwolony i daje brak dopasowań.'); return false; }
     if (source.length > 30 || pattern.length > 10) { text('operation', 'Tekst może mieć do 30 znaków, a wzorzec do 10.'); return false; }
     inspected = null; return true;
   } });
   $('scenario').addEventListener('change', () => {
-    const pair = { example: ['ABABDABACDABABCABAB', 'ABABCABAB'], repeat: ['AAAAAAAAAA', 'AAAA'], none: ['ALGORYTMY', 'KOT'] }[$('scenario').value];
+    const pair = { example: ['ABABDABACDABABCABAB', 'ABABCABAB'], repeat: ['AAAAAAAAAA', 'AAAA'], none: ['ALGORYTMY', 'KOT'], collision: ['A¦A', 'A'] }[$('scenario').value];
     if (pair) { $('text').value = pair[0]; $('pattern').value = pair[1]; } ctl.reset();
   });
   ['text', 'pattern'].forEach(id => $(id).addEventListener('input', () => { $('scenario').value = 'custom'; ctl.reset(); }));
   $('randomBtn').addEventListener('click', () => { $('text').value = Array.from({ length: 24 }, () => 'ABC'[Math.floor(Math.random() * 3)]).join(''); $('pattern').value = $('text').value.slice(8, 12); $('scenario').value = 'custom'; ctl.reset(); });
-  ctl.reset();
+  $('scenario').add(new Option('Kolizja skrótu: A i ¦', 'collision'));
+  $('method').addEventListener('change', updateMethod);
+  if (new URLSearchParams(location.search).get('method') === 'rabin-karp') $('method').value = 'rabin-karp';
+  updateMethod();
 })();
     </script>
   </body>

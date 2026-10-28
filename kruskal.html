@@ -9,7 +9,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="description" content="Algorytm Kruskala krok po kroku: minimalne drzewo rozpinające, składowe i odrzucanie cykli.">
-    <title>Algorytm Kruskala · AlgorithmsLab</title>
+    <title>Minimalne drzewo rozpinające: Kruskal i Prim · AlgorithmsLab</title>
     <link rel="stylesheet" href="styles.css">
   </head>
   <body class="step-lab">
@@ -40,7 +40,8 @@
         </div>
       </section>
       <section class="panel controls" aria-label="Ustawienia i sterowanie">
-        <div class="lab-fields">
+        <div class="lab-fields four">
+          <div class="field"><label for="method">Algorytm</label><select id="method"><option value="kruskal">Kruskal: sortowanie krawędzi</option><option value="prim">Prim: rozrastanie drzewa</option></select></div>
           <div class="field"><label for="scenario">Rodzaj grafu</label><select id="scenario"><option value="connected">Spójny</option><option value="disconnected">Dwie składowe</option><option value="equal">Równe wagi</option></select></div>
           <div class="field"><label for="size">Liczba wierzchołków <output id="sizeLabel" for="size">7</output></label><input id="size" type="range" min="4" max="10" value="7"></div>
           <div class="field"><label for="speed">Tempo <output id="speedLabel" for="speed">3 op./s</output></label><input id="speed" type="range" min="1" max="12" value="3"></div>
@@ -74,14 +75,39 @@
       <p>Materiał pokazowy, niezweryfikowany. Nie jest materiałem edukacyjnym. Może zawierać błędy lub uproszczenia. | Unverified demonstration material. Not educational material. It may contain errors or simplifications. </p>
       <p>Copyright (c) 2026 Marcin Kowalski. <a href="LICENSE" rel="license">GNU GPL v3</a>.</p>
     </footer>
+    <script src="scripts/lab-dom.js"></script>
+    <script src="scripts/lab-animation.js"></script>
     <script>
 (() => {
   'use strict';
   const $ = id => document.getElementById(id);
   const state = { n: 0, edges: [], sorted: [], parent: [], sizes: [], accepted: new Set(), rejected: new Set(), active: -1, total: 0, components: 0, steps: 0, running: false, paused: false, done: false, iterator: null };
-  let frameId = null, lastTime = null, budget = 0;
+  const animation = LabAnimation.create({
+    isRunning: () => state.running && !state.paused,
+    getSpeed: () => Number($('speed').value),
+    step: nextStep
+  });
   let autoStarted = false;
-  const controls = ['scenario', 'size', 'randomBtn'];
+  const controls = ['method', 'scenario', 'size', 'randomBtn'];
+  const kruskalLesson = document.querySelector('.lesson').innerHTML;
+  const kruskalIntro = document.querySelector('.intro').innerHTML;
+  const kruskalHint = document.querySelector('.control-hint').textContent;
+  const kruskalTableHint = $('edgeTitle').nextElementSibling.textContent;
+  const primMethod = () => $('method').value === 'prim';
+
+  function updateMethod() {
+    document.querySelector('.lesson').innerHTML = primMethod() ? `
+      <div class="lesson-header"><div><p class="eyebrow">01 / Zrozum algorytm</p><h2 id="lessonTitle">Algorytm Prima</h2></div><span class="tag">Minimalne drzewo rozpinające</span></div>
+      <dl class="complexity"><div><dt>Strategia</dt><dd>Zachłanna</dd></div><div><dt>Czas tej wersji</dt><dd>O(V² + E)</dd></div><div><dt>Pamięć</dt><dd>O(V + E)</dd></div><div><dt>Graf</dt><dd>Nieskierowany</dd></div></dl>
+      <p class="complexity-note">V to liczba wierzchołków, E to liczba krawędzi. Minimum wybieramy liniowo z tablicy kluczy; wersja z kopcem osiąga O((V + E) log V). Rysowanie nie jest wliczone.</p>
+      <div class="lesson-columns"><div><h3>Jak to działa?</h3><p>Dla każdego wierzchołka poza drzewem pamiętamy najtańsze połączenie z drzewem. Wybieramy najmniejszy z tych kosztów i dołączamy wierzchołek.</p><ol><li>Wybierz początek składowej.</li><li>Dołącz najtańszy dostępny wierzchołek.</li><li>Popraw koszty jego sąsiadów.</li><li>Gdy zabraknie połączeń, zacznij kolejną składową.</li></ol></div><div><h3>Dlaczego to działa?</h3><p>Najtańsza krawędź przecinająca granicę między drzewem a resztą grafu jest bezpiecznym wyborem na mocy własności przekroju. Należy do pewnego minimalnego drzewa rozpinającego.</p></div><div><h3>Porównanie z Kruskalem</h3><p>Prim rozbudowuje jedną składową, a Kruskal łączy grupy globalnie według wag. Wynik ma tę samą minimalną wagę, choć przy remisach krawędzie mogą się różnić. Dla grafu niespójnego budujemy minimalny las.</p></div></div>` : kruskalLesson;
+    document.querySelector('.intro').innerHTML = primMethod() ? '<div><span class="eyebrow">Zrozum, zanim zapamiętasz</span><h1 id="pageTitle">Algorytm Prima</h1><p>Rozbudowuj drzewo przez najtańsze połączenie z wierzchołkiem spoza niego. Przełącz na Kruskala, aby porównać metody na tym samym grafie.</p></div><span class="badge">Minimalne drzewo · krok po kroku</span>' : kruskalIntro;
+    document.querySelector('.control-hint').textContent = primMethod() ? 'Jeden krok wybiera wierzchołek albo sprawdza krawędź do sąsiada. Zmiana metody zachowuje graf. Numery wierzchołków od 1.' : kruskalHint;
+    $('edgeTitle').nextElementSibling.textContent = primMethod() ? 'Krawędzie w kolejności wejściowej. Bieżący krok opisuje zmianę najtańszego połączenia; zielone wiersze tworzą wynik.' : kruskalTableHint;
+    const rejectedLegend = document.querySelector('.lab-legend .rejected').parentElement;
+    rejectedLegend.lastChild.textContent = primMethod() ? '× Poza wynikiem' : '× Odrzucona · cykl';
+    reset();
+  }
   const edgeName = edge => `${edge.a + 1}-${edge.b + 1}`;
 
   function find(v) {
@@ -129,6 +155,7 @@
   }
 
   function* runAlgorithm() {
+    if (primMethod()) { yield* runPrim(); return; }
     state.sorted.sort((a, b) => a.weight - b.weight || a.a - b.a || a.b - b.b);
     yield 'Posortowano krawędzie rosnąco według wagi. Teraz sprawdzamy je po kolei.';
     for (const edge of state.sorted) {
@@ -155,12 +182,43 @@
     yield result;
   }
 
-  function svg(name, attributes, text) {
-    const node = document.createElementNS('http://www.w3.org/2000/svg', name);
-    for (const [key, value] of Object.entries(attributes)) node.setAttribute(key, value);
-    if (text !== undefined) node.textContent = text;
-    return node;
+  function* runPrim() {
+    const visited = Array(state.n).fill(false), best = Array(state.n).fill(Infinity), connection = Array(state.n).fill(null);
+    const adjacency = Array.from({ length: state.n }, () => []);
+    state.edges.forEach(edge => { adjacency[edge.a].push(edge); adjacency[edge.b].push(edge); });
+    for (let count = 0; count < state.n; count++) {
+      let vertex = -1;
+      for (let i = 0; i < state.n; i++) if (!visited[i] && (vertex < 0 || best[i] < best[vertex])) vertex = i;
+      visited[vertex] = true;
+      const chosen = connection[vertex];
+      if (chosen) {
+        state.active = chosen.id; state.accepted.add(chosen.id); state.total += chosen.weight; state.components--;
+        // DSU only maintains the displayed connected groups.
+        let a = find(chosen.a), b = find(chosen.b);
+        if (state.sizes[a] < state.sizes[b]) [a, b] = [b, a];
+        state.parent[b] = a; state.sizes[a] += state.sizes[b];
+        yield `Dołączamy ${vertex + 1} przez najtańszą krawędź ${edgeName(chosen)}, waga ${chosen.weight}. Suma = ${state.total}.`;
+      } else {
+        state.active = -1;
+        yield `Rozpoczynamy nową składową od wierzchołka ${vertex + 1}.`;
+      }
+      for (const edge of adjacency[vertex]) {
+        const neighbor = edge.a === vertex ? edge.b : edge.a;
+        if (visited[neighbor]) continue;
+        state.active = edge.id;
+        const improves = edge.weight < best[neighbor];
+        if (improves) { best[neighbor] = edge.weight; connection[neighbor] = edge; }
+        yield `Sprawdzamy ${edgeName(edge)}: ${improves ? `najtańsze znane połączenie do ${neighbor + 1} ma teraz wagę ${edge.weight}` : `pozostawiamy koszt ${best[neighbor]} do ${neighbor + 1}`}.`;
+      }
+    }
+    state.active = -1; state.done = true;
+    for (const edge of state.edges) if (!state.accepted.has(edge.id)) state.rejected.add(edge.id);
+    const result = `${state.components === 1 ? 'Minimalne drzewo rozpinające' : 'Minimalny las rozpinający'}: ${state.components} składowych, ${state.accepted.size} krawędzi, łączna waga ${state.total}.`;
+    $('resultText').textContent = result;
+    yield result;
   }
+
+  const svg = LabDom.svg;
 
   function draw() {
     const board = $('board'); board.replaceChildren();
@@ -200,7 +258,7 @@
       const row = document.createElement('tr');
       const accepted = state.accepted.has(edge.id), rejected = state.rejected.has(edge.id);
       row.className = accepted ? 'lab-accepted' : rejected ? 'lab-rejected' : state.active === edge.id ? 'lab-current' : '';
-      const label = accepted ? '✓ Przyjęta' : rejected ? '× Odrzucona - cykl' : state.active === edge.id ? 'Badana' : 'Oczekuje';
+      const label = accepted ? '✓ Przyjęta' : rejected ? (primMethod() ? '× Poza minimalnym lasem' : '× Odrzucona - cykl') : state.active === edge.id ? 'Badana' : 'Oczekuje';
       for (const value of [edgeName(edge), edge.weight, label]) {
         const cell = document.createElement('td'); cell.textContent = value; row.append(cell);
       }
@@ -220,10 +278,7 @@
     updateControls();
   }
 
-  function stopClock() {
-    if (frameId !== null) cancelAnimationFrame(frameId);
-    frameId = null; lastTime = null; budget = 0;
-  }
+  function stopClock() { animation.stop(); }
 
   function updateControls() {
     $('statusText').textContent = state.done ? 'Zakończono' : state.running ? state.paused ? 'Pauza' : 'W trakcie' : 'Gotowy';
@@ -259,21 +314,13 @@
     autoStarted = wasAutoStarted && target > 0; updateControls();
   }
 
-  function animate(time) {
-    frameId = null;
-    if (!state.running || state.paused || document.hidden) { lastTime = null; return; }
-    if (lastTime === null) lastTime = time;
-    budget += Math.min(time - lastTime, 100) * Number($('speed').value) / 1000;
-    lastTime = time;
-    while (budget >= 1 && state.running) { budget--; nextStep(); }
-    if (state.running && !state.paused) frameId = requestAnimationFrame(animate);
-  }
+
 
   function start() {
     if (state.running && !state.paused) return;
     if (state.done) reset();
     stopClock(); state.running = true; state.paused = false; autoStarted = true; updateControls();
-    frameId = requestAnimationFrame(animate);
+    animation.request();
   }
 
   $('startBtn').addEventListener('click', start);
@@ -298,14 +345,16 @@
   $('stopBtn').addEventListener('click', reset);
   $('randomBtn').addEventListener('click', generateData);
   $('scenario').addEventListener('change', generateData);
+  $('method').addEventListener('change', updateMethod);
   $('size').addEventListener('input', () => { $('sizeLabel').textContent = $('size').value; });
   $('size').addEventListener('change', generateData);
   $('speed').addEventListener('input', () => { $('speedLabel').textContent = `${$('speed').value} op./s`; });
   document.addEventListener('visibilitychange', () => {
     stopClock();
-    if (!document.hidden && state.running && !state.paused) frameId = requestAnimationFrame(animate);
+    if (!document.hidden && state.running && !state.paused) animation.request();
   });
   generateData();
+  if (new URLSearchParams(location.search).get('method') === 'prim') { $('method').value = 'prim'; updateMethod(); }
 })();
     </script>
   </body>

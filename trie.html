@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<!--
+  Copyright (c) 2024-2026 Marcin Kowalski.
+  SPDX-License-Identifier: GPL-3.0-only
+  See LICENSE for the full license text. Distributed without warranty.
+-->
+<html lang="pl">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Wspólne początki słów zajmują wspólną ścieżkę. Porównaj wyszukanie pełnego słowa ze sprawdzeniem samego prefiksu.">
+    <title>Trie: drzewo prefiksowe · AlgorithmsLab</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body class="step-lab interactive-lab algorithm-lab">
+    <a class="skip" href="#visualization">Przejdź do wizualizacji</a>
+    <main class="shell">
+      <header class="masthead">
+        <a class="brand" href="index.html"><span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i></span>AlgorithmsLab <span class="brand-note"> / wizualizacje</span></a>
+        <span class="meta">Struktury danych · Napisy</span>
+      </header>
+      <section class="intro" aria-labelledby="pageTitle">
+        <div><span class="eyebrow">Zrozum, zanim zapamiętasz</span><h1 id="pageTitle">Trie: drzewo prefiksowe</h1><p>Wspólne początki słów zajmują wspólną ścieżkę. Porównaj wyszukanie pełnego słowa ze sprawdzeniem samego prefiksu.</p></div>
+        <span class="badge">Algorytmy · krok po kroku</span>
+      </section>
+      <section class="panel lesson" aria-labelledby="lessonTitle">
+        <div class="lesson-header"><div><p class="eyebrow">01 / Zrozum algorytm</p><h2 id="lessonTitle">Trie (drzewo prefiksowe)</h2></div><span class="tag">Struktury danych · Napisy</span></div>
+        <dl class="complexity"><div><dt>Czas</dt><dd id="timeComplexity">Budowa O(S); wyszukanie O(m)</dd></div><div><dt>Pamięć</dt><dd id="spaceComplexity">O(S)</dd></div></dl>
+        <p class="complexity-note" id="complexityNote">S to suma długości słów, m to długość zapytania. Zakładamy stały średni koszt operacji Map. Wypisanie wszystkich słów pod prefiksem dodatkowo odwiedza jego poddrzewo. Rozróżniamy wielkość liter i punkty kodowe Unicode; pusty prefiks pasuje do wszystkich słów.</p>
+        <div class="lesson-columns">
+          <div><h3>Jak to działa?</h3><p id="explanation">Każda krawędź reprezentuje znak. Węzeł jest oznaczony osobno, jeśli kończy się w nim słowo. Dzięki temu „kot” i „kotek” współdzielą pierwsze trzy znaki, ale oba mogą być samodzielnymi wpisami.</p><ol id="steps"><li>Dla każdego słowa zacznij w korzeniu.</li><li>Przechodź kolejnymi znakami, tworząc brakujące węzły.</li><li>Oznacz koniec słowa.</li><li>Wyszukując, przejdź ścieżkę zapytania i w razie potrzeby sprawdź znacznik końca.</li></ol></div>
+          <div><h3>Dlaczego to działa?</h3><p id="correctness">Ścieżka od korzenia jednoznacznie odpowiada prefiksowi. Wstawianie tworzy tylko brakujące przejścia. Znacznik końca rozróżnia zapisane słowo od fragmentu dłuższego wpisu.</p></div>
+          <div><h3>Zastosowania i ograniczenia</h3><p id="applications">Słowniki, podpowiedzi wyszukiwania i autouzupełnianie. Znaki są przechowywane w Map, więc także symbole spoza alfabetu łacińskiego są obsługiwane.</p></div>
+        </div>
+      </section>
+      <section class="panel controls" aria-label="Ustawienia i sterowanie">
+        <div class="lab-fields">
+          <div class="field"><label for="method">Algorytm</label><select id="method"></select></div>
+          <div class="field"><label for="scenario">Przykład</label><select id="scenario"></select></div>
+          <div class="field"><label for="speed">Tempo <output id="speedLabel" for="speed">6 op./s</output></label><input id="speed" type="range" min="1" max="30" value="6"></div>
+        </div>
+        <div class="lab-fields" id="inputFields"></div>
+        <p id="inputError" role="alert"></p>
+        <div class="actions"><button type="button" id="startBtn" class="btn primary">Start</button><button type="button" id="pauseBtn" class="btn" disabled>Pauza</button><button type="button" id="backBtn" class="btn" disabled>Krok wstecz</button><button type="button" id="stepBtn" class="btn">Krok naprzód</button><button type="button" id="stopBtn" class="btn">Reset</button></div>
+        <p class="control-hint">Start odtwarza kolejne kroki. Po pauzie użyj Start, aby wznowić. Strzałki ← i → zmieniają krok, spacja uruchamia lub zatrzymuje animację. Zmiana danych rozpoczyna nową symulację.</p>
+        <noscript><p>Włącz JavaScript, aby korzystać z interaktywnej symulacji.</p></noscript>
+      </section>
+      <div class="main-column lab-results">
+        <section class="panel visualizer" id="visualization" tabindex="-1" aria-labelledby="chartTitle">
+          <div class="chart-heading"><div><div class="eyebrow">02 / Obserwuj działanie</div><h2 id="chartTitle">Stan algorytmu</h2></div><span id="statusText" role="status">Gotowe</span></div>
+          <p id="operation" role="status" aria-live="polite">Wybierz Start lub wykonaj pierwszy krok.</p>
+          <div id="panels"></div>
+          <div class="chart-caption lab-legend"><span><i class="lab-key current" aria-hidden="true"></i>Bieżący element</span><span><i class="lab-key accepted" aria-hidden="true"></i>Wybrane elementy</span></div>
+          <p class="lab-progress">Wykonane kroki: <output id="stepCount">0</output>. Licznik dotyczy wizualizacji, nie pomiaru wydajności.</p>
+        </section>
+        <section class="panel lab-table-panel" aria-labelledby="resultTitle"><h2 id="resultTitle">Wynik</h2><p id="resultText" class="lab-result" role="status">Wynik pojawi się po zakończeniu.</p></section>
+        <details class="data-details"><summary>Reguła algorytmu</summary><p id="rule" class="lab-rule">node = root
+for char in word: node = node.children[char] (utwórz, jeśli brak)
+node.terminal = true</p></details>
+      </div>
+    </main>
+    <footer class="project-notice" aria-label="Informacje o projekcie / Project information">
+      <p>Materiał pokazowy, niezweryfikowany. Nie jest materiałem edukacyjnym. Może zawierać błędy lub uproszczenia. | Unverified demonstration material. Not educational material. It may contain errors or simplifications. </p>
+      <p>Copyright (c) 2026 Marcin Kowalski. <a href="LICENSE" rel="license">GNU GPL v3</a>.</p>
+    </footer>
+    <script src="scripts/lab-dom.js"></script>
+    <script src="scripts/lab-core.js"></script>
+    <script>
+/* Copyright (c) 2026 Marcin Kowalski. SPDX-License-Identifier: GPL-3.0-only */
+'use strict';
+(() => {
+  const { characters, table, frame, field, example } = LabCore;
+  function* run(input) {
+    const words = input.words.trim().split(/\s+/).filter(Boolean);
+    if (!words.length || words.length > 10) throw new Error('Wpisz od 1 do 10 słów oddzielonych spacjami.');
+    words.forEach(word => characters(word, 'Słowo', 10));
+    const query = characters(input.query, 'Zapytanie', 10);
+    if (!['prefix', 'word'].includes(input.queryType)) throw new Error('Nieznany rodzaj wyszukiwania.');
+    const nodes = [{ parent: null, char: '∅', prefix: '', terminal: false, children: new Map() }];
+    const panels = active => [table('Węzły drzewa prefiksowego; ★ oznacza koniec zapisanego słowa', ['Id', 'Rodzic', 'Znak', 'Prefiks od korzenia', 'Koniec słowa', 'Dzieci'], nodes.map((node, id) => [id, node.parent ?? '·', node.char, node.prefix || '∅', node.terminal ? '★ tak' : 'nie', [...node.children.entries()].map(([char, child]) => `${char} → ${child}`).join(', ') || '∅']), active === undefined ? [] : [[active, 3]])];
+    const picture = active => ({ nodes: nodes.map((node, id) => ({ id, parent: node.parent, label: node.char, note: node.terminal ? '★' : '', active: id === active, accepted: node.terminal })) });
+    yield frame('Korzeń reprezentuje pusty prefiks.', panels(0), { tree: picture(0) });
+    for (const word of words) {
+      let current = 0;
+      for (const char of Array.from(word)) {
+        const node = nodes[current];
+        const exists = node.children.has(char);
+        if (!exists) {
+          node.children.set(char, nodes.length);
+          nodes.push({ parent: current, char, prefix: node.prefix + char, terminal: false, children: new Map() });
+        }
+        current = node.children.get(char);
+        yield frame(`Wstawiamy „${word}”: ${exists ? 'przechodzimy istniejącą' : 'tworzymy nową'} krawędzią „${char}”.`, panels(current), { tree: picture(current) });
+      }
+      nodes[current].terminal = true;
+      yield frame(`Oznaczamy koniec słowa „${word}”. Powtórne wstawienie nie tworzy duplikatu.`, panels(current), { tree: picture(current) });
+    }
+    let current = 0;
+    for (const char of query) {
+      const next = nodes[current].children.get(char);
+      yield frame(`Szukamy znaku „${char}” w dzieciach węzła ${current}: ${next === undefined ? 'brak krawędzi' : `węzeł ${next}`}.`, panels(current), { tree: picture(current) });
+      if (next === undefined) { current = -1; break; }
+      current = next;
+    }
+    const found = current >= 0 && (input.queryType === 'prefix' || nodes[current].terminal);
+    const matches = [];
+    // Enumerate only the matching subtree; searching a prefix itself costs O(|p|).
+    function collect(id) {
+      if (nodes[id].terminal) matches.push(nodes[id].prefix);
+      for (const child of nodes[id].children.values()) collect(child);
+    }
+    if (found && input.queryType === 'prefix') collect(current);
+    if (found && input.queryType === 'word') matches.push(nodes[current].prefix);
+    yield frame('Zakończono wyszukiwanie.', panels(current), { tree: picture(current), done: true, result: found ? `${input.queryType === 'prefix' ? 'Prefiks istnieje. Słowa' : 'Słowo istnieje'}: ${matches.join(', ')}.` : 'Brak dopasowania. Istnienie ścieżki nie zawsze oznacza koniec pełnego słowa.', data: { found, matches, nodeCount: nodes.length } });
+  }
+  const definition = { title: 'Trie: drzewo prefiksowe', category: 'Struktury danych · Napisy', intro: 'Wspólne początki słów zajmują wspólną ścieżkę. Porównaj wyszukanie pełnego słowa ze sprawdzeniem samego prefiksu.', modes: {
+    trie: {
+      title: 'Trie (drzewo prefiksowe)',
+      fields: [field('words', 'Słowa: 1…10 słów, do 10 znaków każde', 'kot kod kora koza pies'), field('query', 'Szukany napis (do 10 znaków)', 'ko'), field('queryType', 'Rodzaj wyszukiwania', 'prefix', { options: [['prefix', 'Prefiks i jego słowa'], ['word', 'Dokładne słowo']] })],
+      examples: [example('Wspólny prefiks', { words: 'kot kod kora koza pies', query: 'ko', queryType: 'prefix' }), example('Prefiks nie jest pełnym słowem', { words: 'kot kotek', query: 'ko', queryType: 'word' }), example('Słowo będące prefiksem', { words: 'kot kotek', query: 'kot', queryType: 'word' }), example('Brak gałęzi', { words: 'dom domek', query: 'kot', queryType: 'prefix' })],
+      time: 'Budowa O(S); wyszukanie O(m)',
+      space: 'O(S)',
+      note: 'S to suma długości słów, m to długość zapytania. Zakładamy stały średni koszt operacji Map. Wypisanie wszystkich słów pod prefiksem dodatkowo odwiedza jego poddrzewo. Rozróżniamy wielkość liter i punkty kodowe Unicode; pusty prefiks pasuje do wszystkich słów.',
+      explanation: 'Każda krawędź reprezentuje znak. Węzeł jest oznaczony osobno, jeśli kończy się w nim słowo. Dzięki temu „kot” i „kotek” współdzielą pierwsze trzy znaki, ale oba mogą być samodzielnymi wpisami.',
+      correctness: 'Ścieżka od korzenia jednoznacznie odpowiada prefiksowi. Wstawianie tworzy tylko brakujące przejścia. Znacznik końca rozróżnia zapisane słowo od fragmentu dłuższego wpisu.',
+      applications: 'Słowniki, podpowiedzi wyszukiwania i autouzupełnianie. Znaki są przechowywane w Map, więc także symbole spoza alfabetu łacińskiego są obsługiwane.',
+      steps: ['Dla każdego słowa zacznij w korzeniu.', 'Przechodź kolejnymi znakami, tworząc brakujące węzły.', 'Oznacz koniec słowa.', 'Wyszukując, przejdź ścieżkę zapytania i w razie potrzeby sprawdź znacznik końca.'],
+      rule: 'node = root\nfor char in word: node = node.children[char] (utwórz, jeśli brak)\nnode.terminal = true',
+      run
+    }
+  } };
+  window.LabDefinition = definition;
+})();
+    </script>
+    <script src="scripts/lab-player.js"></script>
+  </body>
+</html>
