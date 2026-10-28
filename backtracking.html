@@ -25,12 +25,13 @@
       </section>
       <section class="panel lesson" aria-labelledby="lessonTitle">
         <div class="lesson-header"><div><p class="eyebrow">01 / Zrozum algorytm</p><h2 id="lessonTitle">Problem N hetmanów</h2></div><span class="tag">Rekurencja · Backtracking</span></div>
+        <div class="lesson-purpose"><h3>Cel i wynik</h3><p id="purpose">Problem N hetmanów polega na ustawieniu n hetmanów na szachownicy n × n tak, aby żadne dwa się nie atakowały. Hetman atakuje wzdłuż całego swojego rzędu, kolumny i obu przekątnych, więc żadne dwie figury nie mogą dzielić tych linii. Algorytm szuka jednego poprawnego ustawienia albo stwierdza, że ono nie istnieje.</p></div>
         <dl class="complexity"><div><dt>Czas</dt><dd id="timeComplexity">O(n · n!) jako górne oszacowanie</dd></div><div><dt>Pamięć</dt><dd id="spaceComplexity">O(n) pomocniczej</dd></div></dl>
         <p class="complexity-note" id="complexityNote">Sprawdzamy n kolumn na każdym odwiedzonym poziomie; zajętość kolumn i przekątnych sprawdzają zbiory. Kończymy na pierwszym rozwiązaniu, nie liczymy wszystkich ustawień. Pamięć tabel i historii animacji jest dodatkowa.</p>
         <div class="lesson-columns">
-          <div><h3>Jak to działa?</h3><p id="explanation">W każdym rzędzie ustawiamy dokładnie jednego hetmana. Kandydat jest poprawny, jeśli nie zajmuje użytej kolumny ani przekątnej. Bezpieczną decyzję rozwijamy rekurencyjnie.</p><ol id="steps"><li>Wybierz kolejną kolumnę bieżącego rzędu.</li><li>Sprawdź kolumnę oraz przekątne r − c i r + c.</li><li>Jeżeli pole jest bezpieczne, przejdź rekurencyjnie do następnego rzędu.</li><li>Po niepowodzeniu usuń hetmana i kontynuuj próby.</li></ol></div>
+          <div><h3>Jak to działa?</h3><p id="explanation">Przeszukiwanie z nawrotami (backtracking) buduje rozwiązanie po jednej decyzji. Po bezpiecznym ustawieniu hetmana przechodzimy do następnego rzędu. Gdy nie da się kontynuować, cofamy ostatnią decyzję i próbujemy innej kolumny.</p><ol id="steps"><li>Zacznij od pustej planszy i pierwszego rzędu.</li><li>Sprawdź kolejną kolumnę: musi być wolna, podobnie jak obie przekątne r − c i r + c.</li><li>Na bezpiecznym polu ustaw hetmana i spróbuj obsadzić następny rząd. Ustawienie n hetmanów kończy szukanie sukcesem.</li><li>Jeśli dalsze ustawianie się nie uda, usuń hetmana i sprawdź następną kolumnę. Wyczerpanie wszystkich możliwości oznacza brak rozwiązania.</li></ol></div>
           <div><h3>Dlaczego to działa?</h3><p id="correctness">Każde poprawne ustawienie ma jeden wybór kolumny w każdym rzędzie. Algorytm rozpatruje wszystkie takie wybory, odcinając tylko te, które już zawierają konflikt. Żadne ich przedłużenie nie może być rozwiązaniem.</p></div>
-          <div><h3>Zastosowania i ograniczenia</h3><p id="applications">Problemy ograniczeń: łamigłówki, układanie harmonogramów i generowanie kombinacji. Odcinanie gałęzi pomaga, ale pesymistycznie liczba prób pozostaje bardzo duża.</p></div>
+          <div><h3>Zastosowania i ograniczenia</h3><p id="applications">N hetmanów to przykład problemu spełniania ograniczeń. Ta sama technika służy m.in. do rozwiązywania sudoku i układania harmonogramów. Odrzucanie konfliktów ogranicza liczbę prób, ale czas nadal może gwałtownie rosnąć; dla n = 2 i n = 3 rozwiązanie nie istnieje.</p></div>
         </div>
       </section>
       <section class="panel controls" aria-label="Ustawienia i sterowanie">
@@ -97,15 +98,16 @@
   const definition = { title: 'Przeszukiwanie z nawrotami: N hetmanów', category: 'Rekurencja · Backtracking', intro: 'Buduj ustawienie po jednym rzędzie. Odrzuć konflikt od razu, a gdy utkniesz, cofnij ostatnią decyzję.', modes: {
     queens: {
       title: 'Problem N hetmanów',
+      purpose: 'Problem N hetmanów polega na ustawieniu n hetmanów na szachownicy n × n tak, aby żadne dwa się nie atakowały. Hetman atakuje wzdłuż całego swojego rzędu, kolumny i obu przekątnych, więc żadne dwie figury nie mogą dzielić tych linii. Algorytm szuka jednego poprawnego ustawienia albo stwierdza, że ono nie istnieje.',
       fields: [field('size', 'Rozmiar planszy n (1…8)', '4', { type: 'number', min: 1, max: 8 })],
       examples: [example('Czterech hetmanów', { size: '4' }), example('Brak rozwiązania: n = 3', { size: '3' }), example('Ośmiu hetmanów', { size: '8' }), example('Jeden hetman', { size: '1' })],
       time: 'O(n · n!) jako górne oszacowanie',
       space: 'O(n) pomocniczej',
       note: 'Sprawdzamy n kolumn na każdym odwiedzonym poziomie; zajętość kolumn i przekątnych sprawdzają zbiory. Kończymy na pierwszym rozwiązaniu, nie liczymy wszystkich ustawień. Pamięć tabel i historii animacji jest dodatkowa.',
-      explanation: 'W każdym rzędzie ustawiamy dokładnie jednego hetmana. Kandydat jest poprawny, jeśli nie zajmuje użytej kolumny ani przekątnej. Bezpieczną decyzję rozwijamy rekurencyjnie.',
+      explanation: 'Przeszukiwanie z nawrotami (backtracking) buduje rozwiązanie po jednej decyzji. Po bezpiecznym ustawieniu hetmana przechodzimy do następnego rzędu. Gdy nie da się kontynuować, cofamy ostatnią decyzję i próbujemy innej kolumny.',
       correctness: 'Każde poprawne ustawienie ma jeden wybór kolumny w każdym rzędzie. Algorytm rozpatruje wszystkie takie wybory, odcinając tylko te, które już zawierają konflikt. Żadne ich przedłużenie nie może być rozwiązaniem.',
-      applications: 'Problemy ograniczeń: łamigłówki, układanie harmonogramów i generowanie kombinacji. Odcinanie gałęzi pomaga, ale pesymistycznie liczba prób pozostaje bardzo duża.',
-      steps: ['Wybierz kolejną kolumnę bieżącego rzędu.', 'Sprawdź kolumnę oraz przekątne r − c i r + c.', 'Jeżeli pole jest bezpieczne, przejdź rekurencyjnie do następnego rzędu.', 'Po niepowodzeniu usuń hetmana i kontynuuj próby.'],
+      applications: 'N hetmanów to przykład problemu spełniania ograniczeń. Ta sama technika służy m.in. do rozwiązywania sudoku i układania harmonogramów. Odrzucanie konfliktów ogranicza liczbę prób, ale czas nadal może gwałtownie rosnąć; dla n = 2 i n = 3 rozwiązanie nie istnieje.',
+      steps: ['Zacznij od pustej planszy i pierwszego rzędu.', 'Sprawdź kolejną kolumnę: musi być wolna, podobnie jak obie przekątne r − c i r + c.', 'Na bezpiecznym polu ustaw hetmana i spróbuj obsadzić następny rząd. Ustawienie n hetmanów kończy szukanie sukcesem.', 'Jeśli dalsze ustawianie się nie uda, usuń hetmana i sprawdź następną kolumnę. Wyczerpanie wszystkich możliwości oznacza brak rozwiązania.'],
       rule: 'search(row):\n  if row == n: sukces\n  for column in 0…n−1:\n    jeśli bez konfliktu: postaw; search(row+1); w razie porażki usuń',
       run
     }

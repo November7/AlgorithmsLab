@@ -25,18 +25,19 @@
       </section>
       <section class="panel lesson" aria-labelledby="lessonTitle">
         <div class="lesson-header"><div><p class="eyebrow">01 / Zrozum algorytm</p><h2 id="lessonTitle">Odległość edycyjna</h2></div><span class="tag">Programowanie dynamiczne</span></div>
+        <div class="lesson-purpose"><h3>Cel i wynik</h3><p id="purpose">Oblicza najmniejszą liczbę zmian potrzebnych do zamiany jednego napisu w drugi. Dozwolone są wstawienie, usunięcie i zamiana jednego znaku, każda z kosztem 1; np. „kot” → „kod” wymaga jednej zamiany. Wynikiem jest odległość Levenshteina i jedna najkrótsza lista operacji; zamiana miejsc dwóch znaków nie jest osobną operacją.</p></div>
         <dl class="complexity"><div><dt>Czas</dt><dd>O(n · m)</dd></div><div><dt>Pamięć</dt><dd>O(n · m)</dd></div><div><dt>Sama wartość</dt><dd>O(min(n, m)) pamięci</dd></div><div><dt>Operacje</dt><dd>Wstaw, usuń, zamień</dd></div><div><dt>Odtwarzanie</dt><dd>O(n + m)</dd></div></dl>
         <p class="complexity-note">n i m to długości słów. Pełna tabela jest potrzebna tylko do odtworzenia listy operacji; samą odległość można policzyć, trzymając dwa wiersze.</p>
         <div class="lesson-columns">
           <div><h3>Jak to działa?</h3>
-            <p>Mierzy, ile pojedynczych zmian potrzeba, aby zamienić jedno słowo w drugie. Dozwolone są wstawienie litery, usunięcie litery i zamiana litery na inną; każda operacja kosztuje 1. Na przykład „kot” → „kod” wymaga jednej zamiany. Zamiast sprawdzać wszystkie możliwe ciągi zmian, zapisujemy w tabeli wyniki dla krótszych początków słów, czyli prefiksów. To przykład programowania dynamicznego: większy wynik budujemy z już obliczonych mniejszych.</p><ol>
+            <p>Zapisujemy w tabeli wyniki dla krótszych początków słów, czyli prefiksów. Każda komórka wybiera najtańszą z trzech możliwości: usunięcie, wstawienie albo dopasowanie ostatnich znaków. To programowanie dynamiczne: większy wynik powstaje z już obliczonych mniejszych.</p><ol>
               <li>Komórka w wierszu i i kolumnie j oznacza najmniejszy koszt zamiany pierwszych i liter źródła na pierwsze j liter celu. Wpisz w pierwszy wiersz 0, 1, 2… wstawień, a w pierwszą kolumnę 0, 1, 2… usunięć.</li>
               <li>Wypełniaj tabelę wierszami. Dla każdej komórki rozważ wynik z góry + 1 za usunięcie, z lewej + 1 za wstawienie oraz z przekątnej za dopasowanie ostatnich liter.</li>
               <li>Do wyniku z przekątnej dodaj 0, jeśli litery są takie same, albo 1 za ich zamianę. Wpisz najmniejszy z trzech kosztów. Prawy dolny róg daje odległość całych słów.</li>
               <li>Aby odtworzyć zmiany, cofaj się od prawego dolnego rogu do komórki, z której pochodzi wybrany koszt. Odczytane w odwrotnej kolejności kroki opisują zamianę źródła w cel.</li>
             </ol></div>
           <div><h3>Dlaczego to działa?</h3><p>Ostatni znak słowa źródłowego jest albo dopasowany lub zamieniony, albo usunięty, albo trzeba dopisać ostatni znak docelowy. Każdy z tych przypadków sprowadza się do mniejszego, już policzonego podproblemu.</p><h3>Remisy</h3><p>Gdy kilka operacji daje to samo minimum, może istnieć kilka różnych list zmian o tej samej najmniejszej długości. Sama odległość pozostaje jednoznaczna. Przy remisie wybieramy przekątną (zgodność lub zamianę), następnie usunięcie, a na końcu wstawienie.</p></div>
-          <div><h3>Kiedy się przydaje?</h3><p>Przy sprawdzaniu pisowni i podpowiedziach „czy chodziło o…?”, porównywaniu sekwencji DNA, wykrywaniu zmian między wersjami tekstu oraz w wyszukiwaniu przybliżonym.</p></div>
+          <div><h3>Kiedy się przydaje?</h3><p>Przy korekcie pisowni, wyszukiwaniu przybliżonym i porównywaniu napisów. Mierzy różnice znaków, a nie znaczenie słów. Równe koszty operacji są uproszczeniem; np. model błędów klawiatury może wymagać innych wag.</p></div>
         </div>
       </section>
       <section class="panel controls" aria-label="Ustawienia i sterowanie">

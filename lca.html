@@ -35,6 +35,7 @@
           <div><p class="eyebrow">01 / Zrozum algorytm</p><h2 id="lessonTitle">Najniższy wspólny przodek (LCA)</h2></div>
           <span class="tag" id="methodTag">Wyrównywanie głębokości</span>
         </div>
+        <div class="lesson-purpose"><h3>Cel i wynik</h3><p id="purpose">Dla dwóch wierzchołków ukorzenionego drzewa znajduje ich najniższego wspólnego przodka (LCA), czyli wspólnego przodka leżącego najdalej od korzenia. Przykładem jest najbliższy wspólny folder dwóch plików. Wynikiem jest jeden wierzchołek; może nim być któryś z pytanych wierzchołków, bo każdy uznajemy za własnego przodka.</p></div>
         <dl class="complexity">
           <div><dt>Wejście</dt><dd>Ukorzenione drzewo</dd></div>
           <div><dt>Przygotowanie</dt><dd id="cxPrep">Θ(V)</dd></div>
@@ -46,7 +47,7 @@
         <div class="lesson-columns">
           <div>
             <h3>Wyrównywanie głębokości – jak to działa?</h3>
-            <p>W ukorzenionym drzewie każdy wierzchołek poza korzeniem ma jednego rodzica. Szukamy wspólnego przodka dwóch wskazanych wierzchołków, który leży najbliżej nich, czyli najdalej od korzenia. Przykładowo dla dwóch plików w różnych podfolderach byłby to ich najbliższy wspólny folder. Głębokość oznacza liczbę krawędzi od korzenia. Najpierw wyrównujemy głębokości, a potem wspinamy się obiema drogami naraz.</p>
+            <p>Każdy wierzchołek poza korzeniem ma jednego rodzica. Głębokość to liczba krawędzi od korzenia. Najpierw przesuwamy głębszy wierzchołek w górę, aby wyrównać głębokości, a potem wspinamy się obiema drogami naraz do pierwszego spotkania.</p>
             <ol>
               <li>Jeśli jeden wierzchołek leży głębiej, zastępuj go jego rodzicem, aż oba znajdą się na tej samej głębokości. Tylko głębszy wierzchołek wykonuje te pierwsze kroki.</li>
               <li>Sprawdź, czy wskazania są już równe. Jeśli tak, znaleziony wierzchołek jest LCA; tak dzieje się m.in., gdy jeden z początkowych wierzchołków był przodkiem drugiego.</li>

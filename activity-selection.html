@@ -25,6 +25,7 @@
       </section>
       <section class="panel lesson" aria-labelledby="lessonTitle">
         <div class="lesson-header"><div><p class="eyebrow">01 / Zrozum algorytm</p><h2 id="lessonTitle">Wybór niepokrywających się zadań</h2></div><span class="tag">Algorytmy zachłanne</span></div>
+        <div class="lesson-purpose"><h3>Cel i wynik</h3><p id="purpose">Z podanych zadań o ustalonych czasach początku i końca wybiera jak najwięcej takich, które nie nakładają się na siebie. Wszystkie korzystają z jednego zasobu, np. jednej sali, i każde liczy się tak samo. Wynikiem jest maksymalna liczba zadań i ich lista; koniec jednego może być początkiem następnego.</p></div>
         <dl class="complexity"><div><dt>Czas</dt><dd id="timeComplexity">O(n log n); po sortowaniu O(n)</dd></div><div><dt>Pamięć</dt><dd id="spaceComplexity">O(n) na dane i wynik</dd></div></dl>
         <p class="complexity-note" id="complexityNote">n to liczba zadań. Przedziały są lewostronnie domknięte [start, end), więc zadanie może zacząć się dokładnie po zakończeniu poprzedniego. Koszt wizualizacji nie jest wliczony.</p>
         <div class="lesson-columns">
@@ -96,6 +97,7 @@ for job: if job.start ≥ lastEnd: wybierz job; lastEnd = job.end</p></details>
   const definition = { title: 'Zachłanny wybór zadań', category: 'Algorytmy zachłanne', intro: 'Wybierz jak najwięcej niekolidujących zadań na jednym zasobie. Najwcześniejszy koniec zostawia najwięcej miejsca na następne zadania.', modes: {
     activities: {
       title: 'Wybór niepokrywających się zadań',
+      purpose: 'Z podanych zadań o ustalonych czasach początku i końca wybiera jak najwięcej takich, które nie nakładają się na siebie. Wszystkie korzystają z jednego zasobu, np. jednej sali, i każde liczy się tak samo. Wynikiem jest maksymalna liczba zadań i ich lista; koniec jednego może być początkiem następnego.',
       fields: [field('activities', 'Zadania: początek koniec, po jednym w wierszu (0 ≤ początek < koniec ≤ 31)', '1 4\n3 5\n0 6\n5 7\n3 9\n5 9\n6 10\n8 11\n8 12\n2 14\n12 16', { multiline: true })],
       examples: [example('Klasyczny zestaw', { activities: '1 4\n3 5\n0 6\n5 7\n3 9\n5 9\n6 10\n8 11\n8 12\n2 14\n12 16' }), example('Stykające się końce', { activities: '0 2\n2 4\n4 6\n0 6' }), example('Wszystkie kolidują', { activities: '0 8\n1 7\n2 6' })],
       time: 'O(n log n); po sortowaniu O(n)',

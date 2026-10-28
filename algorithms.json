@@ -1,211 +1,211 @@
 [
   {
     "title": "Wyznaczanie minimum i maksimum",
-    "description": "Algorytmy wyznaczania minimum i maksimum.",
+    "description": "Wskazanie najmniejszej i największej wartości w tablicy bez jej sortowania. Porównaj pięć sposobów ograniczania liczby porównań.",
     "url": "minmax.html",
     "status": "published"
   },
   {
     "title": "Algorytmy wyszukiwania",
-    "description": "Algorytmy wyszukiwania.",
+    "description": "Znalezienie pozycji podanej wartości lub stwierdzenie jej braku. Porównaj osiem metod i sprawdź, które wymagają posortowanych danych.",
     "url": "search.html",
     "status": "published"
   },
   {
     "title": "Usuwanie duplikatów",
-    "description": "Usuwanie duplikatów przez zbiór, sortowanie, porównywanie z wynikiem i tablicę obecności.",
+    "description": "Pozostawienie po jednym wystąpieniu każdej wartości. Cztery metody różnią się pamięcią, czasem i kolejnością wyniku.",
     "url": "duplicates.html",
     "status": "published"
   },
   {
     "title": "Algorytmy sortowania",
-    "description": "Algorytmy sortowania.",
+    "description": "Uporządkowanie elementów tablicy od najmniejszego do największego. Dziesięć metod o różnych kosztach i stabilności.",
     "url": "sort.html",
     "status": "published"
   },
   {
     "title": "Przeszukiwanie grafów - DFS i BFS",
-    "description": "Algorytmy przeszukiwania grafów - DFS i BFS.",
+    "description": "Odwiedzanie wierzchołków grafu i ustalanie osiągalności. BFS wyznacza odległości w liczbie krawędzi, a DFS zagłębia się w gałęzie i wraca.",
     "url": "dfs-bfs.html",
     "status": "published"
   },
   {
     "title": "Najniższy wspólny przodek (LCA)",
-    "description": "Algorytm znajdowania najniższego wspólnego przodka (LCA) dwóch wierzchołków w drzewie.",
+    "description": "Znalezienie wspólnego przodka dwóch wierzchołków drzewa, który leży najdalej od korzenia. Porównaj zwykłe wspinanie z binary lifting.",
     "url": "lca.html",
     "status": "published"
   },
   {
     "title": "Algorytm Dijkstry",
-    "description": "Algorytm Dijkstry do wyznaczania najkrótszych ścieżek w grafie.",
+    "description": "Najtańsze drogi od jednego startu do pozostałych wierzchołków. Wymaga nieujemnych wag krawędzi i pozwala odtworzyć wybraną trasę.",
     "url": "dijkstra.html",
     "status": "published"
   },
   {
     "title": "Algorytm Kruskala",
-    "description": "Minimalne drzewo i las rozpinający: wybór krawędzi, składowe i odrzucanie cykli.",
+    "description": "Połączenie wierzchołków grafu nieskierowanego bez cykli i z najmniejszą sumą wag. Kruskal wybiera krawędzie od najtańszych.",
     "url": "kruskal.html",
     "status": "published"
   },
   {
     "title": "Sortowanie topologiczne Kahna",
-    "description": "Kolejność zadań z zależnościami, kolejka gotowych zadań i wykrywanie cyklu.",
+    "description": "Ułożenie zadań tak, aby każde wymaganie poprzedzało zadanie, które od niego zależy. Cykl oznacza brak pełnej poprawnej kolejności.",
     "url": "topological.html",
     "status": "published"
   },
   {
     "title": "Problem plecakowy 0/1",
-    "description": "Tabela programowania dynamicznego i odtwarzanie optymalnego zestawu przedmiotów.",
+    "description": "Wybór przedmiotów o największej łącznej wartości bez przekroczenia pojemności. Każdy przedmiot można zabrać w całości najwyżej raz.",
     "url": "knapsack.html",
     "status": "published"
   },
   {
     "title": "Odległość edycyjna (Levenshtein)",
-    "description": "Tabela programowania dynamicznego i odtwarzanie operacji zamieniających jedno słowo w drugie.",
+    "description": "Najmniejsza liczba wstawień, usunięć i zamian znaków potrzebnych do przekształcenia jednego napisu w drugi, wraz z listą zmian.",
     "url": "edit-distance.html",
     "status": "published"
   },
   {
     "title": "Algorytm Bellmana-Forda",
-    "description": "Najkrótsze ścieżki z ujemnymi wagami i wykrywanie ujemnego cyklu.",
+    "description": "Najtańsze drogi od jednego startu, także z ujemnymi wagami. Dodatkowe sprawdzenie wykrywa osiągalny ujemny cykl.",
     "url": "bellman-ford.html",
     "status": "published"
   },
   {
     "title": "Union-Find (zbiory rozłączne)",
-    "description": "Operacje find i union, łączenie według rangi i kompresja ścieżek.",
+    "description": "Łączenie rozłącznych grup i sprawdzanie, czy dwa elementy należą do tej samej grupy. Ranga i kompresja ścieżek przyspieszają operacje.",
     "url": "union-find.html",
     "status": "published"
   },
   {
     "title": "Wyszukiwanie wzorca (KMP)",
-    "description": "Wyszukiwanie wzorca w tekście z tablicą prefikso-sufiksów, bez cofania się w tekście.",
+    "description": "Znalezienie wszystkich dokładnych wystąpień wzorca w tekście, także nakładających się. KMP korzysta z tablicy prefikso-sufiksów.",
     "url": "kmp.html",
     "status": "published"
   },
   {
     "title": "Kopiec binarny (kolejka priorytetowa)",
-    "description": "Wstawianie, usuwanie korzenia, przesuwanie w górę i w dół oraz sortowanie przez kopcowanie.",
+    "description": "Szybkie wybieranie minimum lub maksimum ze zmieniającej się kolekcji. Wstawianie, pobieranie korzenia, budowa kopca i sortowanie.",
     "url": "heap.html",
     "status": "published"
   },
   {
     "title": "Sito Eratostenesa",
-    "description": "Znajdowanie liczb pierwszych przez wykreślanie wielokrotności.",
+    "description": "Lista wszystkich liczb pierwszych nie większych niż n. Sito wykreśla wielokrotności zamiast osobno testować każdą liczbę.",
     "url": "sieve.html",
     "status": "published"
   },
   {
     "title": "Wieże Hanoi (rekurencja)",
-    "description": "Rekurencyjne przenoszenie krążków, stos wywołań i minimalna liczba ruchów 2ⁿ − 1.",
+    "description": "Przeniesienie wieży krążków między trzema prętami bez kładzenia większego na mniejszym. Dwie metody dają minimum 2ⁿ − 1 ruchów.",
     "url": "hanoi.html",
     "status": "published"
   },
   {
     "title": "Operatory w językach programowania",
-    "description": "Operatory arytmetyczne, relacji, logiczne, bitowe i przypisania krok po kroku, z różnicami między językami.",
+    "description": "Obliczanie wartości, porównywanie liczb, łączenie warunków i zmiana zmiennych. Sześć kategorii operatorów z różnicami między językami.",
     "url": "operators.html",
     "status": "published"
   },
   {
     "title": "Algorytm Kadane’a",
-    "description": "Znajdowanie spójnego podciągu o maksymalnej sumie w tablicy.",
+    "description": "Znalezienie niepustego, spójnego fragmentu tablicy o największej sumie. Kadane wyznacza sumę i granice w jednym przebiegu.",
     "url": "array-techniques.html?method=kadane",
     "status": "published"
   },
   {
     "title": "Sumy prefiksowe i algorytm dwóch wskaźników",
-    "description": "Szybkie obliczanie sum na przedziałach oraz rozwiązywanie zadań na tablicach z użyciem dwóch wskaźników.",
+    "description": "Sumy prefiksowe odpowiadają na pytania o sumę fragmentu tablicy. Dwa wskaźniki szukają pary o zadanej sumie w posortowanych danych.",
     "url": "array-techniques.html?method=prefix",
     "status": "published"
   },
   {
     "title": "Algorytm Euklidesa",
-    "description": "Wyznaczanie największego wspólnego dzielnika oraz rozszerzony algorytm Euklidesa.",
+    "description": "Największy wspólny dzielnik dwóch liczb. Wersja rozszerzona znajduje także całkowite x i y spełniające a·x + b·y = NWD(a, b).",
     "url": "number-theory.html?method=euclid",
     "status": "published"
   },
   {
     "title": "Szybkie potęgowanie",
-    "description": "Obliczanie potęgi w czasie logarytmicznym, także modulo zadaną liczbę.",
+    "description": "Obliczanie potęgi całkowitej przez kolejne kwadraty: dokładny wynik albo reszta modulo m, przy logarytmicznej liczbie mnożeń.",
     "url": "number-theory.html?method=power",
     "status": "published"
   },
   {
     "title": "Algorytm Floyda-Warshalla",
-    "description": "Wyznaczanie najkrótszych ścieżek między wszystkimi parami wierzchołków.",
+    "description": "Najmniejsze koszty dróg między wszystkimi parami wierzchołków. Macierz odległości, odtwarzanie trasy i oznaczanie wpływu ujemnych cykli.",
     "url": "graph-analysis.html?method=floyd",
     "status": "published"
   },
   {
     "title": "Algorytm Prima",
-    "description": "Wyznaczanie minimalnego drzewa rozpinającego przez iteracyjne dołączanie najtańszej krawędzi.",
+    "description": "Minimalne drzewo rozpinające grafu nieskierowanego. Prim rozbudowuje drzewo, dołączając najtańsze połączenie z nowym wierzchołkiem.",
     "url": "kruskal.html?method=prim",
     "status": "published"
   },
   {
     "title": "Silnie spójne składowe",
-    "description": "Znajdowanie silnie spójnych składowych grafu skierowanego algorytmem Kosaraju lub Tarjana.",
+    "description": "Podział grafu skierowanego na największe grupy wzajemnie osiągalnych wierzchołków. Algorytm Kosaraju wykonuje dwa przejścia DFS.",
     "url": "graph-analysis.html?method=scc",
     "status": "published"
   },
   {
     "title": "Drzewo przedziałowe",
-    "description": "Efektywne wykonywanie zapytań o przedziały i aktualizacji elementów tablicy.",
+    "description": "Sumowanie fragmentów tablicy po zmianach pojedynczych elementów. Drzewo przedziałowe obsługuje oba rodzaje operacji w O(log n).",
     "url": "range-trees.html?method=segment",
     "status": "published"
   },
   {
     "title": "Drzewo Fenwicka",
-    "description": "Obliczanie sum prefiksowych i aktualizacja elementów tablicy w czasie logarytmicznym.",
+    "description": "Szybkie sumy przedziałów w zmieniającej się tablicy. Drzewo Fenwicka przechowuje sumy bloków i aktualizuje je w O(log n).",
     "url": "range-trees.html?method=fenwick",
     "status": "published"
   },
   {
     "title": "Trie (drzewo prefiksowe)",
-    "description": "Przechowywanie słów i wyszukiwanie prefiksów z użyciem drzewa znaków.",
+    "description": "Przechowywanie słów, sprawdzanie pełnego słowa i znajdowanie wpisów o wspólnym początku. Wspólne prefiksy korzystają z jednej ścieżki.",
     "url": "trie.html",
     "status": "published"
   },
   {
     "title": "Algorytm Rabina-Karpa",
-    "description": "Wyszukiwanie wzorca w tekście przez porównywanie skrótów kroczących.",
+    "description": "Wszystkie dokładne wystąpienia wzorca w tekście. Rabin-Karp przesuwa okno, porównuje skróty i potwierdza trafienia znak po znaku.",
     "url": "kmp.html?method=rabin-karp",
     "status": "published"
   },
   {
     "title": "Najdłuższy wspólny podciąg (LCS)",
-    "description": "Wyznaczanie najdłuższego podciągu wspólnego dla dwóch sekwencji za pomocą programowania dynamicznego.",
+    "description": "Najdłuższy ciąg znaków wspólny dla dwóch napisów, z zachowaniem kolejności, ale bez wymogu sąsiedztwa. Długość i odtworzony podciąg.",
     "url": "sequence-dp.html?method=lcs",
     "status": "published"
   },
   {
     "title": "Najdłuższy rosnący podciąg (LIS)",
-    "description": "Wyznaczanie najdłuższego rosnącego podciągu w sekwencji.",
+    "description": "Najdłuższy ściśle rosnący podciąg tablicy. Można pomijać elementy, lecz nie zmieniać ich kolejności; wynikiem jest długość i podciąg.",
     "url": "sequence-dp.html?method=lis",
     "status": "published"
   },
   {
     "title": "Wydawanie reszty",
-    "description": "Znajdowanie minimalnej liczby monet potrzebnych do uzyskania zadanej kwoty.",
+    "description": "Najmniejsza liczba monet dających dokładnie zadaną kwotę, przy dowolnej liczbie sztuk każdego nominału. Wynik albo informacja o braku rozwiązania.",
     "url": "sequence-dp.html?method=coins",
     "status": "published"
   },
   {
     "title": "Przeszukiwanie z nawrotami",
-    "description": "Rozwiązywanie problemów kombinatorycznych, takich jak problem N hetmanów, przez budowanie i odrzucanie kandydatów.",
+    "description": "Ustawienie n hetmanów na planszy n × n tak, aby żadne dwa się nie atakowały. Backtracking próbuje ustawień i cofa decyzje prowadzące do konfliktu.",
     "url": "backtracking.html",
     "status": "published"
   },
   {
     "title": "Algorytm zachłanny wyboru zadań",
-    "description": "Wybieranie maksymalnej liczby niepokrywających się zadań przez uporządkowanie ich według czasu zakończenia.",
+    "description": "Wybór maksymalnej liczby niepokrywających się zadań na jednym zasobie. Strategia zachłanna preferuje najwcześniejszy koniec.",
     "url": "activity-selection.html",
     "status": "published"
   },
   {
     "title": "Algorytm Huffmana",
-    "description": "Interaktywna budowa drzewa kodów prefiksowych i kodowanie tekstu według częstości znaków.",
+    "description": "Bezstratne kodowanie tekstu za pomocą bitów. Częstości znaków wyznaczają drzewo kodów prefiksowych o minimalnej łącznej długości.",
     "url": "huffman.html",
     "status": "published"
   }

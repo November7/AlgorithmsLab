@@ -25,10 +25,11 @@
       </section>
       <section class="panel lesson" aria-labelledby="lessonTitle">
         <div class="lesson-header"><div><p class="eyebrow">01 / Zrozum algorytm</p><h2 id="lessonTitle">Euklides i rozszerzony algorytm Euklidesa</h2></div><span class="tag">Teoria liczb</span></div>
+        <div class="lesson-purpose"><h3>Cel i wynik</h3><p id="purpose">Wyznacza największy wspólny dzielnik (NWD) dwóch liczb całkowitych, czyli największą dodatnią liczbę dzielącą obie bez reszty. Na przykład NWD(18, 24) = 6. Wersja rozszerzona znajduje również całkowite x i y takie, że a·x + b·y = NWD(a, b); dla pary (0, 0) przyjmujemy umownie NWD = 0.</p></div>
         <dl class="complexity"><div><dt>Czas</dt><dd id="timeComplexity">O(log min(|a|, |b|)) dla a,b ≠ 0</dd></div><div><dt>Pamięć</dt><dd id="spaceComplexity">O(1) liczb</dd></div></dl>
         <p class="complexity-note" id="complexityNote">Dla zer algorytm kończy się w stałej liczbie kroków. Złożoność liczy operacje arytmetyczne, bez kosztu zapisu historii. Współczynniki nie muszą być jedyne.</p>
         <div class="lesson-columns">
-          <div><h3>Jak to działa?</h3><p id="explanation">Zastępuj parę (a, b) parą (b, a mod b), aż druga liczba będzie zerem. Wersja rozszerzona równolegle zapisuje każdą resztę jako kombinację liczb wejściowych.</p><ol id="steps"><li>Rozpocznij od wartości bezwzględnych a i b.</li><li>Oblicz iloraz i resztę, przesuń parę reszt.</li><li>Wykonaj identyczne przekształcenie współczynników.</li><li>Przywróć znaki współczynników zgodnie z wejściem.</li></ol></div>
+          <div><h3>Jak to działa?</h3><p id="explanation">Zastępuj parę (a, b) parą (b, a mod b), aż druga liczba będzie zerem. Wersja rozszerzona równolegle zapisuje każdą resztę jako kombinację liczb wejściowych.</p><ol id="steps"><li>Rozpocznij od |a| i |b| oraz współczynników (1, 0) i (0, 1).</li><li>Dopóki druga reszta nie jest zerem, oblicz iloraz i resztę z dzielenia pierwszej przez drugą.</li><li>Zastąp parę reszt drugą resztą i nową resztą; wykonaj to samo odejmowanie na współczynnikach.</li><li>Pierwsza reszta po zakończeniu pętli jest NWD. Dostosuj znaki x i y do znaków danych wejściowych.</li></ol></div>
           <div><h3>Dlaczego to działa?</h3><p id="correctness">Wspólne dzielniki a i b są dokładnie wspólnymi dzielnikami b i a − q·b. Te same przekształcenia współczynników zachowują r = a·x + b·y.</p></div>
           <div><h3>Zastosowania i ograniczenia</h3><p id="applications">Skracanie ułamków, równania diofantyczne i odwrotność modulo. Gdy NWD(a, m) = 1, współczynnik x jest odwrotnością a modulo m.</p></div>
         </div>
@@ -87,7 +88,7 @@
       yield frame(`Iloraz q = ${quotient}; nowa reszta = ${remainder}. Przesuwamy parę reszt i współczynników.`, panels());
     }
     const coefficientA = a < 0 ? -oldX : oldX, coefficientB = b < 0 ? -oldY : oldY;
-    yield frame('Ostatnia niezerowa reszta jest NWD. Dla pary (0, 0) przyjmujemy NWD = 0.', panels(), { done: true, result: `NWD(${a}, ${b}) = ${oldR}; ${a} · (${coefficientA}) + ${b} · (${coefficientB}) = ${oldR}.`, data: { gcd: oldR, x: coefficientA, y: coefficientB } });
+    yield frame('Pierwsza reszta po zakończeniu pętli jest NWD. Dla pary (0, 0) przyjmujemy NWD = 0.', panels(), { done: true, result: `NWD(${a}, ${b}) = ${oldR}; ${a} · (${coefficientA}) + ${b} · (${coefficientB}) = ${oldR}.`, data: { gcd: oldR, x: coefficientA, y: coefficientB } });
   }
   function* power(input) {
     const base = BigInt(integer(input.base, 'Podstawa', -1000, 1000));
@@ -113,6 +114,7 @@
   const definition = { title: 'Algorytmy arytmetyczne', category: 'Teoria liczb', intro: 'Obserwuj, jak dzielenie z resztą i zapis binarny zastępują długie ciągi prostych operacji.', modes: {
     euclid: {
       title: 'Euklides i rozszerzony algorytm Euklidesa',
+      purpose: 'Wyznacza największy wspólny dzielnik (NWD) dwóch liczb całkowitych, czyli największą dodatnią liczbę dzielącą obie bez reszty. Na przykład NWD(18, 24) = 6. Wersja rozszerzona znajduje również całkowite x i y takie, że a·x + b·y = NWD(a, b); dla pary (0, 0) przyjmujemy umownie NWD = 0.',
       fields: [field('first', 'a (−1 000 000…1 000 000)', '240', { type: 'number', min: -1000000, max: 1000000 }), field('second', 'b (−1 000 000…1 000 000)', '46', { type: 'number', min: -1000000, max: 1000000 })],
       examples: [example('NWD i współczynniki', { first: '240', second: '46' }), example('Liczba ujemna', { first: '-35', second: '15' }), example('Jedno zero', { first: '0', second: '18' }), example('Dwa zera', { first: '0', second: '0' })],
       time: 'O(log min(|a|, |b|)) dla a,b ≠ 0',
@@ -121,12 +123,13 @@
       explanation: 'Zastępuj parę (a, b) parą (b, a mod b), aż druga liczba będzie zerem. Wersja rozszerzona równolegle zapisuje każdą resztę jako kombinację liczb wejściowych.',
       correctness: 'Wspólne dzielniki a i b są dokładnie wspólnymi dzielnikami b i a − q·b. Te same przekształcenia współczynników zachowują r = a·x + b·y.',
       applications: 'Skracanie ułamków, równania diofantyczne i odwrotność modulo. Gdy NWD(a, m) = 1, współczynnik x jest odwrotnością a modulo m.',
-      steps: ['Rozpocznij od wartości bezwzględnych a i b.', 'Oblicz iloraz i resztę, przesuń parę reszt.', 'Wykonaj identyczne przekształcenie współczynników.', 'Przywróć znaki współczynników zgodnie z wejściem.'],
+      steps: ['Rozpocznij od |a| i |b| oraz współczynników (1, 0) i (0, 1).', 'Dopóki druga reszta nie jest zerem, oblicz iloraz i resztę z dzielenia pierwszej przez drugą.', 'Zastąp parę reszt drugą resztą i nową resztą; wykonaj to samo odejmowanie na współczynnikach.', 'Pierwsza reszta po zakończeniu pętli jest NWD. Dostosuj znaki x i y do znaków danych wejściowych.'],
       rule: '(r₀, r₁) ← (r₁, r₀ − q·r₁)\n(x₀, x₁) ← (x₁, x₀ − q·x₁)\n(y₀, y₁) ← (y₁, y₀ − q·y₁)',
       run: euclid
     },
     power: {
       title: 'Szybkie potęgowanie',
+      purpose: 'Oblicza a do potęgi e dla całkowitego wykładnika e ≥ 0, wykonując znacznie mniej mnożeń niż mnożenie a przez siebie e razy. Może zwrócić dokładną potęgę albo jej resztę z dzielenia przez dodatnie m, czyli wynik modulo m.',
       fields: [field('base', 'Podstawa (−1000…1000)', '3', { type: 'number', min: -1000, max: 1000 }), field('exponent', 'Wykładnik (0…1000)', '13', { type: 'number', min: 0, max: 1000 }), field('modulus', 'Modulo: 0 = bez modulo; maks. 1 000 000 000', '0', { type: 'number', min: 0, max: 1000000000 })],
       examples: [example('Dokładna potęga', { base: '3', exponent: '13', modulus: '0' }), example('Potęgowanie modulo', { base: '7', exponent: '128', modulus: '19' }), example('Ujemna podstawa', { base: '-3', exponent: '5', modulus: '7' }), example('Wykładnik zero', { base: '0', exponent: '0', modulus: '0' })],
       time: 'O(log(e + 1)) mnożeń',
@@ -134,7 +137,7 @@
       note: 'e to wykładnik. Koszt mnożenia zależy od długości liczb; bez modulo wynik może mieć wiele cyfr. Umownie przyjmujemy 0⁰ = 1. Modulo 1 każdy wynik wynosi 0.',
       explanation: 'Rozkładamy wykładnik na bity. Kolejne kwadraty podstawy odpowiadają potęgom o wykładnikach 1, 2, 4, 8… Do wyniku trafiają tylko potęgi odpowiadające bitom 1.',
       correctness: 'Iloczyn wyniku i bieżącej podstawy podniesionej do pozostałego wykładnika jest równy zadanej potędze (lub przystaje do niej modulo m). Każdy krok zachowuje ten niezmiennik.',
-      applications: 'Duże potęgi całkowite i obliczenia modularne. Używamy BigInt, aby uniknąć zaokrągleń typu Number.',
+      applications: 'Obliczenia modularne w teorii liczb, testach pierwszości i algorytmach kryptograficznych. Redukowanie modulo ogranicza rozmiar liczb pośrednich. Bez modulo wynik szybko rośnie; ten wariant nie obsługuje wykładników ujemnych ani ułamkowych.',
       steps: ['Ustaw wynik na 1 i podstawę na a.', 'Jeśli wykładnik jest nieparzysty, pomnóż wynik przez podstawę.', 'Podziel wykładnik całkowicie przez 2 i podnieś podstawę do kwadratu.', 'Powtarzaj do wyzerowania wykładnika; po mnożeniu stosuj modulo, jeśli wybrano.'],
       rule: 'while e > 0:\n  if e mod 2 == 1: result *= base\n  e = floor(e / 2)\n  base *= base\nKażde mnożenie można redukować modulo m.',
       run: power

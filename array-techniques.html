@@ -25,12 +25,13 @@
       </section>
       <section class="panel lesson" aria-labelledby="lessonTitle">
         <div class="lesson-header"><div><p class="eyebrow">01 / Zrozum algorytm</p><h2 id="lessonTitle">Algorytm Kadane’a</h2></div><span class="tag">Tablice</span></div>
+        <div class="lesson-purpose"><h3>Cel i wynik</h3><p id="purpose">Znajduje niepusty, spójny fragment tablicy o największej sumie. Spójny oznacza, że wybieramy kolejne elementy bez przeskakiwania pozycji. Zwraca największą sumę i granice fragmentu; dla samych liczb ujemnych wynikiem jest największy pojedynczy element.</p></div>
         <dl class="complexity"><div><dt>Czas</dt><dd id="timeComplexity">O(n)</dd></div><div><dt>Pamięć</dt><dd id="spaceComplexity">O(1) pomocniczej</dd></div></dl>
         <p class="complexity-note" id="complexityNote">Indeksy od 0; oba końce przedziału są włączone. n to liczba elementów. Koszt historii i rysowania nie wchodzi w podaną złożoność.</p>
         <div class="lesson-columns">
           <div><h3>Jak to działa?</h3><p id="explanation">Dla każdej pozycji wybieramy: zacząć nowy fragment czy przedłużyć poprzedni. Zapamiętujemy najlepszy wynik oraz jego granice.</p><ol id="steps"><li>Ustaw sumę bieżącą i najlepszą na A[0].</li><li>Dla kolejnego elementu wybierz max(A[i], suma + A[i]).</li><li>Jeżeli wynik jest większy od rekordu, zapisz go i jego granice.</li></ol></div>
           <div><h3>Dlaczego to działa?</h3><p id="correctness">Każdy fragment kończący się w i składa się z A[i] albo z fragmentu kończącego się w i − 1 i A[i]. Ujemny poprzedni wynik pogarsza nowy fragment, więc można go odrzucić.</p></div>
-          <div><h3>Zastosowania i ograniczenia</h3><p id="applications">Najlepszy spójny okres zysków i strat. Szukamy fragmentu niepustego, a nie dowolnego podzbioru.</p></div>
+          <div><h3>Zastosowania i ograniczenia</h3><p id="applications">Wybór okresu o największym łącznym zysku na podstawie dziennych zysków i strat. Dopuszcza liczby ujemne i działa w jednym przebiegu. Przy remisach może istnieć kilka równie dobrych fragmentów; zwracamy jeden z nich.</p></div>
         </div>
       </section>
       <section class="panel controls" aria-label="Ustawienia i sterowanie">
@@ -125,6 +126,7 @@ best = max(best, current)</p></details>
   const definition = { title: 'Techniki pracy na tablicach', category: 'Tablice', intro: 'Wybierz maksymalny fragment, sumy prefiksowe lub szukanie pary dwoma wskaźnikami. Każda metoda wykorzystuje inne własności danych.', modes: {
     kadane: {
       title: 'Algorytm Kadane’a',
+      purpose: 'Znajduje niepusty, spójny fragment tablicy o największej sumie. Spójny oznacza, że wybieramy kolejne elementy bez przeskakiwania pozycji. Zwraca największą sumę i granice fragmentu; dla samych liczb ujemnych wynikiem jest największy pojedynczy element.',
       fields: [valuesField],
       examples: [example('Mieszane wartości', { values: valuesField.value }), example('Same ujemne', { values: '-8 -3 -6 -2 -5' }), example('Jeden element', { values: '7' })],
       time: 'O(n)',
@@ -132,13 +134,14 @@ best = max(best, current)</p></details>
       note,
       explanation: 'Dla każdej pozycji wybieramy: zacząć nowy fragment czy przedłużyć poprzedni. Zapamiętujemy najlepszy wynik oraz jego granice.',
       correctness: 'Każdy fragment kończący się w i składa się z A[i] albo z fragmentu kończącego się w i − 1 i A[i]. Ujemny poprzedni wynik pogarsza nowy fragment, więc można go odrzucić.',
-      applications: 'Najlepszy spójny okres zysków i strat. Szukamy fragmentu niepustego, a nie dowolnego podzbioru.',
+      applications: 'Wybór okresu o największym łącznym zysku na podstawie dziennych zysków i strat. Dopuszcza liczby ujemne i działa w jednym przebiegu. Przy remisach może istnieć kilka równie dobrych fragmentów; zwracamy jeden z nich.',
       steps: ['Ustaw sumę bieżącą i najlepszą na A[0].', 'Dla kolejnego elementu wybierz max(A[i], suma + A[i]).', 'Jeżeli wynik jest większy od rekordu, zapisz go i jego granice.'],
       rule: 'current = max(A[i], current + A[i])\nbest = max(best, current)',
       run: kadane
     },
     prefix: {
       title: 'Sumy prefiksowe',
+      purpose: 'Przygotowuje tablicę do szybkiego obliczania sum jej fragmentów. Zapytanie o indeksy l i r zwraca sumę wszystkich elementów między nimi, łącznie z końcami. Jednorazowe obliczenie sum początków tablicy pozwala potem odpowiadać jednym odejmowaniem.',
       fields: [valuesField, field('left', 'Lewy indeks', '2', { type: 'number', min: 0, max: 15 }), field('right', 'Prawy indeks', '6', { type: 'number', min: 0, max: 15 })],
       examples: [example('Suma środkowego zakresu', { values: valuesField.value, left: '2', right: '6' }), example('Cała tablica', { values: '2 -5 3 7', left: '0', right: '3' }), example('Jeden element', { values: '-4', left: '0', right: '0' })],
       time: 'Budowa O(n); zapytanie O(1)',
@@ -146,13 +149,14 @@ best = max(best, current)</p></details>
       note,
       explanation: 'P[k] przechowuje sumę pierwszych k elementów. Różnica dwóch prefiksów usuwa wszystko przed interesującym nas zakresem.',
       correctness: 'W P[r + 1] i P[l] występują te same elementy o indeksach mniejszych od l. Odejmowanie je usuwa, pozostawiając dokładnie A[l]…A[r].',
-      applications: 'Wiele zapytań o sumy w niezmiennej tablicy. Przy częstych aktualizacjach porównaj drzewo Fenwicka lub przedziałowe.',
+      applications: 'Wiele pytań o sumy, np. sprzedaż w różnych okresach, gdy dane się nie zmieniają. Zmiana elementu wymaga poprawienia wszystkich kolejnych prefiksów, nawet O(n) pracy. Przy częstych zmianach lepsze będą drzewa Fenwicka lub przedziałowe.',
       steps: ['Przyjmij P[0] = 0.', 'Oblicz P[i + 1] = P[i] + A[i].', 'Odpowiedz P[r + 1] − P[l].'],
       rule: 'P[0] = 0\nP[i + 1] = P[i] + A[i]\nsum(l, r) = P[r + 1] − P[l]',
       run: prefix
     },
     'two-pointers': {
       title: 'Dwa wskaźniki: para o zadanej sumie',
+      purpose: 'Szuka dwóch różnych pozycji w posortowanej tablicy, których wartości dają zadaną sumę. Zwraca jedną taką parę albo informację, że nie istnieje. Wartości mogą być równe, np. dwa wystąpienia 2 dają sumę 4.',
       fields: [field('values', 'Tablica posortowana niemalejąco', '-5 -2 0 1 3 6 9'), field('target', 'Szukana suma (−200…200)', '7', { type: 'number', min: -200, max: 200 })],
       examples: [example('Para w środku', { values: '-5 -2 0 1 3 6 9', target: '7' }), example('Brak pary', { values: '1 2 4 8', target: '20' }), example('Powtarzające się wartości', { values: '2 2 2', target: '4' })],
       time: 'O(n) dla posortowanych danych',
@@ -160,7 +164,7 @@ best = max(best, current)</p></details>
       note,
       explanation: 'Wskaźniki zaczynają na końcach posortowanej tablicy. Za mała suma przesuwa lewy wskaźnik, za duża przesuwa prawy.',
       correctness: 'Jeżeli suma jest za mała, lewy element nie utworzy rozwiązania z żadnym mniejszym prawym elementem. Analogicznie odrzucamy prawy element przy zbyt dużej sumie.',
-      applications: 'Wyszukiwanie pary o zadanej sumie. Dane muszą być posortowane; sortowanie nie jest częścią tej symulacji. Ujemne liczby i duplikaty są dozwolone.',
+      applications: 'Dobieranie dwóch wartości do budżetu lub zadanej sumy. Dane muszą być posortowane; przygotowanie nieposortowanych danych ma dodatkowy koszt. Ten wariant znajduje jedną parę, a nie wszystkie pary ani fragment o zadanej sumie.',
       steps: ['Ustaw l = 0 i r = n − 1.', 'Porównaj A[l] + A[r] z celem.', 'Przesuń odpowiedni wskaźnik; zakończ przy dopasowaniu albo l ≥ r.'],
       rule: 'while l < r:\n  s = A[l] + A[r]\n  if s == target: return (l, r)\n  if s < target: l++\n  else: r--',
       run: twoPointers

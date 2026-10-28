@@ -35,6 +35,7 @@
           <div><p class="eyebrow">01 / Zrozum algorytm</p><h2 id="lessonTitle">Algorytm Dijkstry</h2></div>
           <span class="tag">Relaksacja krawędzi</span>
         </div>
+        <div class="lesson-purpose"><h3>Cel i wynik</h3><p id="purpose">Znajduje drogi o najmniejszej sumie wag od wybranego startu do wszystkich osiągalnych wierzchołków. Wszystkie krawędzie muszą mieć wagi nieujemne, np. długości lub czasy przejazdu. Wynikiem są odległości i poprzednicy pozwalający odtworzyć trasę do wybranego celu; ∞ oznacza, że celu nie można osiągnąć.</p></div>
         <dl class="complexity">
           <div><dt>Reprezentacja</dt><dd>Listy sąsiedztwa</dd></div>
           <div><dt>Czas</dt><dd>O(V² + E)</dd></div>
@@ -45,7 +46,7 @@
         <div class="lesson-columns">
           <div>
             <h3>Jak to działa?</h3>
-            <p>Wyznacza najtańsze drogi od wybranego startu, gdy wszystkie wagi krawędzi są nieujemne. Wierzchołki można wyobrazić sobie jako miasta, a wagi jako długości dróg. Dla każdego miasta zapisujemy najlepszą dotąd znalezioną odległość. Zawsze wybieramy najbliższe miasto, którego wyniku jeszcze nie zatwierdziliśmy, i sprawdzamy, czy przejście przez nie poprawia dojazd do sąsiadów.</p>
+            <p>Dla każdego wierzchołka pamiętamy najlepszą dotąd znalezioną odległość. Wybieramy najbliższy wierzchołek, którego wyniku jeszcze nie zatwierdziliśmy. Następnie sprawdzamy, czy przejście przez niego poprawia koszt dojścia do jego sąsiadów.</p>
             <ol>
               <li>Ustaw odległość startu na 0, a pozostałych wierzchołków na nieskończoność: droga do nich nie jest jeszcze znana.</li>
               <li>Wybierz spośród nieustalonych wierzchołków ten o najmniejszej skończonej odległości. Zatwierdź jego wynik — przy nieujemnych wagach nie będzie już krótszej drogi.</li>

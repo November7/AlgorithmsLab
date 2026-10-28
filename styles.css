@@ -518,12 +518,15 @@
   font-size:13px;
   margin:0 0 8px;
 }
-.lesson-columns p,.lesson-columns li {
+.lesson-purpose p,.lesson-columns p,.lesson-columns li {
   font-size:13px;
   color:var(--text-secondary);
 }
 .lesson-columns p {
   margin:0 0 14px;
+}
+.lesson-purpose p {
+  margin:0 0 20px;
 }
 .lesson-columns ol {
   margin:12px 0 0;
@@ -1110,11 +1113,6 @@ footer.project-notice::before {
 .interactive-lab #chosen { max-height:230px; overflow-y:auto; padding:4px; }
 
 /* operators.html */
-.operators-lab .op-category-description {
-  margin:0 0 22px;
-  color:var(--muted);
-  font-size:14px;
-}
 .operators-lab .op-section-title {
   margin:0 0 18px;
   font-size:14px;

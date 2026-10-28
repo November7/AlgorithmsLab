@@ -32,6 +32,7 @@
       </section>
       <section class="panel lesson" aria-labelledby="lessonTitle">
         <div class="lesson-header"><div><p class="eyebrow">01 / Zrozum algorytm</p><h2 id="lessonTitle"></h2></div><span class="tag" id="family"></span></div>
+        <div class="lesson-purpose"><h3>Cel i wynik</h3><p id="purpose">Odwiedza wierzchołki osiągalne z wybranego startu i ustala, którędy można do nich dotrzeć. BFS dodatkowo wyznacza najkrótszą liczbę krawędzi od startu do każdego z nich. Wynikiem jest kolejność odwiedzin, drzewo przeszukiwania i odległości; w trybie całego grafu powstaje osobne drzewo dla każdej składowej.</p></div>
         <dl class="complexity" id="complexity"></dl>
         <p class="complexity-note">V to liczba wierzchołków, E to liczba krawędzi. Dla list sąsiedztwa pełne przejście ma czas Θ(V + E) i pamięć pomocniczą O(V), bez grafu wejściowego. Przy przejściu tylko jednej składowej przeglądamy jej wierzchołki i krawędzie; tablice stanu w tej symulacji nadal zajmują O(V). Opis poniżej dotyczy algorytmu wybranego w kroku „02 / Wybierz algorytm”.</p>
         <div class="lesson-columns">
@@ -162,7 +163,7 @@
   const $ = id => document.getElementById(id);
   const ALGO_INFO = {
     bfs: {
-      name: 'Wszerz (BFS)', title: 'Przeszukiwanie wszerz (BFS)', family: 'Kolejka · FIFO',
+      name: 'Wszerz (BFS)', title: 'Przeszukiwanie wszerz (BFS)', purpose: 'Odwiedza wierzchołki osiągalne z wybranego startu i ustala, którędy można do nich dotrzeć. BFS dodatkowo wyznacza najkrótszą liczbę krawędzi od startu do każdego z nich. Wynikiem jest kolejność odwiedzin, drzewo przeszukiwania i odległości; w trybie całego grafu powstaje osobne drzewo dla każdej składowej.', family: 'Kolejka · FIFO',
       description: 'Przegląda graf warstwami, jak kręgi rozchodzące się od miejsca startu. Najpierw odkrywa wierzchołki oddalone o jedną krawędź, potem o dwie i tak dalej. Używa kolejki FIFO: kto został dodany pierwszy, ten pierwszy zostanie obsłużony, jak w kolejce do kasy. Dzięki temu w grafie bez wag pierwsze odkrycie wierzchołka wyznacza najkrótszą drogę do niego pod względem liczby krawędzi.',
       steps: ['Oznacz wierzchołek startowy jako odkryty, ustaw jego odległość na 0 i dodaj go na koniec kolejki.', 'Pobierz wierzchołek z początku kolejki i sprawdź kolejno jego sąsiadów, czyli wierzchołki połączone z nim krawędzią.', 'Każdego nieodkrytego sąsiada od razu oznacz, zapisz bieżący wierzchołek jako jego rodzica i dodaj sąsiada na koniec kolejki. Jego odległość jest o 1 większa.', 'Po sprawdzeniu wszystkich sąsiadów zakończ bieżący wierzchołek. Powtarzaj do opróżnienia kolejki; wtedy odwiedzono całą składową dostępną ze startu.'],
       pros: 'Wyznacza najkrótsze ścieżki w grafie nieważonym. Oznaczenie przy dodawaniu zapobiega duplikatom w kolejce.',
@@ -171,7 +172,7 @@
       exercise: 'Uruchom BFS, a potem DFS na tym samym grafie. Porównaj kolejność odkrywania i wartości w tabeli. Czy BFS odkrywa wierzchołki według niemalejącej odległości od startu?'
     },
     dfs: {
-      name: 'W głąb (DFS)', title: 'Przeszukiwanie w głąb (DFS)', family: 'Stos · LIFO',
+      name: 'W głąb (DFS)', title: 'Przeszukiwanie w głąb (DFS)', purpose: 'Odwiedza wierzchołki osiągalne ze startu, zagłębiając się w kolejne gałęzie grafu. Wynikiem jest kolejność odwiedzin i drzewo połączeń, po których odkryto wierzchołki. Pozwala ustalić osiągalność, lecz głębokość w drzewie DFS nie musi być najkrótszą odległością; tryb całego grafu obejmuje kolejne składowe.', family: 'Stos · LIFO',
       description: 'Przegląda graf podobnie do osoby badającej labirynt: wybiera przejście i idzie nim tak daleko, jak może. Gdy nie ma już nieodkrytych sąsiadów, wraca do poprzedniego wierzchołka i próbuje innej gałęzi. Miejsca powrotu zapamiętuje na stosie LIFO: ostatnio dodany element jest zdejmowany jako pierwszy, jak talerz ze stosu. W tej symulacji jawny stos zastępuje rekurencję, czyli kolejne wywołania tej samej procedury.',
       steps: ['Oznacz start jako odkryty i połóż go na stosie. Stos będzie przechowywał bieżącą ścieżkę i informacje, gdzie kontynuować przeglądanie.', 'Sprawdź następnego sąsiada wierzchołka na szczycie stosu. Pomiń sąsiada, który został już odkryty.', 'Jeśli sąsiad jest nowy, oznacz go, zapisz jego rodzica i dodaj go na szczyt stosu. Teraz to jego sąsiedzi będą sprawdzani.', 'Gdy wierzchołek nie ma już sąsiadów do sprawdzenia, zakończ go i zdejmij ze stosu, wracając do poprzedniego. Pusty stos oznacza koniec przejścia tej składowej.'],
       pros: 'Naturalnie pokazuje zagłębianie i powroty. Jawny stos pozwala uniknąć ograniczenia głębokości rekurencji.',
@@ -262,7 +263,7 @@
 
   function renderLesson() {
     const info = ALGO_INFO[state.selected], bfs = state.selected === 'bfs';
-    for (const id of ['description', 'pros', 'cons', 'uses', 'exercise', 'family']) $(id).textContent = info[id];
+    for (const id of ['purpose', 'description', 'pros', 'cons', 'uses', 'exercise', 'family']) $(id).textContent = info[id];
     $('chartTitle').textContent = $('lessonTitle').textContent = info.title;
     $('steps').replaceChildren(...info.steps.map(text => { const li = document.createElement('li'); li.textContent = text; return li; }));
     $('complexity').innerHTML = `<div><dt>Pełne przejście</dt><dd>Θ(V + E)</dd></div><div><dt>Pamięć pomocnicza</dt><dd>O(V)</dd></div><div><dt>Struktura</dt><dd>${bfs ? 'Kolejka FIFO' : 'Stos LIFO'}</dd></div><div><dt>Najkrótsze ścieżki</dt><dd>${bfs ? 'Tak, bez wag' : 'Brak gwarancji'}</dd></div><div><dt>Reprezentacja</dt><dd>Listy sąsiedztwa</dd></div>`;

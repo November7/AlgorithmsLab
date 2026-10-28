@@ -25,6 +25,7 @@
       </section>
       <section class="panel lesson" aria-labelledby="lessonTitle">
         <div class="lesson-header"><div><p class="eyebrow">01 / Zrozum algorytm</p><h2 id="lessonTitle">Kodowanie Huffmana</h2></div><span class="tag">Kompresja bezstratna</span></div>
+        <div class="lesson-purpose"><h3>Cel i wynik</h3><p id="purpose">Zamienia znaki tekstu na ciągi bitów, aby zmniejszyć długość zapisu bez utraty informacji. Dla podanych częstości tworzy kod o najmniejszej łącznej długości wśród binarnych kodów prefiksowych przypisujących osobny kod każdemu znakowi. Wynikiem jest słownik kodów i zakodowany tekst; żaden kod znaku nie jest początkiem innego, więc odczyt jest jednoznaczny.</p></div>
         <dl class="complexity"><div><dt>Budowa drzewa</dt><dd>O(k log k)</dd></div><div><dt>Kodowanie tekstu</dt><dd>O(n + b)</dd></div><div><dt>Pamięć</dt><dd>O(k + b)</dd></div><div><dt>Wymóg</dt><dd>Znane częstości</dd></div><div><dt>Wynik</dt><dd>Kody prefiksowe</dd></div></dl>
         <p class="complexity-note">n oznacza liczbę znaków (punktów kodowych Unicode), k liczbę różnych znaków, a b długość zakodowanego ciągu bitów. Zliczanie częstości zajmuje O(n). Podane złożoności dotyczą algorytmu z kopcem, bez zapisywania i sortowania klatek animacji. Żaden kod znaku nie jest prefiksem kodu innego znaku. Dla jednego rodzaju znaku używamy kodu 0.</p>
         <div class="lesson-columns">
@@ -35,7 +36,7 @@
             <li>Odczytaj kod znaku z drogi od korzenia do liścia i zastąp każdy znak jego kodem.</li>
           </ol></div>
           <div><h3>Dlaczego to działa?</h3><p>Dwa najrzadsze znaki można umieścić jako rodzeństwo na najgłębszym poziomie optymalnego drzewa. Zastąpienie ich wspólnym węzłem zmniejsza problem do mniejszego drzewa, co uzasadnia zachłanny wybór.</p><h3>Remisy</h3><p>Przy równych częstościach może powstać więcej niż jedno optymalne drzewo. Wizualizacja rozstrzyga remisy stabilnie, według kolejności utworzenia węzłów.</p></div>
-          <div><h3>Kiedy się przydaje?</h3><p>Huffman jest używany jako etap kodowania entropijnego w formatach kompresji. Samo kodowanie nie przechowuje słownika ani częstości, więc pełny format musi przekazać je odbiorcy.</p><div class="exercise"><h3>Sprawdź samodzielnie</h3><p>Porównaj kody dla tekstu „BANANA BANDANA”. Następnie wpisz powtarzający się jeden znak i zobacz, jak obsługiwany jest przypadek bez rozgałęzień.</p></div></div>
+          <div><h3>Kiedy się przydaje?</h3><p>Jest etapem bezstratnej kompresji plików. Odbiorca potrzebuje także słownika kodów lub danych do jego odtworzenia, co zwiększa rozmiar zapisu. Dla krótkich tekstów ten narzut może przewyższyć oszczędność bitów; kodowanie nie służy do ukrywania treści.</p><div class="exercise"><h3>Sprawdź samodzielnie</h3><p>Porównaj kody dla tekstu „BANANA BANDANA”. Następnie wpisz powtarzający się jeden znak i zobacz, jak obsługiwany jest przypadek bez rozgałęzień.</p></div></div>
         </div>
       </section>
       <section class="panel controls" aria-label="Ustawienia i sterowanie">

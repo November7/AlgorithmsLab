@@ -25,11 +25,12 @@
       </section>
       <section class="panel lesson" aria-labelledby="lessonTitle">
         <div class="lesson-header"><div><p class="eyebrow">01 / Zrozum algorytm</p><h2 id="lessonTitle">Union-Find</h2></div><span class="tag">Struktura danych</span></div>
+        <div class="lesson-purpose"><h3>Cel i wynik</h3><p id="purpose">Utrzymuje podział elementów na rozłączne grupy i pozwala te grupy łączyć. Operacja find zwraca reprezentanta grupy, więc równe wyniki dla dwóch elementów oznaczają ich przynależność do tej samej grupy. Operacja union scala dwie grupy; struktura nie przechowuje najkrótszych ścieżek między ich elementami.</p></div>
         <dl class="complexity"><div><dt>find / union</dt><dd>O(α(n)) zamortyzowane (z obiema optymalizacjami)</dd></div><div><dt>Naiwnie</dt><dd>O(n) w najgorszym razie</dd></div><div><dt>Pamięć</dt><dd>O(n)</dd></div><div><dt>Optymalizacje</dt><dd>Ranga, kompresja ścieżek</dd></div><div><dt>Tworzenie</dt><dd>O(n)</dd></div></dl>
         <p class="complexity-note">n oznacza liczbę elementów. Przy obu optymalizacjach koszt opisuje bardzo wolno rosnąca funkcja α(n), więc w praktyce operacje są niemal stałoczasowe. „Zamortyzowane” oznacza koszt rozłożony na całą serię operacji: pojedyncze wyszukanie może trwać dłużej, ale skraca drogę następnym. Bez optymalizacji drzewo może stać się długim łańcuchem.</p>
         <div class="lesson-columns">
           <div><h3>Jak to działa?</h3>
-            <p>Przechowuje podział elementów na rozłączne grupy: każdy element należy do dokładnie jednej z nich. Operacja find wskazuje reprezentanta grupy, a union łączy dwie grupy w jedną. Można myśleć o zespołach, które stopniowo się łączą. Każdą grupę zapisujemy jako drzewo odsyłaczy do rodzica, a reprezentantem jest korzeń. Dwa elementy należą do tej samej grupy wtedy i tylko wtedy, gdy find prowadzi do tego samego korzenia.</p><ol>
+            <p>Każdą grupę zapisujemy jako drzewo odsyłaczy do rodzica, którego korzeń jest reprezentantem. find wspina się do korzenia, a union łączy korzenie różnych drzew. Kompresja ścieżek i łączenie według rangi skracają drogi, ale nie zmieniają podziału na grupy.</p><ol>
               <li>Na początku każdy element jest osobną grupą i wskazuje sam siebie jako rodzica. Jest więc korzeniem własnego drzewa.</li>
               <li>Aby wykonać find, idź po odsyłaczach do rodzica, aż trafisz na korzeń. Przy włączonej kompresji ścieżek podepnij odwiedzone elementy bezpośrednio pod niego, skracając przyszłe wyszukiwania.</li>
               <li>Aby wykonać union, znajdź korzenie obu elementów. Jeśli są takie same, nic nie zmieniaj: elementy już należą do jednej grupy.</li>

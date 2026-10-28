@@ -25,11 +25,12 @@
       </section>
       <section class="panel lesson" aria-labelledby="lessonTitle">
         <div class="lesson-header"><div><p class="eyebrow">01 / Zrozum algorytm</p><h2 id="lessonTitle">Wieże Hanoi</h2></div><span class="tag">Rekurencja</span></div>
+        <div class="lesson-purpose"><h3>Cel i wynik</h3><p id="purpose">Celem jest przeniesienie całej wieży n krążków z pręta startowego na docelowy, korzystając z trzeciego pręta pomocniczego. Wolno przenosić tylko jeden wierzchni krążek naraz i nie wolno położyć większego na mniejszym. Zarówno metoda rekurencyjna, jak i iteracyjna wyznacza poprawną sekwencję o minimalnej liczbie 2ⁿ − 1 ruchów.</p></div>
         <dl class="complexity"><div><dt>Liczba ruchów</dt><dd>2ⁿ − 1 (minimum)</dd></div><div><dt>Czas</dt><dd>O(2ⁿ)</dd></div><div><dt>Pamięć stosu</dt><dd>O(n)</dd></div><div><dt>Rekurencja</dt><dd>T(n) = 2T(n − 1) + 1</dd></div><div><dt>Pręty</dt><dd>3</dd></div></dl>
         <p class="complexity-note">n to liczba krążków. Każdy dodatkowy krążek wymaga dwa razy tylu ruchów co poprzednio i jeszcze jednego: dla 2 krążków są 3 ruchy, dla 3 — 7, a dla 4 — 15. Przy 20 krążkach to już ponad milion ruchów, dlatego symulacja ogranicza n do 7.</p>
         <div class="lesson-columns">
           <div><h3>Jak to działa?</h3>
-            <p>Celem jest przeniesienie całej wieży krążków z jednego pręta na drugi. W jednym ruchu wolno przenieść tylko wierzchni krążek i nigdy nie wolno położyć większego na mniejszym. Trzeci pręt służy jako miejsce pomocnicze. Główna myśl jest prosta: aby przenieść największy krążek, najpierw trzeba odłożyć wszystkie mniejsze. Przenoszenie tej mniejszej wieży rozwiązuje się dokładnie tym samym sposobem — to rekurencja.</p><ol>
+            <p>Aby przenieść największy krążek, najpierw trzeba odłożyć wszystkie mniejsze na pręt pomocniczy. Przenoszenie tej mniejszej wieży rozwiązujemy tym samym sposobem. Wywoływanie tej samej procedury dla coraz mniejszych wież to rekurencja.</p><ol>
               <li>Jeśli do przeniesienia jest 0 krążków, nic nie rób. To przypadek bazowy, który zatrzymuje dalsze wywołania rekurencji.</li>
               <li>Przenieś n − 1 górnych krążków z pręta startowego na pomocniczy, używając docelowego jako miejsca tymczasowego.</li>
               <li>Przenieś odsłonięty największy krążek ze startu na pręt docelowy. Ten etap wymaga jednego ruchu.</li>

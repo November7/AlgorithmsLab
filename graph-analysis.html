@@ -25,12 +25,13 @@
       </section>
       <section class="panel lesson" aria-labelledby="lessonTitle">
         <div class="lesson-header"><div><p class="eyebrow">01 / Zrozum algorytm</p><h2 id="lessonTitle">Algorytm Floyda-Warshalla</h2></div><span class="tag">Grafy</span></div>
+        <div class="lesson-purpose"><h3>Cel i wynik</h3><p id="purpose">Wyznacza najmniejsze sumy wag dróg między każdą parą wierzchołków grafu skierowanego. Wynikiem jest macierz odległości, a zapisane przejścia pozwalają odtworzyć wybraną drogę. Brak połączenia oznaczamy jako ∞; gdy koszt można obniżać bez końca przez ujemny cykl na trasie, skończone minimum nie istnieje.</p></div>
         <dl class="complexity"><div><dt>Czas</dt><dd id="timeComplexity">O(V³)</dd></div><div><dt>Pamięć</dt><dd id="spaceComplexity">O(V² + E)</dd></div></dl>
         <p class="complexity-note" id="complexityNote">V to liczba wierzchołków, E to liczba krawędzi wejściowych. Numery od 0; graf skierowany, wagi od −100 do 100. Złożoność nie obejmuje historii wizualizacji.</p>
         <div class="lesson-columns">
-          <div><h3>Jak to działa?</h3><p id="explanation">Macierz d zawiera bieżące odległości. W iteracji k dopuszczamy wierzchołek k jako pośredni i sprawdzamy, czy droga i → k → j jest lepsza.</p><ol id="steps"><li>Zainicjalizuj macierz wagami, zerami i ∞.</li><li>Dla każdego k sprawdź wszystkie pary (i, j).</li><li>Zapisuj pierwszy krok poprawionej ścieżki.</li><li>Oznacz wpływ ujemnych cykli i odtwórz wybrane połączenie.</li></ol></div>
+          <div><h3>Jak to działa?</h3><p id="explanation">Macierz d zawiera bieżące odległości. W iteracji k dopuszczamy wierzchołek k jako pośredni i sprawdzamy, czy droga i → k → j jest lepsza.</p><ol id="steps"><li>Wpisz 0 na przekątnej, wagi bezpośrednich krawędzi i ∞ tam, gdzie ich brak; dla pętli ujemnej zachowaj jej wagę.</li><li>Dla każdego k i każdej pary (i, j) porównaj d[i][j] z d[i][k] + d[k][j], jeśli oba odcinki istnieją.</li><li>Przy poprawie zapisz mniejszy koszt i pierwszy krok nowej drogi.</li><li>Po wszystkich iteracjach oznacz wpływ ujemnych cykli; odtwórz wybraną ścieżkę, jeśli ma skończone minimum.</li></ol></div>
           <div><h3>Dlaczego to działa?</h3><p id="correctness">Ścieżka używająca wierzchołków pośrednich do k albo omija k, albo składa się z dwóch ścieżek przez mniejsze numery. Minimum tych możliwości daje kolejną macierz. Ujemna przekątna po obliczeniach wskazuje ujemny cykl.</p></div>
-          <div><h3>Zastosowania i ograniczenia</h3><p id="applications">Odległości między wszystkimi parami w małych lub gęstych grafach. Ujemne cykle wymagają oznaczenia par, dla których minimum nie istnieje.</p></div>
+          <div><h3>Zastosowania i ograniczenia</h3><p id="applications">Przygotowanie odległości do wielu zapytań w małej sieci, np. kosztów przejazdu między każdą parą punktów. Obsługuje ujemne krawędzie, ale trzeba oznaczyć pary zależne od ujemnych cykli. Koszt O(V³) i macierz O(V²) ograniczają użycie dla dużych grafów.</p></div>
         </div>
       </section>
       <section class="panel controls" aria-label="Ustawienia i sterowanie">
@@ -142,6 +143,7 @@
   const definition = { title: 'Analiza grafów skierowanych', category: 'Grafy', intro: 'Zbadaj odległości między wszystkimi parami albo podziel graf na grupy wzajemnie osiągalnych wierzchołków. Dane grafu można edytować.', modes: {
     floyd: {
       title: 'Algorytm Floyda-Warshalla',
+      purpose: 'Wyznacza najmniejsze sumy wag dróg między każdą parą wierzchołków grafu skierowanego. Wynikiem jest macierz odległości, a zapisane przejścia pozwalają odtworzyć wybraną drogę. Brak połączenia oznaczamy jako ∞; gdy koszt można obniżać bez końca przez ujemny cykl na trasie, skończone minimum nie istnieje.',
       fields: [field('size', 'Liczba wierzchołków (1…8)', '4', { type: 'number', min: 1, max: 8 }), field('edges', 'Krawędzie: od do waga, po jednej w wierszu; do 40', '0 1 3\n0 3 10\n1 2 -2\n2 3 4\n3 1 1', { multiline: true }), field('source', 'Początek odtwarzanej ścieżki', '0', { type: 'number', min: 0, max: 7 }), field('target', 'Koniec odtwarzanej ścieżki', '3', { type: 'number', min: 0, max: 7 })],
       examples: [example('Ujemna krawędź bez ujemnego cyklu', { size: '4', edges: '0 1 3\n0 3 10\n1 2 -2\n2 3 4\n3 1 1', source: '0', target: '3' }), example('Ujemny cykl', { size: '4', edges: '0 1 1\n1 2 -3\n2 1 1\n2 3 2', source: '0', target: '3' }), example('Nieosiągalny cel', { size: '3', edges: '0 1 5', source: '0', target: '2' })],
       time: 'O(V³)',
@@ -149,21 +151,22 @@
       note: 'V to liczba wierzchołków, E to liczba krawędzi wejściowych. Numery od 0; graf skierowany, wagi od −100 do 100. Złożoność nie obejmuje historii wizualizacji.',
       explanation: 'Macierz d zawiera bieżące odległości. W iteracji k dopuszczamy wierzchołek k jako pośredni i sprawdzamy, czy droga i → k → j jest lepsza.',
       correctness: 'Ścieżka używająca wierzchołków pośrednich do k albo omija k, albo składa się z dwóch ścieżek przez mniejsze numery. Minimum tych możliwości daje kolejną macierz. Ujemna przekątna po obliczeniach wskazuje ujemny cykl.',
-      applications: 'Odległości między wszystkimi parami w małych lub gęstych grafach. Ujemne cykle wymagają oznaczenia par, dla których minimum nie istnieje.',
-      steps: ['Zainicjalizuj macierz wagami, zerami i ∞.', 'Dla każdego k sprawdź wszystkie pary (i, j).', 'Zapisuj pierwszy krok poprawionej ścieżki.', 'Oznacz wpływ ujemnych cykli i odtwórz wybrane połączenie.'],
+      applications: 'Przygotowanie odległości do wielu zapytań w małej sieci, np. kosztów przejazdu między każdą parą punktów. Obsługuje ujemne krawędzie, ale trzeba oznaczyć pary zależne od ujemnych cykli. Koszt O(V³) i macierz O(V²) ograniczają użycie dla dużych grafów.',
+      steps: ['Wpisz 0 na przekątnej, wagi bezpośrednich krawędzi i ∞ tam, gdzie ich brak; dla pętli ujemnej zachowaj jej wagę.', 'Dla każdego k i każdej pary (i, j) porównaj d[i][j] z d[i][k] + d[k][j], jeśli oba odcinki istnieją.', 'Przy poprawie zapisz mniejszy koszt i pierwszy krok nowej drogi.', 'Po wszystkich iteracjach oznacz wpływ ujemnych cykli; odtwórz wybraną ścieżkę, jeśli ma skończone minimum.'],
       rule: 'for k, i, j:\n  d[i][j] = min(d[i][j], d[i][k] + d[k][j])',
       run: floyd
     },
     scc: {
       title: 'Silnie spójne składowe: Kosaraju',
+      purpose: 'Dzieli graf skierowany na silnie spójne składowe: największe grupy, w których z każdego wierzchołka można dojść do każdego innego zgodnie z kierunkiem krawędzi. Każdy wierzchołek trafia do dokładnie jednej grupy. Kosaraju zwraca ten podział, również dla wierzchołków izolowanych.',
       fields: [field('size', 'Liczba wierzchołków (1…8)', '6', { type: 'number', min: 1, max: 8 }), field('edges', 'Krawędzie: od do, po jednej w wierszu; do 40', '0 1\n1 2\n2 0\n2 3\n3 4\n4 3\n4 5', { multiline: true })],
       examples: [example('Trzy składowe', { size: '6', edges: '0 1\n1 2\n2 0\n2 3\n3 4\n4 3\n4 5' }), example('Graf acykliczny', { size: '4', edges: '0 1\n1 2\n1 3' }), example('Wierzchołki izolowane', { size: '3', edges: '' })],
       time: 'O(V + E)',
       space: 'O(V + E)',
       note: 'V to liczba wierzchołków, E to liczba krawędzi. Dwa przejścia korzystają z list sąsiedztwa. Historia i rysowanie nie są wliczone.',
-      explanation: 'Silnie spójna składowa to maksymalna grupa wierzchołków wzajemnie osiągalnych. Pierwszy DFS zapisuje kolejność zakończeń, drugi działa na odwróconych krawędziach w odwrotnej kolejności.',
+      explanation: 'Wykonujemy dwa przeszukiwania w głąb (DFS). Pierwsze ustala kolejność zakończenia pracy nad wierzchołkami. Drugie używa odwróconych krawędzi i zaczyna od wierzchołków zakończonych najpóźniej.',
       correctness: 'Po zwinięciu składowych powstaje DAG. Porządek zakończeń pierwszego DFS pozwala w transponowanym grafie zaczynać od składowej bez wyjścia do jeszcze nieodwiedzonych składowych. Drugi DFS nie wyjdzie wtedy poza właściwą grupę.',
-      applications: 'Wykrywanie grup cyklicznych zależności i upraszczanie grafu do DAG. Pojedynczy wierzchołek też może być składową.',
+      applications: 'Analiza wzajemnych zależności modułów i grupowanie obszarów sieci dostępnych w obie strony. Zastąpienie każdej składowej jednym wierzchołkiem daje graf bez cykli (DAG). Składowa jednoelementowa nie musi zawierać cyklu; drugi przebieg wymaga dostępu do odwróconych krawędzi.',
       steps: ['Wykonaj DFS ze wszystkich nieodwiedzonych wierzchołków.', 'Zapisuj wierzchołki przy wyjściu z rekurencji.', 'Odwróć krawędzie.', 'Uruchamiaj DFS od końca zapisanej listy i oznaczaj nowe składowe.'],
       rule: 'order = kolejność zakończeń DFS(G)\nfor v in reverse(order):\n  jeśli v nie ma składowej: DFS(Gᵀ, v) tworzy nową składową',
       run: kosaraju

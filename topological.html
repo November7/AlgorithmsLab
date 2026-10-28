@@ -25,11 +25,12 @@
       </section>
       <section class="panel lesson" aria-labelledby="lessonTitle">
         <div class="lesson-header"><div><p class="eyebrow">01 / Zrozum algorytm</p><h2 id="lessonTitle">Sortowanie topologiczne Kahna</h2></div><span class="tag">Kolejka FIFO</span></div>
+        <div class="lesson-purpose"><h3>Cel i wynik</h3><p id="purpose">Układa wszystkie wierzchołki grafu skierowanego w kolejności zgodnej z zależnościami: dla krawędzi A → B wierzchołek A musi znaleźć się przed B. Wynikiem jest jedna poprawna kolejność albo informacja, że cykl uniemożliwia jej ustalenie. Pełny porządek istnieje tylko w grafie skierowanym bez cykli, nazywanym DAG.</p></div>
         <dl class="complexity"><div><dt>Czas</dt><dd>O(V + E)</dd></div><div><dt>Pamięć</dt><dd>O(V + E)</dd></div><div><dt>Reprezentacja</dt><dd>Listy sąsiedztwa</dd></div><div><dt>Pełny porządek</dt><dd>Tylko dla DAG</dd></div><div><dt>Wynik</dt><dd>Kolejność zadań</dd></div></dl>
         <p class="complexity-note">V to liczba wierzchołków, E – krawędzi. Każdy wierzchołek trafia do kolejki raz; każdą krawędź usuwamy raz. Kolejka ma indeks początku, więc pobieranie nie przesuwa tablicy. Koszty dotyczą algorytmu, bez rysowania i aktualizacji tabel.</p>
         <div class="lesson-columns">
           <div><h3>Jak to działa?</h3>
-            <p>Układa zadania w kolejności zgodnej z zależnościami. Krawędź A → B oznacza: najpierw wykonaj A, dopiero potem B. Stopień wejściowy to liczba krawędzi prowadzących do zadania, czyli liczba jego jeszcze niespełnionych wymagań. Algorytm wybiera zadania gotowe do wykonania i odblokowuje następne. Pełna kolejność istnieje tylko dla DAG, czyli grafu skierowanego bez cykli.</p><ol>
+            <p>Stopień wejściowy wierzchołka to liczba prowadzących do niego krawędzi. W trakcie działania oznacza liczbę jeszcze niespełnionych wymagań zadania. Algorytm pobiera z kolejki zadania o stopniu 0 i usuwa ich wpływ na wymagania następnych zadań.</p><ol>
               <li>Policz stopnie wejściowe wszystkich zadań. Te o stopniu 0 dodaj do kolejki FIFO — pierwsze dodane zadanie będzie pierwsze pobrane.</li>
               <li>Pobierz zadanie z początku kolejki i dopisz je do wyniku. Wszystkie jego wymagania zostały już spełnione.</li>
               <li>Potraktuj jego krawędzie wychodzące jako usunięte: dla każdego następnego zadania zmniejsz stopień wejściowy o 1. Gdy spadnie do 0, dodaj to zadanie na koniec kolejki.</li>

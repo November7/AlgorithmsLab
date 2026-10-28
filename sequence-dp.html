@@ -25,12 +25,13 @@
       </section>
       <section class="panel lesson" aria-labelledby="lessonTitle">
         <div class="lesson-header"><div><p class="eyebrow">01 / Zrozum algorytm</p><h2 id="lessonTitle">Najdłuższy wspólny podciąg (LCS)</h2></div><span class="tag">Programowanie dynamiczne</span></div>
+        <div class="lesson-purpose"><h3>Cel i wynik</h3><p id="purpose">Znajduje najdłuższy ciąg znaków występujący w obu napisach w tej samej kolejności. Znaki nie muszą ze sobą sąsiadować: „AC” jest wspólnym podciągiem „ABC” i „ADC”. Wynik obejmuje długość i jeden taki podciąg; przy braku wspólnych znaków jest on pusty.</p></div>
         <dl class="complexity"><div><dt>Czas</dt><dd id="timeComplexity">O(n · m)</dd></div><div><dt>Pamięć</dt><dd id="spaceComplexity">O(n · m)</dd></div></dl>
         <p class="complexity-note" id="complexityNote">Złożoności dotyczą algorytmu, bez zapisu historii animacji. Podciąg zachowuje kolejność elementów, ale nie musi być spójny. n i m to długości napisów w punktach kodowych Unicode.</p>
         <div class="lesson-columns">
           <div><h3>Jak to działa?</h3><p id="explanation">dp[i][j] to długość wspólnego podciągu prefiksów długości i oraz j. Równe końcowe znaki przedłużają rozwiązanie z przekątnej. Przy różnych znakach pomijamy jeden z nich.</p><ol id="steps"><li>Wypełnij zerami brzeg tabeli.</li><li>Oblicz komórki kolejno według zgodności znaków.</li><li>Od prawego dolnego rogu odtwórz znaki wybrane na przekątnych.</li></ol></div>
           <div><h3>Dlaczego to działa?</h3><p id="correctness">Przy zgodnych końcach istnieje rozwiązanie optymalne używające obu końcowych znaków. Przy różnych końcach co najmniej jeden nie należy do wspólnego podciągu, więc wystarczy wybrać lepszy z dwóch krótszych problemów.</p></div>
-          <div><h3>Zastosowania i ograniczenia</h3><p id="applications">Porównywanie sekwencji i podstawy narzędzi różnicowych. Wiele różnych podciągów może mieć tę samą maksymalną długość.</p></div>
+          <div><h3>Zastosowania i ograniczenia</h3><p id="applications">Porównywanie wersji tekstu i sekwencji, np. szukanie części zachowanych po zmianach. Wynik może być niejednoznaczny. Pełna tabela ułatwia odtworzenie podciągu, ale dla długich napisów kosztuje dużo pamięci; LCS nie wymaga spójnego fragmentu.</p></div>
         </div>
       </section>
       <section class="panel controls" aria-label="Ustawienia i sterowanie">
@@ -139,6 +140,7 @@ w przeciwnym razie: max(dp[i−1][j], dp[i][j−1])</p></details>
   const definition = { title: 'Programowanie dynamiczne: podciągi i monety', category: 'Programowanie dynamiczne', intro: 'Buduj rozwiązanie z wcześniej obliczonych mniejszych problemów. Na końcu prześledź wskaźniki, aby odtworzyć wybrany podciąg lub monety.', modes: {
     lcs: {
       title: 'Najdłuższy wspólny podciąg (LCS)',
+      purpose: 'Znajduje najdłuższy ciąg znaków występujący w obu napisach w tej samej kolejności. Znaki nie muszą ze sobą sąsiadować: „AC” jest wspólnym podciągiem „ABC” i „ADC”. Wynik obejmuje długość i jeden taki podciąg; przy braku wspólnych znaków jest on pusty.',
       fields: [field('first', 'Pierwszy napis (do 12 znaków, może być pusty)', 'ABCBDAB'), field('second', 'Drugi napis (do 12 znaków, może być pusty)', 'BDCABA')],
       examples: [example('Wiele poprawnych rozwiązań', { first: 'ABCBDAB', second: 'BDCABA' }), example('Brak wspólnych znaków', { first: 'ABC', second: 'XYZ' }), example('Pusty napis', { first: '', second: 'KOT' })],
       time: 'O(n · m)',
@@ -146,13 +148,14 @@ w przeciwnym razie: max(dp[i−1][j], dp[i][j−1])</p></details>
       note: `${note} n i m to długości napisów w punktach kodowych Unicode.`,
       explanation: 'dp[i][j] to długość wspólnego podciągu prefiksów długości i oraz j. Równe końcowe znaki przedłużają rozwiązanie z przekątnej. Przy różnych znakach pomijamy jeden z nich.',
       correctness: 'Przy zgodnych końcach istnieje rozwiązanie optymalne używające obu końcowych znaków. Przy różnych końcach co najmniej jeden nie należy do wspólnego podciągu, więc wystarczy wybrać lepszy z dwóch krótszych problemów.',
-      applications: 'Porównywanie sekwencji i podstawy narzędzi różnicowych. Wiele różnych podciągów może mieć tę samą maksymalną długość.',
+      applications: 'Porównywanie wersji tekstu i sekwencji, np. szukanie części zachowanych po zmianach. Wynik może być niejednoznaczny. Pełna tabela ułatwia odtworzenie podciągu, ale dla długich napisów kosztuje dużo pamięci; LCS nie wymaga spójnego fragmentu.',
       steps: ['Wypełnij zerami brzeg tabeli.', 'Oblicz komórki kolejno według zgodności znaków.', 'Od prawego dolnego rogu odtwórz znaki wybrane na przekątnych.'],
       rule: 'A[i−1] == B[j−1]: dp[i][j] = dp[i−1][j−1] + 1\nw przeciwnym razie: max(dp[i−1][j], dp[i][j−1])',
       run: lcs
     },
     lis: {
       title: 'Najdłuższy rosnący podciąg (LIS)',
+      purpose: 'Wybiera z tablicy jak najwięcej elementów tworzących ciąg ściśle rosnący, bez zmiany ich kolejności. Można pomijać pozycje: z [3, 1, 2, 5] otrzymamy [1, 2, 5]. Zwraca długość i jeden najdłuższy podciąg; równe wartości nie przedłużają wyniku.',
       fields: [field('values', 'Tablica (1…16 liczb, −100…100)', '10 9 2 5 3 7 99 18')],
       examples: [example('Podciąg z lukami', { values: '10 9 2 5 3 7 99 18' }), example('Ciąg malejący', { values: '5 4 3 2 1' }), example('Równe elementy', { values: '3 3 3' })],
       time: 'O(n²)',
@@ -160,13 +163,14 @@ w przeciwnym razie: max(dp[i−1][j], dp[i][j−1])</p></details>
       note: `${note} Prezentujemy wersję kwadratową z poprzednikami; istnieje również metoda O(n log n).`,
       explanation: 'Dla pozycji i przeglądamy wcześniejsze mniejsze elementy. Najdłuższy podciąg kończący się na jednym z nich można przedłużyć o A[i]. Zapisujemy też poprzednika.',
       correctness: 'Przedostatni element każdego rosnącego podciągu kończącego się w i ma indeks j < i i wartość A[j] < A[i]. Rozważamy wszystkie takie możliwości.',
-      applications: 'Wykrywanie uporządkowanych trendów. Wariant jest ściśle rosnący: równych wartości nie dokładamy do siebie.',
+      applications: 'Analiza uporządkowania danych i wybór najdłuższej serii wzrostów z pomijaniem części obserwacji. Nie wymaga sąsiednich pozycji, więc nie oznacza ciągłego okresu wzrostu. Pokazana metoda O(n²) jest prosta, lecz dla dużych danych lepszy jest wariant O(n log n).',
       steps: ['Ustaw długości na 1, poprzedników na brak.', 'Dla każdej pary j < i sprawdź A[j] < A[i].', 'Zapisz poprawę i poprzednika.', 'Odtwórz wynik od pozycji z największą długością.'],
       rule: 'dp[i] = max(1, 1 + dp[j]) dla j < i i A[j] < A[i]',
       run: lis
     },
     coins: {
       title: 'Wydawanie reszty',
+      purpose: 'Dobiera najmniejszą liczbę monet, których nominały sumują się dokładnie do zadanej kwoty. Każdy dodatni nominał jest dostępny w nieograniczonej liczbie sztuk. Zwraca liczbę i zestaw monet albo informację, że kwoty nie da się uzyskać; dla kwoty 0 potrzeba 0 monet.',
       fields: [field('coins', 'Nominały (1…8 dodatnich liczb, do 30)', '1 3 4'), field('amount', 'Kwota (0…60)', '6', { type: 'number', min: 0, max: 60 })],
       examples: [example('Zachłanność nie wystarcza', { coins: '1 3 4', amount: '6' }), example('Kwota nieosiągalna', { coins: '4 6', amount: '7' }), example('Kwota zero', { coins: '2 5', amount: '0' })],
       time: 'O(k · S)',
@@ -174,7 +178,7 @@ w przeciwnym razie: max(dp[i−1][j], dp[i][j−1])</p></details>
       note: 'S to kwota, k to liczba różnych nominałów. Każdej monety można użyć dowolnie wiele razy. Złożoność nie obejmuje historii animacji.',
       explanation: 'dp[s] to najmniejsza liczba monet potrzebna do uzyskania kwoty s. Próbujemy każdy nominał jako ostatnią monetę i korzystamy z rozwiązania dla pozostałej kwoty.',
       correctness: 'Każde niepuste rozwiązanie ma ostatnią monetę c. Usunięcie jej zostawia problem s − c. Sprawdzenie wszystkich nominałów obejmuje także monetę występującą w rozwiązaniu optymalnym.',
-      applications: 'Minimalna liczba monet dla dowolnych dodatnich nominałów. Dla monet 1, 3, 4 i kwoty 6 wybór zachłanny 4 + 1 + 1 przegrywa z 3 + 3.',
+      applications: 'Wydawanie reszty i dobieranie najmniejszej liczby jednostek o zadanych wielkościach. Wybór największej monety nie zawsze działa: dla 1, 3, 4 i kwoty 6 daje 4 + 1 + 1 zamiast 3 + 3. Tabela rośnie wraz z kwotą; ograniczona liczba monet wymaga innego wariantu.',
       steps: ['Ustaw dp[0] = 0 i pozostałe wartości na ∞.', 'Dla każdej kwoty sprawdź wszystkie monety nie większe od niej.', 'Zapisz ostatnią monetę poprawiającą minimum.', 'Odtwórz monety albo zgłoś nieosiągalność.'],
       rule: 'dp[0] = 0\ndp[s] = min(dp[s − c] + 1) dla c ≤ s',
       run: coins

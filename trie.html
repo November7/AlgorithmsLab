@@ -25,12 +25,13 @@
       </section>
       <section class="panel lesson" aria-labelledby="lessonTitle">
         <div class="lesson-header"><div><p class="eyebrow">01 / Zrozum algorytm</p><h2 id="lessonTitle">Trie (drzewo prefiksowe)</h2></div><span class="tag">Struktury danych · Napisy</span></div>
+        <div class="lesson-purpose"><h3>Cel i wynik</h3><p id="purpose">Przechowuje zbiór słów, aby sprawdzać obecność całego słowa lub wyszukiwać słowa zaczynające się od podanego prefiksu. Prefiks to początek napisu: „ko” pasuje do „kot” i „kora”, choć samo „ko” nie musi być zapisanym słowem. Wynikiem jest odpowiedź o obecności słowa albo lista pasujących wpisów.</p></div>
         <dl class="complexity"><div><dt>Czas</dt><dd id="timeComplexity">Budowa O(S); wyszukanie O(m)</dd></div><div><dt>Pamięć</dt><dd id="spaceComplexity">O(S)</dd></div></dl>
         <p class="complexity-note" id="complexityNote">S to suma długości słów, m to długość zapytania. Zakładamy stały średni koszt operacji Map. Wypisanie wszystkich słów pod prefiksem dodatkowo odwiedza jego poddrzewo. Rozróżniamy wielkość liter i punkty kodowe Unicode; pusty prefiks pasuje do wszystkich słów.</p>
         <div class="lesson-columns">
-          <div><h3>Jak to działa?</h3><p id="explanation">Każda krawędź reprezentuje znak. Węzeł jest oznaczony osobno, jeśli kończy się w nim słowo. Dzięki temu „kot” i „kotek” współdzielą pierwsze trzy znaki, ale oba mogą być samodzielnymi wpisami.</p><ol id="steps"><li>Dla każdego słowa zacznij w korzeniu.</li><li>Przechodź kolejnymi znakami, tworząc brakujące węzły.</li><li>Oznacz koniec słowa.</li><li>Wyszukując, przejdź ścieżkę zapytania i w razie potrzeby sprawdź znacznik końca.</li></ol></div>
+          <div><h3>Jak to działa?</h3><p id="explanation">Każda krawędź reprezentuje znak. Węzeł jest oznaczony osobno, jeśli kończy się w nim słowo. Dzięki temu „kot” i „kotek” współdzielą pierwsze trzy znaki, ale oba mogą być samodzielnymi wpisami.</p><ol id="steps"><li>Dla każdego słowa zacznij w korzeniu i przechodź kolejnymi znakami, tworząc brakujące węzły.</li><li>Po ostatnim znaku oznacz węzeł jako koniec słowa.</li><li>Podczas szukania idź po znakach zapytania. Brak przejścia oznacza brak dopasowania.</li><li>Dla pełnego słowa sprawdź znacznik końca; dla prefiksu zbierz słowa z osiągniętego poddrzewa.</li></ol></div>
           <div><h3>Dlaczego to działa?</h3><p id="correctness">Ścieżka od korzenia jednoznacznie odpowiada prefiksowi. Wstawianie tworzy tylko brakujące przejścia. Znacznik końca rozróżnia zapisane słowo od fragmentu dłuższego wpisu.</p></div>
-          <div><h3>Zastosowania i ograniczenia</h3><p id="applications">Słowniki, podpowiedzi wyszukiwania i autouzupełnianie. Znaki są przechowywane w Map, więc także symbole spoza alfabetu łacińskiego są obsługiwane.</p></div>
+          <div><h3>Zastosowania i ograniczenia</h3><p id="applications">Słowniki, podpowiedzi wyszukiwania i autouzupełnianie. Długość szukanej ścieżki zależy od liczby znaków zapytania, a nie liczby słów. Wiele węzłów i odsyłaczy może zużywać dużo pamięci; wypisanie podpowiedzi wymaga dodatkowego przejścia poddrzewa.</p></div>
         </div>
       </section>
       <section class="panel controls" aria-label="Ustawienia i sterowanie">
@@ -116,6 +117,7 @@ node.terminal = true</p></details>
   const definition = { title: 'Trie: drzewo prefiksowe', category: 'Struktury danych · Napisy', intro: 'Wspólne początki słów zajmują wspólną ścieżkę. Porównaj wyszukanie pełnego słowa ze sprawdzeniem samego prefiksu.', modes: {
     trie: {
       title: 'Trie (drzewo prefiksowe)',
+      purpose: 'Przechowuje zbiór słów, aby sprawdzać obecność całego słowa lub wyszukiwać słowa zaczynające się od podanego prefiksu. Prefiks to początek napisu: „ko” pasuje do „kot” i „kora”, choć samo „ko” nie musi być zapisanym słowem. Wynikiem jest odpowiedź o obecności słowa albo lista pasujących wpisów.',
       fields: [field('words', 'Słowa: 1…10 słów, do 10 znaków każde', 'kot kod kora koza pies'), field('query', 'Szukany napis (do 10 znaków)', 'ko'), field('queryType', 'Rodzaj wyszukiwania', 'prefix', { options: [['prefix', 'Prefiks i jego słowa'], ['word', 'Dokładne słowo']] })],
       examples: [example('Wspólny prefiks', { words: 'kot kod kora koza pies', query: 'ko', queryType: 'prefix' }), example('Prefiks nie jest pełnym słowem', { words: 'kot kotek', query: 'ko', queryType: 'word' }), example('Słowo będące prefiksem', { words: 'kot kotek', query: 'kot', queryType: 'word' }), example('Brak gałęzi', { words: 'dom domek', query: 'kot', queryType: 'prefix' })],
       time: 'Budowa O(S); wyszukanie O(m)',
@@ -123,8 +125,8 @@ node.terminal = true</p></details>
       note: 'S to suma długości słów, m to długość zapytania. Zakładamy stały średni koszt operacji Map. Wypisanie wszystkich słów pod prefiksem dodatkowo odwiedza jego poddrzewo. Rozróżniamy wielkość liter i punkty kodowe Unicode; pusty prefiks pasuje do wszystkich słów.',
       explanation: 'Każda krawędź reprezentuje znak. Węzeł jest oznaczony osobno, jeśli kończy się w nim słowo. Dzięki temu „kot” i „kotek” współdzielą pierwsze trzy znaki, ale oba mogą być samodzielnymi wpisami.',
       correctness: 'Ścieżka od korzenia jednoznacznie odpowiada prefiksowi. Wstawianie tworzy tylko brakujące przejścia. Znacznik końca rozróżnia zapisane słowo od fragmentu dłuższego wpisu.',
-      applications: 'Słowniki, podpowiedzi wyszukiwania i autouzupełnianie. Znaki są przechowywane w Map, więc także symbole spoza alfabetu łacińskiego są obsługiwane.',
-      steps: ['Dla każdego słowa zacznij w korzeniu.', 'Przechodź kolejnymi znakami, tworząc brakujące węzły.', 'Oznacz koniec słowa.', 'Wyszukując, przejdź ścieżkę zapytania i w razie potrzeby sprawdź znacznik końca.'],
+      applications: 'Słowniki, podpowiedzi wyszukiwania i autouzupełnianie. Długość szukanej ścieżki zależy od liczby znaków zapytania, a nie liczby słów. Wiele węzłów i odsyłaczy może zużywać dużo pamięci; wypisanie podpowiedzi wymaga dodatkowego przejścia poddrzewa.',
+      steps: ['Dla każdego słowa zacznij w korzeniu i przechodź kolejnymi znakami, tworząc brakujące węzły.', 'Po ostatnim znaku oznacz węzeł jako koniec słowa.', 'Podczas szukania idź po znakach zapytania. Brak przejścia oznacza brak dopasowania.', 'Dla pełnego słowa sprawdź znacznik końca; dla prefiksu zbierz słowa z osiągniętego poddrzewa.'],
       rule: 'node = root\nfor char in word: node = node.children[char] (utwórz, jeśli brak)\nnode.terminal = true',
       run
     }

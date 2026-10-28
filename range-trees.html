@@ -25,12 +25,13 @@
       </section>
       <section class="panel lesson" aria-labelledby="lessonTitle">
         <div class="lesson-header"><div><p class="eyebrow">01 / Zrozum algorytm</p><h2 id="lessonTitle">Drzewo Fenwicka</h2></div><span class="tag">Struktury danych</span></div>
+        <div class="lesson-purpose"><h3>Cel i wynik</h3><p id="purpose">Przechowuje tablicę liczb, w której zmieniamy pojedyncze wartości i pytamy o sumę wybranego przedziału. Wynikiem zapytania jest suma od indeksu l do r włącznie, uwzględniająca dotychczasowe zmiany. Dzięki zapamiętanym sumom bloków nie trzeba za każdym razem dodawać wszystkich elementów zakresu.</p></div>
         <dl class="complexity"><div><dt>Czas</dt><dd id="timeComplexity">Budowa O(n); operacja O(log n)</dd></div><div><dt>Pamięć</dt><dd id="spaceComplexity">O(n)</dd></div></dl>
         <p class="complexity-note" id="complexityNote">n oznacza liczbę elementów. Indeksy wejściowe zaczynają się od 1; oba końce zapytania są włączone. Złożoność nie obejmuje zapisywania historii animacji.</p>
         <div class="lesson-columns">
           <div><h3>Jak to działa?</h3><p id="explanation">BIT[i] przechowuje sumę bloku kończącego się w i. Długość bloku to lowbit(i) = i &amp; −i, czyli wartość najmłodszego ustawionego bitu.</p><ol id="steps"><li>Zbuduj sumy bloków i przekaż każdy blok do jego rodzica.</li><li>Dla prefiksu dodawaj BIT[i] i wykonuj i -= lowbit(i).</li><li>Sumę [l, r] oblicz jako prefiks(r) − prefiks(l − 1).</li><li>Przy dodawaniu przyrostu wykonuj i += lowbit(i).</li></ol></div>
           <div><h3>Dlaczego to działa?</h3><p id="correctness">Odejmowanie lowbit usuwa ostatni ustawiony bit i wybiera rozłączne bloki pokrywające prefiks. Aktualizacja odwiedza dokładnie te bloki, które zawierają zmieniony element.</p></div>
-          <div><h3>Zastosowania i ograniczenia</h3><p id="applications">Sumy na zmieniającej się tablicy: liczniki zdarzeń, statystyki i zadania z wieloma zapytaniami. W tym module aktualizacja dodaje przyrost do jednego elementu.</p></div>
+          <div><h3>Zastosowania i ograniczenia</h3><p id="applications">Liczniki zdarzeń, sumy sprzedaży i statystyki aktualizowane na bieżąco. Fenwick jest zwarty i prosty dla sum; różnica prefiksów nie przenosi się wprost na minimum lub maksimum. Tutaj add zwiększa jeden element o podaną wartość.</p></div>
         </div>
       </section>
       <section class="panel controls" aria-label="Ustawienia i sterowanie">
@@ -191,11 +192,13 @@ add(i, d): while i ≤ n: BIT[i] += d; i += i &amp; −i</p></details>
     }
     yield frame('Zakończono budowę i operacje.', panels(), { done: true, result: answers.length ? answers.map(a => `Suma [${a.left}, ${a.right}] = ${a.sum}`).join('; ') : 'Zaktualizowano tablicę.', data: { values, tree, answers } });
   }
-  const shared = { fields, examples, space: 'O(n)', applications: 'Sumy na zmieniającej się tablicy: liczniki zdarzeń, statystyki i zadania z wieloma zapytaniami. W tym module aktualizacja dodaje przyrost do jednego elementu.', note: 'n oznacza liczbę elementów. Indeksy wejściowe zaczynają się od 1; oba końce zapytania są włączone. Złożoność nie obejmuje zapisywania historii animacji.' };
+  const shared = { fields, examples, space: 'O(n)', note: 'n oznacza liczbę elementów. Indeksy wejściowe zaczynają się od 1; oba końce zapytania są włączone. Złożoność nie obejmuje zapisywania historii animacji.' };
   const definition = { title: 'Sumy przedziałowe: Fenwick i drzewo przedziałowe', category: 'Struktury danych', intro: 'Wykonaj te same zapytania i aktualizacje za pomocą dwóch struktur. Obserwuj, które fragmenty tablicy składają się na wynik.', modes: {
     fenwick: {
       ...shared,
       title: 'Drzewo Fenwicka',
+      applications: 'Liczniki zdarzeń, sumy sprzedaży i statystyki aktualizowane na bieżąco. Fenwick jest zwarty i prosty dla sum; różnica prefiksów nie przenosi się wprost na minimum lub maksimum. Tutaj add zwiększa jeden element o podaną wartość.',
+      purpose: 'Przechowuje tablicę liczb, w której zmieniamy pojedyncze wartości i pytamy o sumę wybranego przedziału. Wynikiem zapytania jest suma od indeksu l do r włącznie, uwzględniająca dotychczasowe zmiany. Dzięki zapamiętanym sumom bloków nie trzeba za każdym razem dodawać wszystkich elementów zakresu.',
       time: 'Budowa O(n); operacja O(log n)',
       explanation: 'BIT[i] przechowuje sumę bloku kończącego się w i. Długość bloku to lowbit(i) = i & −i, czyli wartość najmłodszego ustawionego bitu.',
       correctness: 'Odejmowanie lowbit usuwa ostatni ustawiony bit i wybiera rozłączne bloki pokrywające prefiks. Aktualizacja odwiedza dokładnie te bloki, które zawierają zmieniony element.',
@@ -206,6 +209,8 @@ add(i, d): while i ≤ n: BIT[i] += d; i += i &amp; −i</p></details>
     segment: {
       ...shared,
       title: 'Drzewo przedziałowe',
+      applications: 'Statystyki zakresów i wiele zapytań przeplatanych zmianami danych. Drzewo można dostosować do innych operacji łączących wyniki sąsiednich zakresów, np. minimum. Zajmuje więcej pamięci niż Fenwick; ta wersja zmienia pojedyncze elementy, bez aktualizacji całych przedziałów.',
+      purpose: 'Obsługuje zapytania o wynik dla fragmentu tablicy oraz zmiany jej elementów. W tej wersji wynikiem jest suma liczb od l do r włącznie po wszystkich wykonanych aktualizacjach. Inne wersje drzewa mogą przechowywać np. minimum lub maksimum przedziału.',
       time: 'Budowa O(n); operacja O(log n)',
       explanation: 'Liście zawierają elementy tablicy, a każdy rodzic sumuje dwóch synów. Rozmiar dopełniamy zerami do potęgi dwójki. Drzewo dzieli zakres na połówki.',
       correctness: 'Węzeł zawsze przechowuje sumę swojego przedziału. Zapytanie wybiera rozłączne węzły pokrywające dokładnie żądany zakres, a aktualizacja odtwarza sumy na drodze do korzenia.',

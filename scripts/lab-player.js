@@ -190,6 +190,7 @@
   function selectMode() {
     stop(); mode = definition.modes[method.value];
     byId('lessonTitle').textContent = mode.title;
+    byId('purpose').textContent = mode.purpose;
     byId('explanation').textContent = mode.explanation;
     byId('correctness').textContent = mode.correctness;
     byId('applications').textContent = mode.applications;
