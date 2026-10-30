@@ -25,9 +25,9 @@
       </section>
       <section class="panel lesson" aria-labelledby="lessonTitle">
         <div class="lesson-header"><div><p class="eyebrow">01 / Zrozum algorytm</p><h2 id="lessonTitle">Tabu Search na grafie stanów</h2></div><span class="tag">Przeszukiwanie lokalne</span></div>
-        <div class="lesson-purpose"><h3>Cel i wynik</h3><p id="purpose">Maksymalizuje sumę wag krawędzi na odwiedzanej ścieżce w skierowanym grafie stanów. Zapamiętuje najlepszy dotąd prefiks trasy. Tablica tabu przechowuje niedawno opuszczone wierzchołki i zwykle blokuje powrót do nich; kryterium aspiracji pozwala na taki ruch, jeśli poprawiłby najlepszy wynik.</p></div>
+        <div class="lesson-purpose"><h3>Cel i wynik</h3><p id="purpose">Uproszczony wariant inspirowany Tabu Search szuka spaceru o dużej sumie wag w skierowanym grafie. Zapamiętuje najlepszy odwiedzony prefiks, w tym trasę bez przejść o sumie 0. Lista tabu blokuje powrót do niedawno opuszczonych wierzchołków, chyba że ruch poprawia najlepszy dotąd wynik. Wynik zależy od całej trasy, nie tylko od bieżącego wierzchołka.</p></div>
         <dl class="complexity"><div><dt>Strategia</dt><dd>Przeszukiwanie lokalne</dd></div><div><dt>Czas</dt><dd id="timeComplexity">O(V + E + I · (1 + D · T))</dd></div><div><dt>Pamięć</dt><dd id="spaceComplexity">O(V + E + T + I)</dd></div><div><dt>Graf</dt><dd>Skierowany, ważony</dd></div></dl>
-        <p class="complexity-note" id="complexityNote">V oznacza liczbę wierzchołków, E liczbę krawędzi, I limit iteracji, D maksymalny stopień wyjściowy, a T długość listy tabu. W każdej iteracji sprawdzamy krawędzie wychodzące z bieżącego wierzchołka i przeszukujemy listę tabu. Pamięć O(I) przechowuje bieżącą trasę; historia animacji nie jest wliczona.</p>
+        <p class="complexity-note" id="complexityNote">V oznacza liczbę wierzchołków, E liczbę krawędzi, I limit iteracji, D maksymalny stopień wyjściowy, a T długość listy tabu. W każdej iteracji sprawdzamy krawędzie wychodzące z bieżącego wierzchołka i przeszukujemy listę tabu. Pamięć O(I) przechowuje bieżącą trasę. Koszty tworzenia, przechowywania i wyświetlania klatek animacji nie są wliczone.</p>
         <div class="lesson-columns">
           <div><h3>Jak to działa?</h3><p id="explanation">Każdy wierzchołek jest stanem, a krawędź opisuje możliwy ruch z nagrodą lub kosztem. Algorytm wybiera dozwolone przejście dające największą nową sumę.</p><ol id="steps"></ol></div>
           <div><h3>Dlaczego to działa?</h3><p id="correctness">Tabu Search jest metaheurystyką, a nie metodą gwarantującą optimum. Lista tabu ogranicza krótkie cykle, a aspiracja zachowuje możliwość zaakceptowania ruchu zakazanego przez tabu, gdy prowadzi on do wyniku lepszego niż wszystkie dotychczasowe.</p></div>
@@ -35,7 +35,7 @@
         </div>
       </section>
       <section class="panel controls" aria-label="Ustawienia i sterowanie">
-        <div class="lab-fields four">
+        <div class="lab-fields">
           <div class="field"><label for="method">Algorytm</label><select id="method"></select></div>
           <div class="field"><label for="scenario">Przykład</label><select id="scenario"></select></div>
           <div class="field"><label for="speed">Tempo <output id="speedLabel" for="speed">4 op./s</output></label><input id="speed" type="range" min="1" max="30" value="4"></div>
@@ -45,7 +45,7 @@
         <div class="actions"><button type="button" id="startBtn" class="btn primary">Start</button><button type="button" id="pauseBtn" class="btn" disabled>Pauza</button><button type="button" id="backBtn" class="btn" disabled>Krok wstecz</button><button type="button" id="stepBtn" class="btn">Krok naprzód</button><button type="button" id="stopBtn" class="btn">Reset</button></div>
         <p class="control-hint">Krawędzie zapisuj jako „od do waga”, po jednej w wierszu. Wagi są dodawane do wyniku trasy, a algorytm maksymalizuje ich sumę. Numery wierzchołków zaczynają się od 0. Zmiana danych rozpoczyna nową symulację.</p>
         <p class="control-hint">To uproszczony wariant inspirowany Tabu Search: wynik zależy od całej trasy, a nie tylko od wierzchołka. Trasa jest spacerem, może powtarzać wierzchołki i krawędzie. Dodatni cykl może zwiększać sumę bez ograniczeń, dlatego limit iteracji jest częścią zadania. Szukamy najlepszego odwiedzonego prefiksu, uwzględniając trasę bez przejść o sumie 0; nie gwarantujemy optimum w zadanym limicie.</p>
-        <p class="control-hint">Lista tabu zawiera ostatnio opuszczone wierzchołki. Krok wstecz i strzałki ← oraz → pozwalają odtworzyć wcześniejsze stany.</p>
+        <p class="control-hint">Lista tabu zawiera ostatnio opuszczone wierzchołki, od najstarszego wpisu. Długość tabu określa liczbę kolejnych wyborów ruchu objętych zakazem. Powtórne opuszczenie tego samego wierzchołka tworzy nowy wpis. Krok wstecz i strzałki ← oraz → pozwalają odtworzyć wcześniejsze stany.</p>
       </section>
       <div class="main-column lab-results">
         <section class="panel visualizer" id="visualization" tabindex="-1" aria-labelledby="chartTitle">
@@ -83,23 +83,35 @@ dopóki nie osiągnięto limitu:
     const adjacency = Array.from({ length: size }, () => []);
     edges.forEach((edge, index) => adjacency[edge.from].push({ ...edge, index }));
 
-    let current = start, currentScore = 0, bestScore = 0, bestLength = 1, iterations = 0;
-    const path = [start], pathEdges = [], tabu = [];
+    let current = start;
+    let currentScore = 0;
+    let bestScore = 0;
+    let bestLength = 1;
+    let iterations = 0;
+    const path = [start];
+    const pathEdges = [];
+    const tabu = [];
     const picture = (activeNodes = [], activeEdges = []) => ({
       size, edges, activeNodes, activeEdges, acceptedNodes: path.slice(0, bestLength)
     });
-    const statePanel = () => table('Stan wyszukiwania', ['Bieżący wierzchołek', 'Suma bieżącej trasy', 'Najlepsza suma', 'Najlepsza trasa'], [
-      [current, currentScore, bestScore, path.slice(0, bestLength).join(' → ')]
+    const statePanel = () => table('Stan wyszukiwania', ['Wielkość', 'Wartość'], [
+      ['Wykonane iteracje', `${iterations} / ${limit}`],
+      ['Bieżący wierzchołek', current],
+      ['Bieżąca trasa', path.join(' → ')],
+      ['Suma bieżącej trasy', currentScore],
+      ['Najlepsza suma', bestScore],
+      ['Najlepsza trasa', path.slice(0, bestLength).join(' → ')]
     ]);
-    const tabuPanel = () => table('Tablica tabu: ostatnio opuszczone wierzchołki', ['Pozycja', 'Wierzchołek'], tabu.length
-      ? tabu.map((vertex, index) => [index + 1, vertex])
-      : [['·', 'pusta']]);
+    const tabuPanel = () => table('Tablica tabu: od najstarszego wpisu', ['Pozycja', 'Wierzchołek', 'Pozostałe wybory z zakazem'], tabu.length
+      ? tabu.map((vertex, index) => [index + 1, vertex, tenure - tabu.length + index + 1])
+      : [['·', 'pusta', '·']]);
     const candidatePanel = (candidates, source, activeIndex = -1) => table(`Ocena ruchów z ${source} przed wykonaniem kroku`, ['Od', 'Do', 'Waga', 'Nowa suma', 'Status'], candidates.map(candidate => [
       source, candidate.to, candidate.weight, candidate.score,
       candidate.aspiration ? 'aspiracja' : candidate.isTabu ? 'tabu · blokada' : 'dozwolony'
     ]), activeIndex < 0 ? [] : [[activeIndex, 4]]);
-    const pathPanel = () => table('Przejścia najlepszej trasy', ['Krok', 'Od', 'Do', 'Waga'],
-      pathEdges.slice(0, bestLength - 1).map((edge, index) => [index + 1, edge.from, edge.to, edge.weight]));
+    const pathPanel = () => table('Przejścia najlepszej trasy', ['Krok', 'Od', 'Do', 'Waga'], bestLength > 1
+      ? pathEdges.slice(0, bestLength - 1).map((edge, index) => [index + 1, edge.from, edge.to, edge.weight])
+      : [['·', start, 'brak przejść', '·']]);
     const panels = (candidates = [], source = current, activeIndex = -1) => [
       statePanel(), tabuPanel(), pathPanel(),
       ...(candidates.length ? [candidatePanel(candidates, source, activeIndex)] : [])
@@ -149,7 +161,7 @@ dopóki nie osiągnięto limitu:
       }
       const previous = current;
       tabu.push(previous);
-      if (tabu.length > tenure) tabu.shift();
+      const expired = tabu.length > tenure ? tabu.shift() : null;
       current = chosen.to;
       currentScore = chosen.score;
       path.push(current);
@@ -161,7 +173,10 @@ dopóki nie osiągnięto limitu:
         bestLength = path.length;
       }
 
-      yield frame(`Wybieramy ruch ${previous} → ${current} o wadze ${chosen.weight}.${chosen.aspiration ? ' Kryterium aspiracji pozwala ominąć tabu.' : ''} Suma trasy: ${currentScore}. ${improved ? 'Poprawiamy najlepszy wynik.' : 'Najlepszy wynik pozostaje bez zmian.'}`, panels(candidates, previous, candidates.indexOf(chosen)), {
+      const tabuMessage = expired === null
+        ? `Dodajemy ${previous} do tabu.`
+        : `Dodajemy ${previous} do tabu i usuwamy najstarszy wpis: ${expired}.${tabu.includes(expired) ? ' Nowszy wpis nadal obejmuje ten wierzchołek zakazem.' : ''}`;
+      yield frame(`Wybieramy ruch ${previous} → ${current} o wadze ${chosen.weight}.${chosen.aspiration ? ' Kryterium aspiracji pozwala ominąć tabu.' : ''} Suma trasy: ${currentScore}. ${improved ? 'Poprawiamy najlepszy wynik.' : 'Najlepszy wynik pozostaje bez zmian.'} ${tabuMessage}`, panels(), {
         graph: picture([current], [chosen.index])
       });
     }
@@ -178,7 +193,7 @@ dopóki nie osiągnięto limitu:
     modes: {
       tabu: {
         title: 'Tabu Search na grafie stanów',
-        purpose: 'Maksymalizuje sumę wag krawędzi na odwiedzanej ścieżce w skierowanym grafie stanów. Lista tabu przechowuje niedawno opuszczone wierzchołki i blokuje powrót do nich, chyba że ruch poprawiłby najlepszy dotąd wynik.',
+        purpose: 'Uproszczony wariant inspirowany Tabu Search szuka spaceru o dużej sumie wag w skierowanym grafie. Zapamiętuje najlepszy odwiedzony prefiks, w tym trasę bez przejść o sumie 0. Lista tabu blokuje powrót do niedawno opuszczonych wierzchołków, chyba że ruch poprawia najlepszy dotąd wynik. Wynik zależy od całej trasy, nie tylko od bieżącego wierzchołka.',
         fields: [
           field('size', 'Liczba wierzchołków (1…8)', '4', { type: 'number', min: 1, max: 8 }),
           field('edges', 'Krawędzie: od do waga, po jednej w wierszu; do 40', '0 1 4\n1 2 -2\n2 0 5\n2 3 1\n3 1 5', { multiline: true }),
@@ -190,11 +205,12 @@ dopóki nie osiągnięto limitu:
           example('Kryterium aspiracji', { size: '4', edges: '0 1 4\n1 2 -2\n2 0 5\n2 3 1\n3 1 5', start: '0', tenure: '2', limit: '6' }),
           example('Blokada przez tabu', { size: '2', edges: '0 1 3\n1 0 -1', start: '0', tenure: '1', limit: '6' }),
           example('Wygaśnięcie tabu', { size: '3', edges: '0 1 -1\n1 2 -1\n2 0 -1', start: '0', tenure: '1', limit: '6' }),
+          example('Remis między ruchami', { size: '3', edges: '0 2 3\n0 1 3', start: '0', tenure: '2', limit: '6' }),
           example('Brak dalszych ruchów', { size: '3', edges: '0 1 -2\n1 2 5', start: '0', tenure: '2', limit: '6' })
         ],
         time: 'O(V + E + I · (1 + D · T))',
         space: 'O(V + E + T + I)',
-        note: 'V to liczba wierzchołków, E krawędzi, I limit iteracji, D maksymalny stopień wyjściowy, a T długość tabu. Przygotowanie list sąsiedztwa kosztuje O(V + E); sprawdzanie tabu i wybór ruchu w każdej iteracji kosztuje O(D · T). Bieżąca trasa zajmuje O(I); historia animacji nie jest wliczona.',
+        note: 'V to liczba wierzchołków, E krawędzi, I limit iteracji, D maksymalny stopień wyjściowy, a T długość tabu. Przygotowanie list sąsiedztwa kosztuje O(V + E); sprawdzanie tabu i wybór ruchu w każdej iteracji kosztuje O(D · T). Bieżąca trasa zajmuje O(I). Koszty tworzenia, przechowywania i wyświetlania klatek animacji nie są wliczone.',
         explanation: 'W każdej iteracji algorytm ocenia krawędzie wychodzące z bieżącego wierzchołka. Wybiera dozwolony ruch o największej sumie trasy. Ostatnio opuszczone wierzchołki trafiają na listę tabu.',
         correctness: 'Metaheurystyka nie gwarantuje optimum globalnego. Lista tabu zmniejsza ryzyko zapętlenia, a kryterium aspiracji pozwala złamać zakaz, jeżeli kandydat daje wynik lepszy niż najlepszy dotychczas.',
         applications: 'Tabu Search przybliża rozwiązania problemów optymalizacyjnych, gdy można określić sąsiedztwo bieżącego rozwiązania. Rezultat zależy od grafu, długości tabu i limitu iteracji; algorytm może zakończyć się przed znalezieniem optimum.',
@@ -202,7 +218,7 @@ dopóki nie osiągnięto limitu:
           'Ustaw bieżący wierzchołek na start, sumę trasy na 0 i zapisz początkową trasę jako najlepszą.',
           'Wyznacz kandydatów z krawędzi wychodzących i oblicz sumę po każdym ruchu.',
           'Odrzuć kandydatów tabu, chyba że ich nowa suma jest większa od najlepszego wyniku (kryterium aspiracji).',
-          'Wybierz dozwolone przejście o największej sumie; remisy rozstrzygnij numerem wierzchołka.',
+          'Wybierz dozwolone przejście o największej sumie; remisy rozstrzygnij mniejszym numerem wierzchołka, a potem kolejnością krawędzi na wejściu.',
           'Dodaj opuszczony wierzchołek do tablicy tabu, usuń najstarszy wpis po przekroczeniu długości i zapamiętaj poprawę wyniku.',
           'Zakończ po osiągnięciu limitu iteracji, braku sąsiadów lub braku dozwolonego ruchu.'
         ],
