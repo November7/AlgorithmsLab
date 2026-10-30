@@ -138,6 +138,12 @@
     "status": "published"
   },
   {
+    "title": "Tabu Search · przeszukiwanie grafu",
+    "description": "Maksymalizacja sumy wag ścieżki z listą tabu, ograniczeniem powrotów i kryterium aspiracji.",
+    "url": "tabu-search.html",
+    "status": "published"
+  },
+  {
     "title": "Algorytm Prima",
     "description": "Minimalne drzewo rozpinające grafu nieskierowanego. Prim rozbudowuje drzewo, dołączając najtańsze połączenie z nowym wierzchołkiem.",
     "url": "kruskal.html?method=prim",

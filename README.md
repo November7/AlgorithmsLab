@@ -50,6 +50,7 @@ Przed wykorzystaniem pomysłów lub kodu we własnych materiałach należy nieza
 | [Algorytmy arytmetyczne](number-theory.html) | Rozszerzony Euklides i dokładne szybkie potęgowanie, także modulo. |
 | [Podciągi i monety](sequence-dp.html) | LCS, LIS i wydawanie reszty z odtwarzaniem rozwiązania. |
 | [Analiza grafów skierowanych](graph-analysis.html) | Floyd-Warshall z ujemnymi cyklami i silnie spójne składowe Kosaraju. |
+| [Tabu Search](tabu-search.html) | Przeszukiwanie grafu z listą tabu, maksymalizacją sumy wag i kryterium aspiracji. |
 | [Trie](trie.html) | Budowa drzewa słów, wyszukiwanie pełnych słów i prefiksów. |
 | [Przeszukiwanie z nawrotami](backtracking.html) | Pierwsze rozwiązanie problemu N hetmanów i wycofywanie decyzji. |
 | [Zachłanny wybór zadań](activity-selection.html) | Maksymalny zestaw niepokrywających się przedziałów i oś czasu. |
@@ -195,6 +196,7 @@ Before reusing ideas or code in your own materials, independently verify algorit
 | [Arithmetic algorithms](number-theory.html) | Extended Euclid and exact binary exponentiation, including modular powers. |
 | [Subsequences and coins](sequence-dp.html) | LCS, LIS, and minimum coin change with solution reconstruction. |
 | [Directed graph analysis](graph-analysis.html) | Floyd-Warshall with negative cycles and Kosaraju's strongly connected components. |
+| [Tabu Search](tabu-search.html) | Graph search with a tabu list, path-weight maximization, and an aspiration criterion. |
 | [Trie](trie.html) | Word-tree construction, exact lookup, and prefix queries. |
 | [Backtracking](backtracking.html) | The first N-queens solution and reversal of choices. |
 | [Greedy activity selection](activity-selection.html) | A maximum set of non-overlapping intervals and a timeline. |
